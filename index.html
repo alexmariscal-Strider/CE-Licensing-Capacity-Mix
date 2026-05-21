@@ -14,8 +14,6 @@
   .panel { background: #1e2330; border-radius: 8px; padding: 14px; border: 1px solid #2d3548; height: 100%; position: relative; }
   .panel h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px; border-bottom: 1px solid #2d3548; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
   .full-width { grid-column: span 4; }
-  .span-3 { grid-column: span 3; }
-  .span-1 { grid-column: span 1; }
 
   /* EXECUTIVE NARRATIVE INSIGHT BANNER */
   .insight-banner { background: #1a1f2e; border-left: 4px solid #6366f1; padding: 16px; border-radius: 6px; margin-bottom: 16px; border-top: 1px solid #2d3548; border-right: 1px solid #2d3548; border-bottom: 1px solid #2d3548; }
@@ -32,8 +30,8 @@
   .month-bar { display: flex; gap: 3px; align-items: center; }
   .month-btn { padding: 6px 12px; border-radius: 5px; border: 1px solid #2d3548; background: #1e2330; color: #94a3b8; cursor: pointer; font-size: 10px; transition: 0.15s; }
   .month-btn.active { background: #312e81; border-color: #6366f1; color: #fff; font-weight: bold; }
-  .btn-horizon { background: #111827; border: 1px dashed #4b5563; color: #9ca3af; padding: 4px 8px; border-radius: 4px; font-size: 9px; cursor: pointer; }
-  .btn-horizon:hover { border-color: #6366f1; color: #f3f4f6; }
+  .btn-horizon { background: #111827; border: 1px dashed #4b5563; color: #9ca3af; padding: 6px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; transition: 0.2s; }
+  .btn-horizon:hover { border-color: #6366f1; color: #f3f4f6; background: #1e293b; }
 
   /* HIGH LEVEL METRICS SUMMARY CARDS */
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
@@ -44,16 +42,18 @@
 
   /* TABULAR DATA ARCHITECTURE */
   table { width: 100%; border-collapse: collapse; text-align: left; }
-  th { padding: 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  th { padding: 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; }
   td { padding: 4px 6px; border-bottom: 1px solid #1a2030; }
   
   /* ROW HOVER HIGHLIGHT STYLING FOR LONG TRACE INPUT INTEGRITY */
   .hover-row-trace tbody tr:hover td { background-color: #242b3d !important; }
   
-  /* MATRIX ARBITRAGE COLOR MATRIX SCHEMES */
-  .matrix-select { background: #0f1117; border: 1px solid #2d3548; font-size: 9px; padding: 1px 3px; border-radius: 3px; cursor: pointer; font-weight: 700; width: 44px; }
-  .matrix-cell-on { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-  .matrix-cell-off { background: rgba(239, 68, 68, 0.12); color: #f87171; }
+  /* MATRIX ARBITRAGE COLOR SCHEMES */
+  .matrix-select { background: #0f1117; border: 1px solid #2d3548; font-size: 10px; padding: 2px 4px; border-radius: 4px; cursor: pointer; font-weight: 700; width: 48px; outline: none; appearance: none; text-align: center; }
+  .matrix-cell-on { background: rgba(34, 197, 94, 0.1); }
+  .matrix-cell-off { background: rgba(239, 68, 68, 0.05); }
+  .text-green { color: #4ade80; border-color: #22c55e; }
+  .text-red { color: #f87171; }
   
   /* PILL TAG COMPONENT AND STATE VISUAL REHABILITATION */
   .provider-pill { display: inline-block; background: #312e81; color: #c7d2fe; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: 600; margin: 1px; white-space: nowrap; }
@@ -63,12 +63,12 @@
   .status-red { color: #ef4444; font-weight: 700; }
   .status-green { color: #22c55e; font-weight: 700; }
   
-  input, select { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 2px; border-radius: 3px; text-align: center; font-size: 10px; }
-  input[type="text"] { text-align: left; padding: 2px 6px; }
+  input { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 11px; }
+  input[type="text"] { text-align: left; padding: 4px 8px; }
   .btn-action { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: 600; }
   .btn-action:hover { background: #2563eb; }
-  .btn-remove { color: #ef4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; }
-  .btn-remove:hover { color: #f87171; }
+  .btn-remove { color: #ef4444; background: #2a0f0f; border: 1px solid #ef4444; cursor: pointer; font-weight: bold; font-size: 10px; padding: 2px 6px; border-radius: 4px; transition: 0.2s; }
+  .btn-remove:hover { background: #ef4444; color: #fff; }
 
   /* FIXED SIZE VIEWPORT ENVELOPE FOR MODAL COMPACT VIEWS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
@@ -77,7 +77,7 @@
   
   .totals-row { background: #0f1117; font-weight: bold; border-top: 2px solid #3d4a63; }
   .cap-cell { font-weight: 700; color: #6366f1; text-align: center; border-right: 1px solid #2d3548; background: rgba(0,0,0,0.2); }
-  .chart-container { height: 160px; width: 100%; margin-bottom: 4px; }
+  .chart-container { height: 180px; width: 100%; margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -93,9 +93,9 @@
   </div>
 
   <div class="month-bar">
-    <button class="btn-horizon" onclick="archiveEarliestMonth()" title="Archive the oldest tracking period from the timeline dashboard view">(-) Archive Past</button>
-    <div id="month-tabs" style="display: inline-flex; gap: 3px; margin: 0 4px;"></div>
-    <button class="btn-horizon" onclick="appendFutureMonth()" title="Append a consecutive projection period block onto the active planning window">(+) Add Future</button>
+    <button class="btn-horizon" onclick="archiveEarliestMonth()" title="Archive the oldest tracking period">(-) Archive Past</button>
+    <div id="month-tabs" style="display: inline-flex; gap: 3px; margin: 0 8px;"></div>
+    <button class="btn-horizon" onclick="appendFutureMonth()" title="Append a new month to the projection">(+) Add Future</button>
   </div>
   
   <button class="btn-action" onclick="toggleModalEnvelope('settings-modal')">⚙️ GLOBAL PARAMETERS MANAGER</button>
@@ -113,8 +113,9 @@
 
   <div class="panel full-width">
     <h2 id="matrix-title-label">State Allocation & Licensure Grid</h2>
+    <p style="font-size: 10px; color: #94a3b8; margin-bottom: 10px;">Select "On" to instantly route capacity to that state for the selected month. Changing a cell to "On" also automatically adds that state to the evaluator's Master Profile.</p>
     <div style="overflow-x: auto; width: 100%; max-height: 480px; overflow-y: auto;">
-      <table class="hover-row-trace" id="matrix-licensure-table" style="min-width: 1200px;">
+      <table class="hover-row-trace" id="matrix-licensure-table" style="min-width: 1300px;">
         <thead>
           <tr id="matrix-head-row"></tr>
         </thead>
@@ -125,10 +126,27 @@
   </div>
 
   <div class="panel full-width">
-    <h2>Full-Year PTO & Capacity Management Ledger</h2>
+    <h2 id="heat-title">State Weighted Distribution Balance</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>State</th>
+          <th>Demand</th>
+          <th>Weighted Cap</th>
+          <th>Coverage %</th>
+          <th>Balance Gap</th>
+          <th>Assigned Clinical Evaluators</th>
+        </tr>
+      </thead>
+      <tbody id="heatmap-body"></tbody>
+    </table>
+  </div>
+
+  <div class="panel full-width">
+    <h2>Rolling PTO & Capacity Management Ledger</h2>
     <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center; background: #161b26; padding: 10px; border-radius: 6px; border: 1px solid #2d3548;">
         <span style="font-weight: 600; color: #a5b4fc;">Roster Onboarding:</span>
-        <input type="text" id="new-clinician-name" placeholder="Enter full name of incoming Clinical Evaluator" style="width: 260px;">
+        <input type="text" id="new-clinician-name" placeholder="Enter full name of incoming Evaluator" style="width: 260px;">
         <button class="btn-action" onclick="addNewClinicianToRoster()">+ Provision Evaluator Seat</button>
     </div>
     <div style="overflow-x: auto; width: 100%;">
@@ -144,7 +162,7 @@
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-content">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #2d3548; padding-bottom: 10px;">
-        <h2 style="margin:0; border:none; color:#fff; font-size:13px;">Global Base Targets & Projections Control Center</h2>
+        <h2 style="margin:0; border:none; color:#fff; font-size:14px;">Global Base Targets & Projections Control Center</h2>
         <button class="btn-action" onclick="saveGlobalModalParams()">COMMIT PARAMETERS & RECALCULATE</button>
     </div>
     
@@ -156,14 +174,17 @@
     <div class="panel">
         <h2>Accepted App Projections & Target Enrollments</h2>
         <div class="modal-scroll-area">
-            <table id="modal-demand-entry-table"></table>
+            <table id="modal-demand-entry-table" style="width: 100%;"></table>
         </div>
     </div>
-    <button class="danger-btn" onclick="triggerFactoryResetWfm()" style="margin-top: 14px; width: 100%; padding: 8px; font-weight: bold;">⚠️ INITIALIZE HARD RESET TO FACTORY DEFAULTS</button>
+    <button class="btn-action" onclick="triggerFactoryResetWfm()" style="background:transparent; border: 1px solid #ef4444; color: #ef4444; margin-top: 14px; width: 100%; padding: 8px; font-weight: bold;">⚠️ INITIALIZE HARD RESET TO FACTORY DEFAULTS</button>
   </div>
 </div>
 
 <script>
+// --- CRASH PROOF UTILITIES ---
+const fmt = (num) => Math.round(num || 0).toLocaleString();
+
 // --- CORE CONSTANTS & BASELINES ---
 const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const MASTER_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
@@ -220,12 +241,11 @@ let operationalChartInstance = null;
 // --- CRASH-PROOF STRUCTURAL HYDRATION ENGINE ---
 function bootstrapDataEngine() {
   try {
-    ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v16')) || ["May","June","July","August","September","October","November","December"];
-    GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v16')) || {};
-    CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v16')) || {};
-    volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v16')) || 1.0;
+    ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v17')) || ["May","June","July","August","September","October","November","December"];
+    GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v17')) || {};
+    CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v17')) || {};
+    volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v17')) || 1.0;
 
-    // Validate dynamic global metric parameters exist across tracking elements
     ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
       if (!GLOBAL_PROJECTIONS_LEDGER[m]) {
         GLOBAL_PROJECTIONS_LEDGER[m] = {
@@ -240,7 +260,6 @@ function bootstrapDataEngine() {
       }
     });
 
-    // Hydrate roster context matching default data profiles
     if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length === 0) {
       Object.keys(BASELINE_CE_CONFIG).forEach(name => {
         CLINICAL_EVALUATORS_ROSTER[name] = {
@@ -256,7 +275,6 @@ function bootstrapDataEngine() {
         });
       });
     } else {
-      // Backfill protection validation for rolling updates
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         if (!CLINICAL_EVALUATORS_ROSTER[name].ptoMap) CLINICAL_EVALUATORS_ROSTER[name].ptoMap = {};
         if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
@@ -272,16 +290,16 @@ function bootstrapDataEngine() {
     }
     saveStateToStorage();
   } catch (err) {
-    console.error("Hydration Engine Intercept Failure, resetting context storage", err);
+    console.error("Hydration Engine Intercept Failure", err);
     triggerFactoryResetWfm();
   }
 }
 
 function saveStateToStorage() {
-  localStorage.setItem('wfm_timeline_v16', JSON.stringify(ACTIVE_HORIZON_TIMELINE));
-  localStorage.setItem('wfm_ledger_v16', JSON.stringify(GLOBAL_PROJECTIONS_LEDGER));
-  localStorage.setItem('wfm_roster_v16', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
-  localStorage.setItem('wfm_mult_v16', volGrowthMultiplier.toString());
+  localStorage.setItem('wfm_timeline_v17', JSON.stringify(ACTIVE_HORIZON_TIMELINE));
+  localStorage.setItem('wfm_ledger_v17', JSON.stringify(GLOBAL_PROJECTIONS_LEDGER));
+  localStorage.setItem('wfm_roster_v17', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
+  localStorage.setItem('wfm_mult_v17', volGrowthMultiplier.toString());
 }
 
 function triggerFactoryResetWfm() {
@@ -289,7 +307,7 @@ function triggerFactoryResetWfm() {
   location.reload();
 }
 
-// --- SLIDING TIMELINE HORIZON CONTROL MECHANISMS ---
+// --- SLIDING TIMELINE HORIZON CONTROLS ---
 function archiveEarliestMonth() {
   if (ACTIVE_HORIZON_TIMELINE.length <= 1) {
     alert("Proportional allocation limits require keeping at least one active monitoring period context block.");
@@ -309,10 +327,11 @@ function archiveEarliestMonth() {
 
 function appendFutureMonth() {
   let latestMonth = ACTIVE_HORIZON_TIMELINE[ACTIVE_HORIZON_TIMELINE.length - 1];
-  let nextIdx = (ALL_KNOWN_MONTHS.indexOf(latestMonth) + 1) % 12;
+  let cleanMonthName = latestMonth.split('_')[0]; 
+  let nextIdx = (ALL_KNOWN_MONTHS.indexOf(cleanMonthName) + 1) % 12;
   let nextMonthName = ALL_KNOWN_MONTHS[nextIdx];
 
-  if (ACTIVE_HORIZON_TIMELINE.includes(nextMonthName)) {
+  if (ACTIVE_HORIZON_TIMELINE.some(m => m.startsWith(nextMonthName))) {
     nextMonthName += `_${Date.now().toString().slice(-4)}`;
   }
 
@@ -343,7 +362,7 @@ function buildTimelineControls() {
   ACTIVE_HORIZON_TIMELINE.forEach((m, i) => {
     const btn = document.createElement('button');
     btn.className = `month-btn ${i === activeSelectedMonthIdx ? 'active' : ''}`;
-    btn.innerText = m;
+    btn.innerText = m.split('_')[0]; // Hide unique ID string in UI
     btn.onclick = () => {
       activeSelectedMonthIdx = i;
       buildTimelineControls();
@@ -353,25 +372,24 @@ function buildTimelineControls() {
   });
 }
 
-// --- MODAL PARAMETERS LAYOUT POPULATION ---
+// --- MODAL PARAMETERS LAYOUT ---
 function toggleModalEnvelope(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
-  const isOpen = modal.classList.contains('open');
-  if (isOpen) {
-    modal.classList.remove('open');
+  if (modal.style.display === 'flex') {
+    modal.style.display = 'none';
   } else {
     populateGlobalModalViews();
-    modal.classList.add('open');
+    modal.style.display = 'flex';
   }
 }
 
 function populateGlobalModalViews() {
   const wdWrapper = document.getElementById('modal-wd-grid-wrapper');
   if (wdWrapper) {
-    wdWrapper.innerHTML = ACTIVE_HORIZON_TIMELINE.map((m, i) => `
-      <div style="flex:1; min-width:90px; text-align:center; padding:6px; background:#1e2330; border-radius:4px; border:1px solid #2d3548;">
-        <div style="font-size:9px; color:#64748b; margin-bottom:4px; font-weight:700;">${m}</div>
+    wdWrapper.innerHTML = ACTIVE_HORIZON_TIMELINE.map((m) => `
+      <div style="flex:1; min-width:80px; text-align:center; padding:6px; background:#1e2330; border-radius:4px; border:1px solid #2d3548;">
+        <div style="font-size:9px; color:#64748b; margin-bottom:4px; font-weight:700;">${m.split('_')[0]}</div>
         <input type="number" id="mod-wd-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].workingDays}" style="width:100%; font-weight:bold;">
       </div>
     `).join('');
@@ -379,24 +397,14 @@ function populateGlobalModalViews() {
 
   const demandTable = document.getElementById('modal-demand-entry-table');
   if (demandTable) {
-    let html = `<thead><tr><th>Territory / Metric</th>${ACTIVE_HORIZON_TIMELINE.map(m => `<th>${m}</th>`).join('')}</tr></thead><tbody>`;
-    html += `<tr style="background:rgba(99,102,241,0.12);"><td><strong>Monthly Enrollment Target</strong></td>${ACTIVE_HORIZON_TIMELINE.map(m => `<td><input type="number" id="mod-tgt-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget}" style="width:70px; color:#a5b4fc; font-weight:700;"></td>`).join('')}</tr>`;
+    let html = `<thead><tr><th style="position:sticky; left:0; background:#1e2330; z-index:2;">Territory / Metric</th>${ACTIVE_HORIZON_TIMELINE.map(m => `<th>${m.split('_')[0]}</th>`).join('')}</tr></thead><tbody>`;
+    html += `<tr style="background:rgba(99,102,241,0.12);"><td style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548;"><strong>Enrollment Target</strong></td>${ACTIVE_HORIZON_TIMELINE.map(m => `<td><input type="number" id="mod-tgt-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget}" style="width:100%; color:#a5b4fc; font-weight:700;"></td>`).join('')}</tr>`;
     
     MASTER_STATE_LIST.forEach(s => {
-      html += `<tr><td><strong>${s} Demand Volume</strong></td>${ACTIVE_HORIZON_TIMELINE.map(m => `<td><input type="number" id="mod-dem-field-${s}-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0}" style="width:70px;"></td>`).join('')}</tr>`;
+      html += `<tr><td style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548;"><strong>${s} Demand Volume</strong></td>${ACTIVE_HORIZON_TIMELINE.map(m => `<td><input type="number" id="mod-dem-field-${s}-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0}" style="width:100%;"></td>`).join('')}</tr>`;
     });
     html += '</tbody>';
     demandTable.innerHTML = html;
-  }
-
-  const baseRadio = document.getElementById('m-base');
-  const check5 = document.getElementById('m-5');
-  const check10 = document.getElementById('m-10');
-  if (baseRadio && check5 && check10) {
-    document.querySelectorAll('.multiplier-wrap .m-btn').forEach(btn => btn.classList.remove('active'));
-    if (volGrowthMultiplier === 1.05) { if (check5) check5.classList.add('active'); }
-    else if (volGrowthMultiplier === 1.10) { if (check10) check10.classList.add('active'); }
-    else { if (baseRadio) baseRadio.classList.add('active'); }
   }
 }
 
@@ -434,23 +442,21 @@ function addNewClinicianToRoster() {
   const nameInput = document.getElementById('new-clinician-name');
   if (!nameInput) return;
   const name = nameInput.value.trim();
-  if (!name) {
-    alert("Please declare a qualified identifier string for tracking custom clinical resource additions.");
-    return;
-  }
+  if (!name) return;
+  
   if (CLINICAL_EVALUATORS_ROSTER[name]) {
     alert("Resource entity entry already holds assignment constraints inside active tracking namespace registry.");
     return;
   }
   CLINICAL_EVALUATORS_ROSTER[name] = {
     quota: 4,
-    profile: ["MA"],
+    profile: [],
     ptoMap: {},
     monthlyToggles: {}
   };
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
-    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = ["MA"];
+    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [];
   });
   nameInput.value = '';
   saveStateToStorage();
@@ -464,34 +470,14 @@ function deprovisionClinician(name) {
   recalculateDashboardMetrics();
 }
 
-function toggleMasterLicenseInProfile(name, state) {
-  let profile = CLINICAL_EVALUATORS_ROSTER[name].profile;
-  let idx = profile.indexOf(state);
-  if (idx > -1) {
-    profile.splice(idx, 1);
-    // Cascade removal from monthly execution matrices if dropped from core structural license credential map
-    ACTIVE_HORIZON_TIMELINE.forEach(m => {
-      let mix = CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m];
-      let mIdx = mix.indexOf(state);
-      if (mIdx > -1) mix.splice(mIdx, 1);
-    });
-  } else {
-    profile.push(state);
-    ACTIVE_HORIZON_TIMELINE.forEach(m => {
-      if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
-        CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
-      }
-    });
-  }
-  saveStateToStorage();
-  recalculateDashboardMetrics();
-}
-
 function updateMonthlyMixToggle(name, state, value) {
   let currentMonthName = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
   let mix = CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[currentMonthName];
+  let profile = CLINICAL_EVALUATORS_ROSTER[name].profile;
+
   if (value === "On") {
-    if (!mix.includes(state)) mix.push(state);
+    if (!profile.includes(state)) profile.push(state); 
+    if (!mix.includes(state)) mix.push(state); 
   } else {
     CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[currentMonthName] = mix.filter(s => s !== state);
   }
@@ -499,7 +485,7 @@ function updateMonthlyMixToggle(name, state, value) {
   recalculateDashboardMetrics();
 }
 
-// --- REACTIONARY WFM PROCESSING AND ALLOCATION ALGORITHMS ---
+// --- CORE WFM PROCESSING ---
 function recalculateDashboardMetrics() {
   try {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
@@ -508,9 +494,8 @@ function recalculateDashboardMetrics() {
     let wd = GLOBAL_PROJECTIONS_LEDGER[activeMonth].workingDays;
     let targetEnrollment = GLOBAL_PROJECTIONS_LEDGER[activeMonth].enrollTarget;
 
-    // Title label configurations updates
-    SafeSetter('matrix-title-label', `${activeMonth} Cross-Reference Allocation & Licensure Grid`);
-    SafeSetter('heat-title', `${activeMonth} State Proportional Supply Distribution Overview`);
+    SafeSetter('matrix-title-label', `${activeMonth.split('_')[0]} State Allocation & Licensure Grid`);
+    SafeSetter('heat-title', `${activeMonth.split('_')[0]} State Proportional Distribution`);
 
     // 1. Calculate Individual Resource Capacities For Selected Tracking Month
     let clinicianAllocations = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
@@ -524,15 +509,7 @@ function recalculateDashboardMetrics() {
         totalDemandDenom += ((GLOBAL_PROJECTIONS_LEDGER[activeMonth].stateDemand[s] || 0) * volGrowthMultiplier);
       });
 
-      return {
-        name: name,
-        quota: r.quota,
-        pto: pto,
-        capacity: totalCapacity,
-        activeStates: activeStatesThisMonth,
-        denom: totalDemandDenom,
-        masterProfile: r.profile
-      };
+      return { name: name, quota: r.quota, pto: pto, capacity: totalCapacity, activeStates: activeStatesThisMonth, denom: totalDemandDenom, masterProfile: r.profile };
     });
 
     // 2. Build State Proportional Supply Projections Ledgers
@@ -557,27 +534,19 @@ function recalculateDashboardMetrics() {
         }
       });
 
-      // Structural Depth Assessment (Sum capacity contribution potential if everyone certified was toggled active)
+      // Structural Depth Assessment
       let maximumLicensedPotentialSupply = 0;
       clinicianAllocations.forEach(ce => {
         if (ce.masterProfile.includes(s)) {
           let alternateDenom = ce.denom;
-          if (!ce.activeStates.includes(s)) {
-            alternateDenom += stateDemand;
-          }
+          if (!ce.activeStates.includes(s)) alternateDenom += stateDemand;
           let possibleWeight = alternateDenom > 0 ? stateDemand / alternateDenom : 0;
           maximumLicensedPotentialSupply += (ce.capacity * possibleWeight);
         }
       });
 
       systemTotalWeightedSupply += stateWeightedCapacity;
-      stateAllocations[s] = {
-        demand: stateDemand,
-        supply: stateWeightedCapacity,
-        count: contributingCliniciansCount,
-        assigned: concurrentAssignedRoster,
-        maxPotential: maximumLicensedPotentialSupply
-      };
+      stateAllocations[s] = { demand: stateDemand, supply: stateWeightedCapacity, count: contributingCliniciansCount, assigned: concurrentAssignedRoster, maxPotential: maximumLicensedPotentialSupply };
     });
 
     // 3. Render Executive Global Metric Trackers
@@ -587,37 +556,18 @@ function recalculateDashboardMetrics() {
     const statsContainer = document.getElementById('top-stats-container');
     if (statsContainer) {
       statsContainer.innerHTML = `
-        <div class="stat-card">
-          <div class="stat-label">Accepted App Volume <span title="Aggregated consumer funnel pipeline demand for selected tracking month with growth scaling filter applied." class="info-icon">ⓘ</span></div>
-          <div class="stat-val">${fmt(systemTotalDemand)}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Weighted Capacity <span title="Total calculated aggregate slot supply contribution metrics available across active dispatch grid configuration matrices." class="info-icon">ⓘ</span></div>
-          <div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">System Utilization <span title="Primary pipeline processing operations velocity index indicator health check boundary. Baseline thresholds >95% scale immediate staffing burn alerts." class="info-icon">ⓘ</span></div>
-          <div class="stat-val ${aggregateUtilizationIndex > 95 ? 'status-red' : ''}">${aggregateUtilizationIndex}%</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Monthly PTO Pool <span title="Sum total of scheduled evaluator resource days out across selected operational calendar frame." class="info-icon">ⓘ</span></div>
-          <div class="stat-val" style="color:#ef4444;">${totalPtoPoolSum} Days</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Accepted App Volume</div><div class="stat-val">${fmt(systemTotalDemand)}</div></div>
+        <div class="stat-card"><div class="stat-label">Weighted Capacity</div><div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)}</div></div>
+        <div class="stat-card"><div class="stat-label">System Utilization</div><div class="stat-val ${aggregateUtilizationIndex > 95 ? 'status-red' : ''}">${aggregateUtilizationIndex}%</div></div>
+        <div class="stat-card"><div class="stat-label">Total Monthly PTO Pool</div><div class="stat-val" style="color:#ef4444;">${totalPtoPoolSum} Days</div></div>
       `;
     }
 
-    // 4. Render Cross-Reference Dispatched Matrix Grid View
     renderLicensureCrossMatrix(clinicianAllocations, stateAllocations);
-
-    // 5. Render Central Heatmap and Coverage Balances
     renderStateWeightedHeatmap(stateAllocations);
-
-    // 6. Build Narrative Context & Update Long Range Graphical Plots
     renderExecutiveNarrativeBanner(systemTotalDemand, systemTotalWeightedSupply, activeMonth, targetEnrollment);
+    renderPtoManagerGrid();
     renderLongRangeWfmChart();
-
-    // 7. Update Full Year PTO Manager Grid
-    renderPtoManagerGrid(wd);
 
   } catch (err) {
     console.error("Dashboard Engine Processing Intercept Error: ", err);
@@ -630,37 +580,29 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
   const footTotals = document.getElementById('matrix-foot-totals');
   if (!headRow || !bodyRows || !footTotals) return;
 
-  let currentMonthName = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+  headRow.innerHTML = `<th style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548;">Clinical Evaluator Name</th><th style="text-align:center; color:#a5b4fc; font-weight:bold;">Count</th>` + 
+    MASTER_STATE_LIST.map(s => `<th style="text-align:center; font-weight:bold; min-width:54px;">${s}</th>`).join('');
 
-  // Head Row Build
-  headRow.innerHTML = `<th>Clinical Evaluator Name</th><th style="text-align:center; color:#a5b4fc; font-weight:bold;">Count</th>` + 
-    MASTER_STATE_LIST.map(s => `<th style="text-align:center; font-weight:bold; min-width:44px;">${s}</th>`).join('');
-
-  // Body Row Builds
   bodyRows.innerHTML = clinicianAllocations.map(ce => {
     let countActiveOnStates = ce.activeStates.length;
     let stateCellsHtml = MASTER_STATE_LIST.map(s => {
-      let holdsMasterLicense = ce.masterProfile.includes(s);
-      if (!holdsMasterLicense) {
-        return `<td style="text-align:center; background:#0b0e14; color:#374151;">—</td>`;
-      }
       let isCurrentlyOn = ce.activeStates.includes(s);
       return `
         <td class="${isCurrentlyOn ? 'matrix-cell-on' : 'matrix-cell-off'}" style="text-align:center; padding:2px;">
-          <select class="matrix-select" style="color: inherit;" onchange="updateMonthlyMixToggle('${ce.name}', '${s}', this.value)">
-            <option value="On" ${isCurrentlyOn ? 'selected' : ''}>On</option>
-            <option value="Off" ${!isCurrentlyOn ? 'selected' : ''}>Off</option>
+          <select class="matrix-select ${isCurrentlyOn ? 'text-green' : 'text-red'}" onchange="updateMonthlyMixToggle('${ce.name}', '${s}', this.value)">
+            <option value="On" ${isCurrentlyOn ? 'selected' : ''}>On ▼</option>
+            <option value="Off" ${!isCurrentlyOn ? 'selected' : ''}>Off ▼</option>
           </select>
         </td>
       `;
     }).join('');
 
     return `
-      <tr>
-        <td>
-          <div style="display:flex; align-items:center; justify-content:space-between;">
+      <tr data-ce-row-id="${ce.name}">
+        <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding-right:6px;">
             <span style="font-weight:700; color:#f1f5f9;">${ce.name}</span>
-            <button class="btn-remove" onclick="deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
+            <button class="btn-remove" onclick="deprovisionClinician('${ce.name}')" title="Remove Evaluator">×</button>
           </div>
         </td>
         <td style="text-align:center; font-weight:bold; background:#111521; color:#93c5fd;">${countActiveOnStates}</td>
@@ -669,11 +611,9 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
     `;
   }).join('');
 
-  // Foot Row Matrix Summaries Builds
-  let footerHtml = `<tr style="background:#0f1117; font-weight:bold;"><td style="color:#64748b;">Active Providers Dispatched</td><td>—</td>`;
+  let footerHtml = `<tr style="background:#0f1117; font-weight:bold;"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548; color:#64748b;">Active Providers Dispatched</td><td>—</td>`;
   MASTER_STATE_LIST.forEach(s => {
-    let count = stateAllocations[s].count;
-    footerHtml += `<td style="text-align:center; color:#f1f5f9; background:#161b26; border-top:1px solid #3d4a63;">${count}</td>`;
+    footerHtml += `<td style="text-align:center; color:#f1f5f9; background:#161b26; border-top:1px solid #3d4a63;">${stateAllocations[s].count}</td>`;
   });
   footerHtml += '</tr>';
   footTotals.innerHTML = footerHtml;
@@ -688,27 +628,23 @@ function renderStateWeightedHeatmap(stateAllocations) {
     let processingPercentage = r.demand > 0 ? (r.supply / r.demand) * 100 : 100;
     let netBalanceOffset = Math.round(r.supply - r.demand);
     
-    // License capacity structural shortfall threshold marker diagnostics checks
-    let structuralShortageAlert = r.maxPotential < r.demand;
-
     return `
       <tr>
         <td><strong>${s}</strong></td>
         <td style="font-weight:600;">${fmt(r.demand)}</td>
         <td style="color:#a5b4fc; font-weight:600;">${fmt(r.supply)}</td>
-        <td style="text-align:center; font-weight:bold; color:#93c5fd; background:rgba(49,46,129,0.2);">${r.count} CEs</td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
             <span style="width:30px; font-weight:bold;">${Math.round(processingPercentage)}%</span>
             <div class="progress-bg"><div class="progress-fill" style="width:${Math.min(100, processingPercentage)}%; background:${processingPercentage < 95 ? '#ef4444' : '#22c55e'};"></div></div>
           </div>
         </td>
-        <td class="${netBalanceOffset < 0 ? 'status-red' : 'status-green'}" title="Total Unconstrained Potential Licensed Supply Cap Ceiling: ${Math.round(r.maxPotential)} Slots">
-          ${netBalanceOffset > 0 ? '+' : ''}${fmt(netBalanceOffset)} ${structuralShortageAlert ? '<span style="font-size:9px; color:#ef4444; font-weight:900;" title="CRITICAL: Total possible potential capacity across all certified profiles is less than marketing demand. Add licenses.">⚠️ STRUCTURAL</span>' : ''}
+        <td class="${netBalanceOffset < 0 ? 'status-red' : 'status-green'}">
+          ${netBalanceOffset > 0 ? '+' : ''}${fmt(netBalanceOffset)}
         </td>
         <td>
-          <div style="max-width:440px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="linkTraceMarker('${n}')" onmouseout="clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
+          <div style="max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${r.assigned.map(n => `<span class="provider-pill">${n.split(' ')[0]}</span>`).join('')}
           </div>
         </td>
       </tr>
@@ -721,59 +657,68 @@ function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, t
   if (!container) return;
 
   let clinicianDeficitCount = Math.ceil(Math.max(0, totalDemand - totalSupply) / 64);
-  let aggregateConversionConstant = 0.25; // 25% Blended Baseline Screen-to-Onboard Progression Ratio
-  let expectedTheoreticalEnrollments = Math.round(totalSupply * aggregateConversionConstant);
+  let expectedTheoreticalEnrollments = Math.round(totalSupply * 0.25);
   let targetDeficitDelta = targetEnrollment - expectedTheoreticalEnrollments;
 
   container.innerHTML = `
-    <h3>MONTHLY OPERATIONS SYSTEM ANALYSIS — OPERATIONS PULSE: ${activeMonth.toUpperCase()}</h3>
-    <p>Current scheduling processing constraints indicate marketing pipeline demand vectors require clearing <strong>${fmt(totalDemand)} Phone Screen slots</strong> across active deployment matrices. 
-    Available workforce scheduling models yield <strong>${fmt(totalSupply)} viable production appointments</strong>. 
+    <h3>MONTHLY OPERATIONS SYSTEM ANALYSIS — ${activeMonth.split('_')[0].toUpperCase()}</h3>
+    <p>Marketing pipeline volume indicates a demand load of <strong>${fmt(totalDemand)} required screening slots</strong> across active deployment matrices. 
+    Current workforce supply yields <strong>${fmt(totalSupply)} viable production appointments</strong>. 
     ${totalSupply >= totalDemand 
-      ? `Workforce optimization models indicate tactical allocation strategies match queue depth requirements, remaining <strong>perfectly balanced</strong> against incoming pipeline loads.` 
-      : `Operational gaps identify an immediate shortfall of <strong>${fmt(totalDemand - totalSupply)} required phone screens</strong>. Resolving this pipeline processing boundary requires immediately onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong> or optimizing target licensure distribution mix blocks.`}
-    Downstream conversions projection tracks toward delivering a capacity yield potential of <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to organizational goal commitments of <strong>${fmt(targetEnrollment)}</strong> 
+      ? `Workforce optimization models indicate tactical allocation strategies match queue depth requirements.` 
+      : `Operational gaps identify an immediate shortfall of <strong>${fmt(totalDemand - totalSupply)} required slots</strong>. Resolving this requires onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong>.`}
+    Downstream conversions project toward delivering <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to organizational goal commitments of <strong>${fmt(targetEnrollment)}</strong> 
     ${targetDeficitDelta > 0 
-      ? `(Tracking a structural deficit baseline gap risk of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>. Broaden specialized licensing matrices or drive conversion velocity vectors).` 
-      : `(Positioned safely to cross target baseline goals by a margin buffer of <strong class="status-green">+${fmt(Math.abs(targetDeficitDelta))} enrollments</strong>).`}</p>
+      ? `(Tracking a structural deficit gap of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>).` 
+      : `(Positioned to cross target baseline goals by <strong class="status-green">+${fmt(Math.abs(targetDeficitDelta))} enrollments</strong>).`}</p>
   `;
 }
 
-function renderPtoManagerGrid(currentMonthWorkingDays) {
-  const body = document.getElementById('pto-master-body');
-  const foot = document.getElementById('pto-master-foot');
-  if (!body || !foot) return;
+function renderPtoManagerGrid() {
+  const thead = document.getElementById('pto-ledger-head');
+  const body = document.getElementById('pto-ledger-body');
+  const foot = document.getElementById('pto-ledger-foot');
+  if (!thead || !body || !foot) return;
+
+  // Build Headers dynamically based on timeline
+  let headHtml = `<tr><th rowspan="2" style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548; min-width:140px;">Clinical Evaluator</th><th rowspan="2" style="width:50px; text-align:center;">Daily Quota</th>`;
+  ACTIVE_HORIZON_TIMELINE.forEach(m => {
+    headHtml += `<th colspan="2" class="pto-grid-header">${m.split('_')[0]}</th>`;
+  });
+  headHtml += `</tr><tr>`;
+  ACTIVE_HORIZON_TIMELINE.forEach(() => {
+    headHtml += `<th class="sub-head">PTO</th><th class="sub-head">CAP</th>`;
+  });
+  headHtml += `</tr>`;
+  thead.innerHTML = headHtml;
 
   // Render Core Body Elements
   body.innerHTML = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
     let r = CLINICAL_EVALUATORS_ROSTER[name];
-    let columnsHtml = ACTIVE_HORIZON_TIMELINE.map((m, i) => {
+    let columnsHtml = ACTIVE_HORIZON_TIMELINE.map((m) => {
       let ptoValue = r.ptoMap[m] !== undefined ? r.ptoMap[m] : 0;
       let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
       let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(r.quota) || 0));
 
       return `
-        <td><input type="number" step="0.5" value="${ptoValue}" style="width:38px;" onchange="updateClinicianPtoValue('${name}', '${m}', this.value)"></td>
+        <td><input type="number" step="0.5" value="${ptoValue}" style="width:40px;" onchange="updateClinicianPtoValue('${name}', '${m}', this.value)"></td>
         <td class="cap-cell">${Math.round(calculatedCapacity)}</td>
       `;
     }).join('');
 
     return `
       <tr data-ce-row-id="${name}">
-        <td>
-          <div style="display:flex; align-items:center; justify-content:space-between; padding-right:4px;">
-            <strong style="color:#f1f5f9;">${name}</strong>
-            <button class="btn-horizon" style="padding:1px 3px; font-size:7px;" onclick="triggerLicensureAssignmentPrompt('${name}')" title="Configure master credential verification maps for this resource">+ Lic</button>
-          </div>
+        <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
+          <strong style="color:#f1f5f9;">${name}</strong>
         </td>
-        <td><input type="number" value="${r.quota}" style="width:38px; font-weight:bold; color:#6366f1;" onchange="updateClinicianBaseQuota('${name}', this.value)"></td>
+        <td style="text-align:center;"><input type="number" value="${r.quota}" style="width:38px; font-weight:bold; color:#6366f1;" onchange="updateClinicianBaseQuota('${name}', this.value)"></td>
         ${columnsHtml}
       </tr>
     `;
   }).join('');
 
   // Render Footer Dynamic Aggregates Row
-  let totalsHtml = `<tr class="totals-row"><td>AGGREGATE SUMS</td><td>—</td>`;
+  let totalsHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548;">AGGREGATE SUMS</td><td style="text-align:center;">—</td>`;
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
     let aggregatePtoDaysSum = 0;
@@ -787,7 +732,7 @@ function renderPtoManagerGrid(currentMonthWorkingDays) {
     });
 
     totalsHtml += `
-      <td style="text-align:center; color:#f87171;">${aggregatePtoDaysSum}d</td>
+      <td style="text-align:center; color:#f87171;">${aggregatePtoDaysSum}</td>
       <td class="cap-cell" style="color:#4ade80; background:rgba(34,197,94,0.1);">${Math.round(aggregateSlotsCapacitySum)}</td>
     `;
   });
@@ -807,40 +752,22 @@ function updateClinicianBaseQuota(name, value) {
   recalculateDashboardMetrics();
 }
 
-function triggerLicensureAssignmentPrompt(name) {
-  let r = CLINICAL_EVALUATORS_ROSTER[name];
-  let promptStr = prompt(`Configure permanent master licensed credentials for ${name}.\nCurrent Profile: ${r.profile.join(', ')}\n\nEnter state codes to add/remove separated by spaces (e.g. 'TX FL'):`);
-  if (promptStr === null) return;
-  
-  let targetStates = promptStr.toUpperCase().trim().split(/\s+/);
-  targetStates.forEach(s => {
-    if (s && MASTER_STATE_LIST.includes(s)) {
-      toggleMasterLicenseInProfile(name, s);
-    }
-  });
-}
-
 // --- LONG RANGE TIMELINE FORECAST CHART SYSTEM ---
 function renderLongRangeWfmChart() {
   try {
     const ctx = document.getElementById('wfmAnnualChart');
     if (!ctx) return;
 
-    const dataLabels = ACTIVE_HORIZON_TIMELINE;
+    const dataLabels = ACTIVE_HORIZON_TIMELINE.map(m => m.split('_')[0]);
     const aggregateDemandPoints = [];
     const aggregateSupplyPoints = [];
 
     ACTIVE_HORIZON_TIMELINE.forEach(m => {
       let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
-      
-      // Calculate Demand Curve Point
       let demandSum = 0;
-      MASTER_STATE_LIST.forEach(s => {
-        demandSum += ((GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0) * volGrowthMultiplier);
-      });
+      MASTER_STATE_LIST.forEach(s => demandSum += ((GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0) * volGrowthMultiplier));
       aggregateDemandPoints.push(Math.round(demandSum));
 
-      // Calculate Supply Line Point
       let supplySum = 0;
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         let pto = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
@@ -850,9 +777,7 @@ function renderLongRangeWfmChart() {
       aggregateSupplyPoints.push(Math.round(supplySum));
     });
 
-    if (operationalChartInstance) {
-      operationalChartInstance.destroy();
-    }
+    if (operationalChartInstance) operationalChartInstance.destroy();
 
     operationalChartInstance = new Chart(ctx.getContext('2d'), {
       type: 'line',
@@ -888,10 +813,7 @@ function renderLongRangeWfmChart() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            position: 'top',
-            labels: { color: '#64748b', boxWidth: 10, font: { size: 9 } }
-          },
+          legend: { position: 'top', labels: { color: '#64748b', boxWidth: 10, font: { size: 9 } } },
           tooltip: { mode: 'index', intersect: false }
         },
         scales: {
@@ -903,25 +825,6 @@ function renderLongRangeWfmChart() {
   } catch (err) {
     console.error("Chart.js Pipeline Visualization Execution Intercept Failure: ", err);
   }
-}
-
-// --- INTERACTIVE VISUAL HOVER TRACE MATRIX LINKS ---
-function linkTraceMarker(name) {
-  let targetRow = document.querySelector(`tr[data-ce-row-id="${name}"]`);
-  if (targetRow) {
-    targetRow.style.backgroundColor = "#312e81";
-    targetRow.style.outline = "1px solid #6366f1";
-  }
-}
-
-function clearTraceMarker() {
-  Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
-    let targetRow = document.querySelector(`tr[data-ce-row-id="${name}"]`);
-    if (targetRow) {
-      targetRow.style.backgroundColor = "";
-      targetRow.style.outline = "";
-    }
-  });
 }
 
 // SAFE VALUE SETTER HELPER
