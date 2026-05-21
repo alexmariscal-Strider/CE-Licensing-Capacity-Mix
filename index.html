@@ -2,390 +2,939 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>CE Capacity Model Master v12.0</title>
+<title>CE Capacity Model - Strategic WFM Master</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; padding: 20px; font-size: 11px; line-height: 1.3; }
   
+  /* GRID ARRANGEMENT - RESPECTING THE 4-COLUMN SYSTEM */
   .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; }
-  .panel { background: #1e2330; border-radius: 8px; padding: 14px; border: 1px solid #2d3548; height: 100%; }
+  .panel { background: #1e2330; border-radius: 8px; padding: 14px; border: 1px solid #2d3548; height: 100%; position: relative; }
   .panel h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px; border-bottom: 1px solid #2d3548; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
   .full-width { grid-column: span 4; }
   .span-3 { grid-column: span 3; }
   .span-1 { grid-column: span 1; }
 
-  .insight-banner { background: #1a1f2e; border-left: 4px solid #6366f1; padding: 16px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #2d3548; border-left-width: 4px; }
-  .insight-banner h3 { font-size: 10px; text-transform: uppercase; color: #a5b4fc; margin-bottom: 8px; letter-spacing: 0.05em; }
+  /* EXECUTIVE NARRATIVE INSIGHT BANNER */
+  .insight-banner { background: #1a1f2e; border-left: 4px solid #6366f1; padding: 16px; border-radius: 6px; margin-bottom: 16px; border-top: 1px solid #2d3548; border-right: 1px solid #2d3548; border-bottom: 1px solid #2d3548; }
+  .insight-banner h3 { font-size: 10px; text-transform: uppercase; color: #a5b4fc; margin-bottom: 6px; letter-spacing: 0.05em; }
   .insight-banner p { font-size: 12px; line-height: 1.6; color: #cbd5e1; }
+  .insight-banner strong { color: #fff; font-weight: 700; }
 
+  /* HEADER CONTROLS */
   .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
   .multiplier-wrap { display: flex; background: #0f1117; padding: 3px; border-radius: 6px; border: 1px solid #2d3548; align-items: center; }
-  .m-btn { border: none; background: transparent; color: #64748b; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.2s; }
+  .m-btn { border: none; background: transparent; color: #64748b; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.15s; }
   .m-btn.active { background: #334155; color: #fff; }
 
-  .month-bar { display: flex; gap: 3px; }
-  .month-btn { padding: 6px 12px; border-radius: 5px; border: 1px solid #2d3548; background: #1e2330; color: #94a3b8; cursor: pointer; font-size: 10px; }
+  .month-bar { display: flex; gap: 3px; align-items: center; }
+  .month-btn { padding: 6px 12px; border-radius: 5px; border: 1px solid #2d3548; background: #1e2330; color: #94a3b8; cursor: pointer; font-size: 10px; transition: 0.15s; }
   .month-btn.active { background: #312e81; border-color: #6366f1; color: #fff; font-weight: bold; }
+  .btn-horizon { background: #111827; border: 1px dashed #4b5563; color: #9ca3af; padding: 4px 8px; border-radius: 4px; font-size: 9px; cursor: pointer; }
+  .btn-horizon:hover { border-color: #6366f1; color: #f3f4f6; }
 
+  /* HIGH LEVEL METRICS SUMMARY CARDS */
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
   .stat-card { background: #252c3f; padding: 12px; border-radius: 6px; border: 1px solid #3d4a63; }
   .stat-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
   .stat-val { font-size: 20px; font-weight: 700; color: #f8fafc; }
   .info-icon { cursor: help; color: #6366f1; font-weight: bold; font-size: 10px; }
 
-  .ce-row { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #2d3548; }
-  .state-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 3px; font-size: 8px; cursor: pointer; margin: 1px; font-weight: 700; border: 1px solid transparent; }
-  .state-on { background: #1e3a5f; color: #93c5fd; border-color: #3b82f6; }
-  .state-off { background: #0f1117; color: #475569; border-color: #1a2030; }
-  .del-btn { color: #ef4444; font-size: 10px; margin-left: 4px; cursor: pointer; opacity: 0.5; }
-
-  .provider-pill { display: inline-block; background: #312e81; color: #c7d2fe; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: 600; margin: 1px; }
-
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 8px; text-transform: uppercase; }
+  /* TABULAR DATA ARCHITECTURE */
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th { padding: 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
   td { padding: 4px 6px; border-bottom: 1px solid #1a2030; }
   
+  /* ROW HOVER HIGHLIGHT STYLING FOR LONG TRACE INPUT INTEGRITY */
+  .hover-row-trace tbody tr:hover td { background-color: #242b3d !important; }
+  
+  /* MATRIX ARBITRAGE COLOR MATRIX SCHEMES */
+  .matrix-select { background: #0f1117; border: 1px solid #2d3548; font-size: 9px; padding: 1px 3px; border-radius: 3px; cursor: pointer; font-weight: 700; width: 44px; }
+  .matrix-cell-on { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+  .matrix-cell-off { background: rgba(239, 68, 68, 0.12); color: #f87171; }
+  
+  /* PILL TAG COMPONENT AND STATE VISUAL REHABILITATION */
+  .provider-pill { display: inline-block; background: #312e81; color: #c7d2fe; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: 600; margin: 1px; white-space: nowrap; }
   .progress-bg { background: #0f1117; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 3px; width: 60px; }
-  .progress-fill { height: 100%; transition: width 0.3s; }
+  .progress-fill { height: 100%; transition: width 0.3s ease; }
+  
   .status-red { color: #ef4444; font-weight: 700; }
   .status-green { color: #22c55e; font-weight: 700; }
-
-  input { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 2px; border-radius: 3px; text-align: center; font-size: 10px; }
+  
+  input, select { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 2px; border-radius: 3px; text-align: center; font-size: 10px; }
+  input[type="text"] { text-align: left; padding: 2px 6px; }
   .btn-action { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: 600; }
+  .btn-action:hover { background: #2563eb; }
+  .btn-remove { color: #ef4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; }
+  .btn-remove:hover { color: #f87171; }
+
+  /* FIXED SIZE VIEWPORT ENVELOPE FOR MODAL COMPACT VIEWS */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
+  .modal-content { background: #1e2330; padding: 24px; border-radius: 12px; border: 1px solid #3d4a63; width: 90%; max-width: 950px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+  .modal-scroll-area { max-height: 380px; overflow-y: auto; border: 1px solid #2d3548; border-radius: 6px; margin-top: 10px; }
+  
   .totals-row { background: #0f1117; font-weight: bold; border-top: 2px solid #3d4a63; }
   .cap-cell { font-weight: 700; color: #6366f1; text-align: center; border-right: 1px solid #2d3548; background: rgba(0,0,0,0.2); }
-
-  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
-  .modal-content { background: #1e2330; padding: 24px; border-radius: 12px; border: 1px solid #3d4a63; width: 90%; max-width: 1000px; max-height: 90vh; overflow-y: auto; }
+  .chart-container { height: 160px; width: 100%; margin-bottom: 4px; }
 </style>
 </head>
 <body>
 
 <div class="header-flex">
-  <div><h1>CE Capacity Model <span style="font-weight:400; color:#64748b;">· Strategic WFM</span></h1></div>
+  <div><h1>CE Capacity Model <span style="font-weight:400; color:#64748b;">· Strategic WFM Suite</span></h1></div>
   
   <div class="multiplier-wrap">
-    <span style="font-size:9px; color:#94a3b8; font-weight:700; padding: 0 8px;">DEMAND BUMP:</span>
-    <button class="m-btn active" id="m-base" onclick="setMult(1.0, this)">BASE</button>
-    <button class="m-btn" id="m-5" onclick="setMult(1.05, this)">+5%</button>
-    <button class="m-btn" id="m-10" onclick="setMult(1.10, this)">+10%</button>
+    <span style="font-size:9px; color:#94a3b8; font-weight:700; padding: 0 8px;">VOLUME BUMP:</span>
+    <button class="m-btn active" id="m-base" onclick="setVolMultiplier(1.0, this)">BASE</button>
+    <button class="m-btn" id="m-5" onclick="setVolMultiplier(1.05, this)">+5%</button>
+    <button class="m-btn" id="m-10" onclick="setVolMultiplier(1.10, this)">+10%</button>
   </div>
 
-  <div class="month-bar" id="month-selector"></div>
-  <button class="btn-action" onclick="toggleModal('settings-modal')">⚙️ GLOBAL DATA MANAGER</button>
+  <div class="month-bar">
+    <button class="btn-horizon" onclick="archiveEarliestMonth()" title="Archive the oldest tracking period from the timeline dashboard view">(-) Archive Past</button>
+    <div id="month-tabs" style="display: inline-flex; gap: 3px; margin: 0 4px;"></div>
+    <button class="btn-horizon" onclick="appendFutureMonth()" title="Append a consecutive projection period block onto the active planning window">(+) Add Future</button>
+  </div>
+  
+  <button class="btn-action" onclick="toggleModalEnvelope('settings-modal')">⚙️ GLOBAL PARAMETERS MANAGER</button>
 </div>
 
-<div class="insight-banner" id="executive-insight"></div>
+<div class="insight-banner" id="executive-insight-banner"></div>
 
-<div class="stat-grid" id="top-stats"></div>
+<div class="stat-grid" id="top-stats-container"></div>
 
 <div class="dashboard-grid">
   <div class="panel full-width">
-    <h2>Supply (Weighted Cap) vs Demand Projections</h2>
-    <div style="height: 180px;"><canvas id="annualChart"></canvas></div>
-  </div>
-
-  <div class="panel span-1">
-    <h2 id="mix-title">Profile & Monthly Mix</h2>
-    <div id="ce-controls" style="max-height: 600px; overflow-y: auto; padding-right: 5px;"></div>
-  </div>
-
-  <div class="panel span-3">
-    <h2 id="heat-title">State Weighted Distribution</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>State</th>
-          <th>Demand</th>
-          <th>Weighted Cap</th>
-          <th>CE Count</th>
-          <th>Coverage %</th>
-          <th>Balance</th>
-          <th>Assigned Clinical Evaluators</th>
-        </tr>
-      </thead>
-      <tbody id="heatmap-body"></tbody>
-    </table>
+    <h2>Rolling Horizon Strategy Graph (Capacity Supply Line vs Demand Curve)</h2>
+    <div class="chart-container"><canvas id="wfmAnnualChart"></canvas></div>
   </div>
 
   <div class="panel full-width">
-    <h2>Full-Year PTO & Capacity Management (May - Dec)</h2>
-    <div style="margin-bottom: 10px; display: flex; gap: 10px;">
-        <input type="text" id="new-ce-name" placeholder="New Evaluator Name" style="width: 200px; text-align: left; padding-left: 8px;">
-        <button class="btn-action" onclick="addNewCE()">+ ADD CLINICAL EVALUATOR</button>
+    <h2 id="matrix-title-label">State Allocation & Licensure Grid</h2>
+    <div style="overflow-x: auto; width: 100%; max-height: 480px; overflow-y: auto;">
+      <table class="hover-row-trace" id="matrix-licensure-table" style="min-width: 1200px;">
+        <thead>
+          <tr id="matrix-head-row"></tr>
+        </thead>
+        <tbody id="matrix-body-rows"></tbody>
+        <tfoot id="matrix-foot-totals"></tfoot>
+      </table>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th rowspan="2">Clinical Evaluator</th>
-          <th rowspan="2">Daily Quota</th>
-          <th colspan="2">May</th><th colspan="2">June</th><th colspan="2">July</th><th colspan="2">August</th>
-          <th colspan="2">September</th><th colspan="2">October</th><th colspan="2">November</th><th colspan="2">December</th>
-        </tr>
-        <tr>
-          <th>PTO</th><th>CAP</th><th>PTO</th><th>CAP</th><th>PTO</th><th>CAP</th><th>PTO</th><th>CAP</th>
-          <th>PTO</th><th>CAP</th><th>PTO</th><th>CAP</th><th>PTO</th><th>CAP</th><th>PTO</th><th>CAP</th>
-        </tr>
-      </thead>
-      <tbody id="pto-master-body"></tbody>
-      <tfoot id="pto-master-foot"></tfoot>
-    </table>
+  </div>
+
+  <div class="panel full-width">
+    <h2>Full-Year PTO & Capacity Management Ledger</h2>
+    <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center; background: #161b26; padding: 10px; border-radius: 6px; border: 1px solid #2d3548;">
+        <span style="font-weight: 600; color: #a5b4fc;">Roster Onboarding:</span>
+        <input type="text" id="new-clinician-name" placeholder="Enter full name of incoming Clinical Evaluator" style="width: 260px;">
+        <button class="btn-action" onclick="addNewClinicianToRoster()">+ Provision Evaluator Seat</button>
+    </div>
+    <div style="overflow-x: auto; width: 100%;">
+      <table class="hover-row-trace" id="pto-ledger-table">
+        <thead id="pto-ledger-head"></thead>
+        <tbody id="pto-ledger-body"></tbody>
+        <tfoot id="pto-ledger-foot"></tfoot>
+      </table>
+    </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-content">
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0; border:none; color:#fff;">Global Baseline Projections</h2>
-        <div>
-            <button class="btn-action" onclick="saveGlobalSettings()">SAVE & REFRESH</button>
-            <button class="btn-action" onclick="toggleModal('settings-modal')" style="background:#475569;">CLOSE</button>
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #2d3548; padding-bottom: 10px;">
+        <h2 style="margin:0; border:none; color:#fff; font-size:13px;">Global Base Targets & Projections Control Center</h2>
+        <button class="btn-action" onclick="saveGlobalModalParams()">COMMIT PARAMETERS & RECALCULATE</button>
+    </div>
+    
+    <div class="panel" style="margin-bottom: 14px;">
+        <h2>Calendar Working Days Configuration</h2>
+        <div id="modal-wd-grid-wrapper" style="display:flex; gap:8px; flex-wrap:wrap; background:#0f1117; padding:10px; border-radius:6px;"></div>
+    </div>
+
+    <div class="panel">
+        <h2>Accepted App Projections & Target Enrollments</h2>
+        <div class="modal-scroll-area">
+            <table id="modal-demand-entry-table"></table>
         </div>
     </div>
-    <div class="panel" style="margin-bottom:15px;">
-        <h2>Working Days (May - Dec)</h2>
-        <div id="modal-wd-row" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-    </div>
-    <div class="panel">
-        <h2>State Demand</h2>
-        <div style="max-height:400px; overflow-y:auto;"><table id="modal-demand-table"></table></div>
-    </div>
-    <button class="btn-action" onclick="restoreDefaults()" style="background:#ef4444; margin-top:20px; width:100%;">FACTORY RESET ALL DATA</button>
+    <button class="danger-btn" onclick="triggerFactoryResetWfm()" style="margin-top: 14px; width: 100%; padding: 8px; font-weight: bold;">⚠️ INITIALIZE HARD RESET TO FACTORY DEFAULTS</button>
   </div>
 </div>
 
 <script>
-const MONTH_NAMES = ["May","June","July","August","September","October","November","December"];
-const STATE_ORDER = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
-const DEFAULT_WD = [20, 21, 21, 21, 21, 21, 18, 22];
+// --- CORE CONSTANTS & BASELINES ---
+const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MASTER_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
 
-const DEFAULT_DEMAND = {
-  "MA":[306,285,288,303,369,387,356,338],"NJ":[142,135,135,140,169,165,158,151],"NH":[50,45,50,52,63,66,63,60],"CT":[37,33,35,37,48,50,47,45],"NY":[169,160,155,162,191,200,191,182],"PA":[67,64,64,66,74,78,75,74],"RI":[20,18,20,21,23,24,23,22],"ME":[26,25,25,26,29,31,29,28],"VA":[54,45,51,54,67,64,61,58],"OH":[29,30,28,29,35,36,35,34],"TX":[82,75,56,59,71,75,70,66],"IL":[42,42,41,44,52,55,51,48],"DC":[9,9,10,10,12,13,12,13],"FL":[28,32,33,41,54,70,70,70],"NC":[20,20,19,20,22,24,22,23],"GA":[9,13,16,17,16,17,18,19],"SC":[2,5,4,5,4,5,5,5],
-  "MD":[0,0,7,11,13,14,13,14],"DE":[0,0,1,2,2,2,2,2],"WV":[0,0,1,1,1,1,1,1],"MO":[0,0,0,3,4,6,7,6],"WI":[0,0,0,5,6,10,12,12],"NV":[0,0,0,0,5,6,11,11],"AZ":[0,0,0,0,5,9,13,14],"CO":[0,0,0,0,5,9,13,14],"NM":[0,0,0,0,0,2,2,4],"MT":[0,0,0,0,0,2,2,2],"OK":[0,0,0,0,0,4,5,6]
+const BASELINE_WD_MAP = { "May":20, "June":21, "July":21, "August":21, "September":21, "October":21, "November":18, "December":22 };
+const BASELINE_TARGETS_MAP = { "May":327, "June":348, "July":349, "August":370, "September":403, "October":466, "November":528, "December":529 };
+
+const BASELINE_DEMAND_MATRIX = {
+  "MA":[306,285,288,303,369,387,356,338],"NJ":[142,135,135,140,169,165,158,151],"NH":[50,45,50,52,63,66,63,60],
+  "CT":[37,33,35,37,48,50,47,45],"NY":[169,160,155,162,191,200,191,182],"PA":[67,64,64,66,74,78,75,74],
+  "RI":[20,18,20,21,23,24,23,22],"ME":[26,25,25,26,29,31,29,28],"VA":[54,45,51,54,67,64,61,58],
+  "OH":[29,30,28,29,35,36,35,34],"TX":[82,75,56,59,71,75,70,66],"IL":[42,42,41,44,52,55,51,48],
+  "DC":[9,9,10,10,12,13,12,13],"FL":[28,32,33,41,54,70,70,70],"NC":[20,20,19,20,22,24,22,23],
+  "GA":[9,13,16,17,16,17,18,19],"SC":[2,5,4,5,4,5,5,5],"MD":[0,0,7,11,13,14,13,14],
+  "DE":[0,0,1,2,2,2,2,2],"WV":[0,0,1,1,1,1,1,1],"MO":[0,0,0,3,4,6,7,6],
+  "WI":[0,0,0,5,6,10,12,12],"NV":[0,0,0,0,5,6,11,11],"AZ":[0,0,0,0,5,9,13,14],
+  "CO":[0,0,0,0,5,9,13,14],"NM":[0,0,0,0,0,2,2,4],"MT":[0,0,0,0,0,2,2,2],"OK":[0,0,0,0,0,4,5,6]
 };
 
-const DEFAULT_CE = {
-  "Brian Richter": { q: 3, pto: [8,0,1,0,1,1,3,1], profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
-  "Charlotte Lively": { q: 4, pto: [2,6,0,0,0,0,2,0], profile: ["NH","CT","PA","RI","VA","OH","TX"] },
-  "Dina Siegel": { q: 4, pto: [1,0,0,0,0,0,0,0], profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
-  "Dylan Abrams": { q: 3, pto: [6,0,0,0,0,0,0,0], profile: ["NJ","OH","TX","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
-  "Gabby Suihkonen-Gross": { q: 4, pto: [0,0,0,0,0,0,0,0], profile: ["MA","NH","RI","ME"] },
-  "Sheila Rouzitalab": { q: 4, pto: [0,0,0,0,0,0,0,0], profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
-  "Tori Mahoney": { q: 4, pto: [1,4,2,0,0,0,5,0], profile: ["MA","NH","RI","ME","VA","OH"] },
-  "Mackenzie Sheridan": { q: 4, pto: [2,0,6,0,5,0,0,0], profile: ["MA","NH","CT","ME","OH"] },
-  "Sarah Lee": { q: 4, pto: [0,0,0,10,0,0,0,0], profile: ["MA","NJ","CT","VA"] },
-  "Larisa Zaleta": { q: 4, pto: [5,0,0,0,2,0,0,0], profile: ["NJ","CT","NY","IL","DC","FL"] },
-  "Simon Jencius": { q: 4, pto: [2,0,0,0,0,0,0,0], profile: ["MA","NJ","OH","IL"] },
-  "Charlie Snyder": { q: 4, pto: [3,0,0,0,0,0,0,0], profile: ["NY","TX","NV"] },
-  "Grace Rezendes": { q: 4, pto: [0,0,0,0,0,0,0,0], profile: ["MA","NH","RI","ME"] },
-  "Michelle Zalewski": { q: 4, pto: [3,2,1,1,2,0,0,1], profile: ["MA","PA","IL"] },
-  "Hayley Feuchs": { q: 4, pto: [0,2,0,1,4,0,0,0], profile: ["NY","DC","NV","AZ"] }
+const BASELINE_PTO_MAP = {
+  "Brian Richter":[8,0,1,0,1,1,3,1],"Charlotte Lively":[2,6,0,0,0,0,2,0],"Dina Siegel":[1,0,0,0,0,0,0,0],
+  "Dylan Abrams":[6,0,0,0,0,0,0,0],"Gabby Suihkonen-Gross":[0,0,0,0,0,0,0,0],"Sheila Rouzitalab":[0,0,0,0,0,0,0,0],
+  "Tori Mahoney":[1,4,2,0,0,0,5,0],"Mackenzie Sheridan":[2,0,6,0,5,0,0,0],"Sarah Lee":[0,0,0,10,0,0,0,0],
+  "Larisa Zaleta":[5,0,0,0,2,0,0,0],"Simon Jencius":[2,0,0,0,0,0,0,0],"Charlie Snyder":[3,0,0,0,0,0,0,0],
+  "Grace Rezendes":[0,0,0,0,0,0,0,0],"Michelle Zalewski":[3,2,1,1,2,0,0,1],"Hayley Feuchs":[0,2,0,1,4,0,0,0]
 };
 
-let selIdx = 1; 
-let workingDays, demandData, ceData, monthlyMix, volMult;
-let chart = null;
+const BASELINE_CE_CONFIG = {
+  "Brian Richter": { q: 3, profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
+  "Charlotte Lively": { q: 4, profile: ["NH","CT","PA","RI","VA","OH","TX"] },
+  "Dina Siegel": { q: 4, profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
+  "Dylan Abrams": { q: 3, profile: ["NJ","OH","TX","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
+  "Gabby Suihkonen-Gross": { q: 4, profile: ["MA","NH","RI","ME"] },
+  "Sheila Rouzitalab": { q: 4, profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
+  "Tori Mahoney": { q: 4, profile: ["MA","NH","RI","ME","VA","OH"] },
+  "Mackenzie Sheridan": { q: 4, profile: ["MA","NH","CT","ME","OH"] },
+  "Sarah Lee": { q: 4, profile: ["MA","NJ","CT","VA"] },
+  "Larisa Zaleta": { q: 4, profile: ["NJ","CT","NY","IL","DC","FL"] },
+  "Simon Jencius": { q: 4, profile: ["MA","NJ","OH","IL"] },
+  "Charlie Snyder": { q: 4, profile: ["NY","TX","NV"] },
+  "Grace Rezendes": { q: 4, profile: ["MA","NH","RI","ME"] },
+  "Michelle Zalewski": { q: 4, profile: ["MA","PA","IL"] },
+  "Hayley Feuchs": { q: 4, profile: ["NY","DC","NV","AZ"] }
+};
 
-function loadAll() {
-    workingDays = JSON.parse(localStorage.getItem('ce_v12_wd')) || [...DEFAULT_WD];
-    demandData = JSON.parse(localStorage.getItem('ce_v12_dem')) || JSON.parse(JSON.stringify(DEFAULT_DEMAND));
-    ceData = JSON.parse(localStorage.getItem('ce_v12_main')) || JSON.parse(JSON.stringify(DEFAULT_CE));
-    monthlyMix = JSON.parse(localStorage.getItem('ce_v12_mix')) || {};
-    volMult = parseFloat(localStorage.getItem('ce_v12_mult')) || 1.0;
-}
+// --- CORE SYSTEM STATE MUTABLES ---
+let ACTIVE_HORIZON_TIMELINE = [];
+let GLOBAL_PROJECTIONS_LEDGER = {};
+let CLINICAL_EVALUATORS_ROSTER = {};
+let volGrowthMultiplier = 1.0;
+let activeSelectedMonthIdx = 0;
+let operationalChartInstance = null;
 
-function save() {
-  localStorage.setItem('ce_v12_wd', JSON.stringify(workingDays));
-  localStorage.setItem('ce_v12_dem', JSON.stringify(demandData));
-  localStorage.setItem('ce_v12_main', JSON.stringify(ceData));
-  localStorage.setItem('ce_v12_mix', JSON.stringify(monthlyMix));
-  localStorage.setItem('ce_v12_mult', volMult.toString());
-}
-
-function restoreDefaults() {
-  localStorage.clear(); location.reload();
-}
-
-function setMult(v, btn) {
-  volMult = v;
-  document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  save(); render();
-}
-
-function toggleModal(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
-  if(el.style.display === 'flex') renderModalData();
-}
-
-function renderModalData() {
-  const wdRow = document.getElementById('modal-wd-row');
-  wdRow.innerHTML = MONTH_NAMES.map((m, i) => `<div style="flex:1; min-width:80px; text-align:center; padding:5px; background:#0f1117; border-radius:4px; margin:2px;"><div style="font-size:9px; color:#64748b;">${m}</div><input type="number" id="wd-${i}" value="${workingDays[i]}" style="width:100%;"></div>`).join('');
-  let h = `<tr><th>State</th>${MONTH_NAMES.map(m=>`<th>${m.substring(0,3)}</th>`).join('')}</tr>`;
-  STATE_ORDER.forEach(s => {
-    h += `<tr><td><strong>${s}</strong></td>${demandData[s].map((v, i) => `<td><input type="number" id="dem-${s}-${i}" value="${v}"></td>`).join('')}</tr>`;
-  });
-  document.getElementById('modal-demand-table').innerHTML = h;
-}
-
-function saveGlobalSettings() {
-  for(let i=0; i<8; i++) workingDays[i] = parseFloat(document.getElementById(`wd-${i}`).value) || 0;
-  STATE_ORDER.forEach(s => { for(let i=0; i<8; i++) demandData[s][i] = parseInt(document.getElementById(`dem-${s}-${i}`).value) || 0; });
-  save(); toggleModal('settings-modal'); render();
-}
-
-function toggleMix(ce, s) {
-  if(!monthlyMix[selIdx]) monthlyMix[selIdx] = {};
-  if(!monthlyMix[selIdx][ce]) monthlyMix[selIdx][ce] = [...ceData[ce].profile];
-  const idx = monthlyMix[selIdx][ce].indexOf(s);
-  if(idx > -1) monthlyMix[selIdx][ce].splice(idx, 1); else monthlyMix[selIdx][ce].push(s);
-  save(); render();
-}
-
-function addLicense(ce) {
-  const v = document.getElementById(`add-${ce.replace(/\s/g, '')}`).value.toUpperCase().trim();
-  if(v && !ceData[ce].profile.includes(v)) { ceData[ce].profile.push(v); save(); render(); }
-}
-
-function removeLicense(ce, s) {
-  ceData[ce].profile = ceData[ce].profile.filter(p => p !== s); save(); render();
-}
-
-function addNewCE() {
-    const name = document.getElementById('new-ce-name').value.trim();
-    if(name && !ceData[name]) { ceData[name] = { q: 4, pto: [0,0,0,0,0,0,0,0], profile: [] }; save(); render(); }
-}
-
-function render() {
+// --- CRASH-PROOF STRUCTURAL HYDRATION ENGINE ---
+function bootstrapDataEngine() {
   try {
-    const wd = workingDays[selIdx];
-    document.querySelectorAll('.month-btn').forEach((b,i)=>b.classList.toggle('active', i === selIdx));
-    
-    let ceCalcs = Object.keys(ceData).map(name => {
-        const d = ceData[name];
-        const cap = Math.max(0, (wd - d.pto[selIdx]) * d.q);
-        if(!monthlyMix[selIdx]) monthlyMix[selIdx] = {};
-        if(!monthlyMix[selIdx][name]) monthlyMix[selIdx][name] = [...d.profile];
-        const active = monthlyMix[selIdx][name];
-        let denom = 0; active.forEach(s => denom += ( (demandData[s] ? demandData[s][selIdx] : 0) * volMult) );
-        return { name, q: d.q, pto: d.pto[selIdx], cap, denom, active, fullProfile: d.profile };
-    });
+    ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v16')) || ["May","June","July","August","September","October","November","December"];
+    GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v16')) || {};
+    CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v16')) || {};
+    volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v16')) || 1.0;
 
-    let stateRes = {};
-    STATE_ORDER.forEach(s => {
-        const demand = Math.round( (demandData[s][selIdx] || 0) * volMult);
-        let weightedCap = 0; let assigned = [];
-        ceCalcs.forEach(ce => {
-            if(ce.active.includes(s) && ce.denom > 0) {
-                weightedCap += ce.cap * ( ( (demandData[s][selIdx] || 0) * volMult) / ce.denom);
-                assigned.push(ce.name);
-            }
+    // Validate dynamic global metric parameters exist across tracking elements
+    ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
+      if (!GLOBAL_PROJECTIONS_LEDGER[m]) {
+        GLOBAL_PROJECTIONS_LEDGER[m] = {
+          workingDays: BASELINE_WD_MAP[m] !== undefined ? BASELINE_WD_MAP[m] : 21,
+          enrollTarget: BASELINE_TARGETS_MAP[m] !== undefined ? BASELINE_TARGETS_MAP[m] : 400,
+          stateDemand: {}
+        };
+        MASTER_STATE_LIST.forEach(s => {
+          let baselineArray = BASELINE_DEMAND_MATRIX[s];
+          GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = (baselineArray && baselineArray[idx] !== undefined) ? baselineArray[idx] : 0;
         });
-        // Structural Depth Check
-        const totalLicensedPotential = ceCalcs.filter(c => c.fullProfile.includes(s)).reduce((a,b)=>a+b.cap, 0);
-        stateRes[s] = { demand, weightedCap, assigned, totalLicensedPotential };
+      }
     });
 
-    const totD = Object.values(stateRes).reduce((a,b)=>a+b.demand, 0);
-    const totC = Object.values(stateRes).reduce((a,b)=>a+b.weightedCap, 0);
-    const util = totC > 0 ? Math.round((totD/totC)*100) : 0;
-
-    document.getElementById('top-stats').innerHTML = `
-        <div class="stat-card">
-            <div class="stat-label">Accepted App Volume <span title="Marketing projections + Growth Bump." class="info-icon">ⓘ</span></div>
-            <div class="stat-val">${Math.round(totD)}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Weighted Capacity <span title="Total available appointment slots based on current mix." class="info-icon">ⓘ</span></div>
-            <div class="stat-val" style="color:#6366f1;">${Math.round(totC)}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">System Utilization <span title="Ideal Zone: 85-95%. Above 95% indicates an inability to handle surges." class="info-icon">ⓘ</span></div>
-            <div class="stat-val ${util > 95 ? 'status-red' : ''}">${util}%</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Month PTO Total <span title="Evaluator-days lost to PTO this month." class="info-icon">ⓘ</span></div>
-            <div class="stat-val" style="color:#ef4444;">${ceCalcs.reduce((a,b)=>a+b.pto, 0)}</div>
-        </div>`;
-
-    document.getElementById('heatmap-body').innerHTML = STATE_ORDER.map(s => {
-        const r = stateRes[s];
-        const pct = r.demand > 0 ? (r.weightedCap / r.demand) * 100 : 100;
-        const diff = Math.round(r.weightedCap - r.demand);
-        const depthWarn = r.totalLicensedPotential < r.demand;
-        return `<tr>
-          <td><strong>${s}</strong></td><td>${r.demand}</td><td>${Math.round(r.weightedCap)}</td>
-          <td><span style="font-weight:700; color:#93c5fd;">${r.assigned.length}</span></td>
-          <td><div style="display:flex; align-items:center; gap:5px;"><span>${Math.round(pct)}%</span><div class="progress-bg"><div class="progress-fill" style="width:${Math.min(100, pct)}%; background:${pct < 95 ? '#ef4444' : '#22c55e'}"></div></div></div></td>
-          <td class="${diff < 0 ? 'status-red' : 'status-green'}" title="Potential Supply (if all licensed were On): ${Math.round(r.totalLicensedPotential)}">${diff > 0 ? '+' : ''}${diff} ${depthWarn ? '⚠️' : ''}</td>
-          <td>${r.assigned.map(n => `<span class="provider-pill">${n}</span>`).join('')}</td>
-        </tr>`;
-    }).join('');
-
-    document.getElementById('ce-controls').innerHTML = ceCalcs.map(ce => `
-        <div class="ce-row">
-        <div style="display:flex; justify-content:space-between;"><strong>${ce.name}</strong> <span title="Denominator: Total demand of all active states." style="font-size:7px; color:#64748b; cursor:help;">Load: ${Math.round(ce.denom)}</span></div>
-        ${ce.fullProfile.map(s => `<span class="state-pill ${ce.active.includes(s)?'state-on':'state-off'}">
-            <span onclick="toggleMix('${ce.name}','${s}')">${s}</span><span class="del-btn" onclick="removeLicense('${ce.name}','${s}')">×</span></span>`).join('')}
-        <div style="margin-top:4px;"><input type="text" placeholder="Add" style="width:35px;" id="add-${ce.name.replace(/\s/g, '')}"><button class="btn-action" style="padding:2px 4px;" onclick="addLicense('${ce.name}')">+</button></div>
-        </div>`).join('');
-
-    document.getElementById('pto-master-body').innerHTML = Object.keys(ceData).map(name => {
-        const d = ceData[name];
-        let h = `<tr><td><strong>${name}</strong></td><td><input type="number" value="${d.q}" onchange="ceData['${name}'].q=parseFloat(this.value); save(); render();"></td>`;
-        for(let i=0; i<8; i++){ h += `<td><input type="number" value="${d.pto[i]}" onchange="ceData['${name}'].pto[${i}]=parseFloat(this.value); save(); render();"></td><td class="cap-cell">${Math.round(Math.max(0, (workingDays[i]-d.pto[i])*d.q))}</td>`; }
-        return h + `</tr>`;
-    }).join('');
-
-    let footH = `<tr class="totals-row"><td>TOTALS</td><td>—</td>`;
-    for(let i=0; i<8; i++){
-        let p=0, c=0; Object.keys(ceData).forEach(n=>{p+=ceData[n].pto[i]; c+=Math.max(0,(workingDays[i]-ceData[n].pto[i])*ceData[n].q);});
-        footH += `<td>${p}</td><td class="cap-cell">${Math.round(c)}</td>`;
+    // Hydrate roster context matching default data profiles
+    if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length === 0) {
+      Object.keys(BASELINE_CE_CONFIG).forEach(name => {
+        CLINICAL_EVALUATORS_ROSTER[name] = {
+          quota: BASELINE_CE_CONFIG[name].q,
+          profile: [...BASELINE_CE_CONFIG[name].profile],
+          ptoMap: {},
+          monthlyToggles: {}
+        };
+        ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
+          let basePtoArray = BASELINE_PTO_MAP[name];
+          CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = (basePtoArray && basePtoArray[idx] !== undefined) ? basePtoArray[idx] : 0;
+          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...BASELINE_CE_CONFIG[name].profile];
+        });
+      });
+    } else {
+      // Backfill protection validation for rolling updates
+      Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+        if (!CLINICAL_EVALUATORS_ROSTER[name].ptoMap) CLINICAL_EVALUATORS_ROSTER[name].ptoMap = {};
+        if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
+        if (!CLINICAL_EVALUATORS_ROSTER[name].profile) CLINICAL_EVALUATORS_ROSTER[name].profile = [];
+        
+        ACTIVE_HORIZON_TIMELINE.forEach(m => {
+          if (CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] === undefined) CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
+          if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) {
+            CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
+          }
+        });
+      });
     }
-    document.getElementById('pto-master-foot').innerHTML = footH + `</tr>`;
-
-    const ceDeficit = Math.ceil(Math.max(0, totD - totC) / 63); 
-    document.getElementById('executive-insight').innerHTML = `
-        <h3>SLOT CAPACITY ANALYSIS — ${MONTH_NAMES[selIdx]}</h3>
-        <p>Projected demand for ${MONTH_NAMES[selIdx].substring(0,3)} is <strong>${Math.round(totD)} phone screens</strong>. 
-        Current weighted capacity provides <strong>${Math.round(totC)} available slots</strong>. 
-        We are currently ${totC >= totD ? '<strong>fully staffed</strong> for this volume' : `at a deficit of <strong>${Math.round(totD-totC)} slots</strong>, which requires roughly <strong>${ceDeficit.toFixed(1)} additional evaluators</strong>`}. 
-        Check states marked with ⚠️ for critical licensure gaps where toggling alone cannot meet demand.</p>`;
-
-    updateChart();
-  } catch(err) { console.error("Render failure", err); }
+    saveStateToStorage();
+  } catch (err) {
+    console.error("Hydration Engine Intercept Failure, resetting context storage", err);
+    triggerFactoryResetWfm();
+  }
 }
 
-function updateChart() {
-    const ctx = document.getElementById('annualChart').getContext('2d');
-    const dPts=[], sPts=[];
-    for(let i=0; i<8; i++){
-        let dSum=0, sSum=0;
-        Object.values(demandData).forEach(a=>dSum+=(a[i]*volMult));
-        Object.keys(ceData).forEach(n=>sSum+=Math.max(0,(workingDays[i]-ceData[n].pto[i])*ceData[n].q));
-        dPts.push(Math.round(dSum)); sPts.push(Math.round(sSum));
-    }
-    if(chart) chart.destroy();
-    chart = new Chart(ctx, {
-        type: 'line', data: { labels: MONTH_NAMES, datasets: [
-        { label: 'Demand Pot.', data: dPts, borderColor: '#ef4444', backgroundColor: 'transparent', tension:0.3, pointRadius: 5 },
-        { label: 'Supply Capacity', data: sPts, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension:0.3, pointRadius: 5 }
-        ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:true, labels:{ color:'#64748b', boxWidth:10, font:{size:9}} } },
-        scales: { x: { grid: { display:false }, ticks:{ color:'#64748b', font:{size:9}} }, y: { grid:{ color:'#1a2030'}, ticks:{ color:'#64748b', font:{size:9}}} }
+function saveStateToStorage() {
+  localStorage.setItem('wfm_timeline_v16', JSON.stringify(ACTIVE_HORIZON_TIMELINE));
+  localStorage.setItem('wfm_ledger_v16', JSON.stringify(GLOBAL_PROJECTIONS_LEDGER));
+  localStorage.setItem('wfm_roster_v16', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
+  localStorage.setItem('wfm_mult_v16', volGrowthMultiplier.toString());
+}
+
+function triggerFactoryResetWfm() {
+  localStorage.clear();
+  location.reload();
+}
+
+// --- SLIDING TIMELINE HORIZON CONTROL MECHANISMS ---
+function archiveEarliestMonth() {
+  if (ACTIVE_HORIZON_TIMELINE.length <= 1) {
+    alert("Proportional allocation limits require keeping at least one active monitoring period context block.");
+    return;
+  }
+  let removed = ACTIVE_HORIZON_TIMELINE.shift();
+  delete GLOBAL_PROJECTIONS_LEDGER[removed];
+  Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+    if (CLINICAL_EVALUATORS_ROSTER[name].ptoMap) delete CLINICAL_EVALUATORS_ROSTER[name].ptoMap[removed];
+    if (CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) delete CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[removed];
+  });
+  activeSelectedMonthIdx = 0;
+  saveStateToStorage();
+  buildTimelineControls();
+  recalculateDashboardMetrics();
+}
+
+function appendFutureMonth() {
+  let latestMonth = ACTIVE_HORIZON_TIMELINE[ACTIVE_HORIZON_TIMELINE.length - 1];
+  let nextIdx = (ALL_KNOWN_MONTHS.indexOf(latestMonth) + 1) % 12;
+  let nextMonthName = ALL_KNOWN_MONTHS[nextIdx];
+
+  if (ACTIVE_HORIZON_TIMELINE.includes(nextMonthName)) {
+    nextMonthName += `_${Date.now().toString().slice(-4)}`;
+  }
+
+  ACTIVE_HORIZON_TIMELINE.push(nextMonthName);
+  GLOBAL_PROJECTIONS_LEDGER[nextMonthName] = {
+    workingDays: 21,
+    enrollTarget: 400,
+    stateDemand: {}
+  };
+  MASTER_STATE_LIST.forEach(s => {
+    GLOBAL_PROJECTIONS_LEDGER[nextMonthName].stateDemand[s] = 0;
+  });
+
+  Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+    CLINICAL_EVALUATORS_ROSTER[name].ptoMap[nextMonthName] = 0;
+    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[nextMonthName] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
+  });
+
+  saveStateToStorage();
+  buildTimelineControls();
+  recalculateDashboardMetrics();
+}
+
+function buildTimelineControls() {
+  const container = document.getElementById('month-tabs');
+  if (!container) return;
+  container.innerHTML = '';
+  ACTIVE_HORIZON_TIMELINE.forEach((m, i) => {
+    const btn = document.createElement('button');
+    btn.className = `month-btn ${i === activeSelectedMonthIdx ? 'active' : ''}`;
+    btn.innerText = m;
+    btn.onclick = () => {
+      activeSelectedMonthIdx = i;
+      buildTimelineControls();
+      recalculateDashboardMetrics();
+    };
+    container.appendChild(btn);
+  });
+}
+
+// --- MODAL PARAMETERS LAYOUT POPULATION ---
+function toggleModalEnvelope(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  const isOpen = modal.classList.contains('open');
+  if (isOpen) {
+    modal.classList.remove('open');
+  } else {
+    populateGlobalModalViews();
+    modal.classList.add('open');
+  }
+}
+
+function populateGlobalModalViews() {
+  const wdWrapper = document.getElementById('modal-wd-grid-wrapper');
+  if (wdWrapper) {
+    wdWrapper.innerHTML = ACTIVE_HORIZON_TIMELINE.map((m, i) => `
+      <div style="flex:1; min-width:90px; text-align:center; padding:6px; background:#1e2330; border-radius:4px; border:1px solid #2d3548;">
+        <div style="font-size:9px; color:#64748b; margin-bottom:4px; font-weight:700;">${m}</div>
+        <input type="number" id="mod-wd-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].workingDays}" style="width:100%; font-weight:bold;">
+      </div>
+    `).join('');
+  }
+
+  const demandTable = document.getElementById('modal-demand-entry-table');
+  if (demandTable) {
+    let html = `<thead><tr><th>Territory / Metric</th>${ACTIVE_HORIZON_TIMELINE.map(m => `<th>${m}</th>`).join('')}</tr></thead><tbody>`;
+    html += `<tr style="background:rgba(99,102,241,0.12);"><td><strong>Monthly Enrollment Target</strong></td>${ACTIVE_HORIZON_TIMELINE.map(m => `<td><input type="number" id="mod-tgt-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget}" style="width:70px; color:#a5b4fc; font-weight:700;"></td>`).join('')}</tr>`;
+    
+    MASTER_STATE_LIST.forEach(s => {
+      html += `<tr><td><strong>${s} Demand Volume</strong></td>${ACTIVE_HORIZON_TIMELINE.map(m => `<td><input type="number" id="mod-dem-field-${s}-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0}" style="width:70px;"></td>`).join('')}</tr>`;
+    });
+    html += '</tbody>';
+    demandTable.innerHTML = html;
+  }
+
+  const baseRadio = document.getElementById('m-base');
+  const check5 = document.getElementById('m-5');
+  const check10 = document.getElementById('m-10');
+  if (baseRadio && check5 && check10) {
+    document.querySelectorAll('.multiplier-wrap .m-btn').forEach(btn => btn.classList.remove('active'));
+    if (volGrowthMultiplier === 1.05) { if (check5) check5.classList.add('active'); }
+    else if (volGrowthMultiplier === 1.10) { if (check10) check10.classList.add('active'); }
+    else { if (baseRadio) baseRadio.classList.add('active'); }
+  }
+}
+
+function saveGlobalModalParams() {
+  try {
+    ACTIVE_HORIZON_TIMELINE.forEach(m => {
+      const wdEl = document.getElementById(`mod-wd-field-${m}`);
+      const tgtEl = document.getElementById(`mod-tgt-field-${m}`);
+      if (wdEl) GLOBAL_PROJECTIONS_LEDGER[m].workingDays = parseFloat(wdEl.value) || 0;
+      if (tgtEl) GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget = parseInt(tgtEl.value) || 0;
+      
+      MASTER_STATE_LIST.forEach(s => {
+        const demEl = document.getElementById(`mod-dem-field-${s}-${m}`);
+        if (demEl) GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = parseInt(demEl.value) || 0;
+      });
+    });
+    saveStateToStorage();
+    toggleModalEnvelope('settings-modal');
+    recalculateDashboardMetrics();
+  } catch (err) {
+    console.error("Parameters Commit Intercept Failure", err);
+  }
+}
+
+function setVolMultiplier(val, btn) {
+  volGrowthMultiplier = parseFloat(val) || 1.0;
+  document.querySelectorAll('.multiplier-wrap .m-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+// --- ROSTER PROVISIONING LOGIC ---
+function addNewClinicianToRoster() {
+  const nameInput = document.getElementById('new-clinician-name');
+  if (!nameInput) return;
+  const name = nameInput.value.trim();
+  if (!name) {
+    alert("Please declare a qualified identifier string for tracking custom clinical resource additions.");
+    return;
+  }
+  if (CLINICAL_EVALUATORS_ROSTER[name]) {
+    alert("Resource entity entry already holds assignment constraints inside active tracking namespace registry.");
+    return;
+  }
+  CLINICAL_EVALUATORS_ROSTER[name] = {
+    quota: 4,
+    profile: ["MA"],
+    ptoMap: {},
+    monthlyToggles: {}
+  };
+  ACTIVE_HORIZON_TIMELINE.forEach(m => {
+    CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
+    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = ["MA"];
+  });
+  nameInput.value = '';
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function deprovisionClinician(name) {
+  if (!confirm(`Are you certain you wish to completely clear ${name} from deployment tracking rosters permanently?`)) return;
+  delete CLINICAL_EVALUATORS_ROSTER[name];
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function toggleMasterLicenseInProfile(name, state) {
+  let profile = CLINICAL_EVALUATORS_ROSTER[name].profile;
+  let idx = profile.indexOf(state);
+  if (idx > -1) {
+    profile.splice(idx, 1);
+    // Cascade removal from monthly execution matrices if dropped from core structural license credential map
+    ACTIVE_HORIZON_TIMELINE.forEach(m => {
+      let mix = CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m];
+      let mIdx = mix.indexOf(state);
+      if (mIdx > -1) mix.splice(mIdx, 1);
+    });
+  } else {
+    profile.push(state);
+    ACTIVE_HORIZON_TIMELINE.forEach(m => {
+      if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
+        CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
+      }
+    });
+  }
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function updateMonthlyMixToggle(name, state, value) {
+  let currentMonthName = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+  let mix = CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[currentMonthName];
+  if (value === "On") {
+    if (!mix.includes(state)) mix.push(state);
+  } else {
+    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[currentMonthName] = mix.filter(s => s !== state);
+  }
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+// --- REACTIONARY WFM PROCESSING AND ALLOCATION ALGORITHMS ---
+function recalculateDashboardMetrics() {
+  try {
+    let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+    if (!activeMonth) return;
+    
+    let wd = GLOBAL_PROJECTIONS_LEDGER[activeMonth].workingDays;
+    let targetEnrollment = GLOBAL_PROJECTIONS_LEDGER[activeMonth].enrollTarget;
+
+    // Title label configurations updates
+    SafeSetter('matrix-title-label', `${activeMonth} Cross-Reference Allocation & Licensure Grid`);
+    SafeSetter('heat-title', `${activeMonth} State Proportional Supply Distribution Overview`);
+
+    // 1. Calculate Individual Resource Capacities For Selected Tracking Month
+    let clinicianAllocations = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
+      let r = CLINICAL_EVALUATORS_ROSTER[name];
+      let pto = parseFloat(r.ptoMap[activeMonth]) || 0;
+      let totalCapacity = Math.max(0, (wd - pto) * (parseFloat(r.quota) || 0));
+      
+      let activeStatesThisMonth = r.monthlyToggles[activeMonth] || [];
+      let totalDemandDenom = 0;
+      activeStatesThisMonth.forEach(s => {
+        totalDemandDenom += ((GLOBAL_PROJECTIONS_LEDGER[activeMonth].stateDemand[s] || 0) * volGrowthMultiplier);
+      });
+
+      return {
+        name: name,
+        quota: r.quota,
+        pto: pto,
+        capacity: totalCapacity,
+        activeStates: activeStatesThisMonth,
+        denom: totalDemandDenom,
+        masterProfile: r.profile
+      };
+    });
+
+    // 2. Build State Proportional Supply Projections Ledgers
+    let stateAllocations = {};
+    let systemTotalDemand = 0;
+    let systemTotalWeightedSupply = 0;
+
+    MASTER_STATE_LIST.forEach(s => {
+      let stateDemand = Math.round((GLOBAL_PROJECTIONS_LEDGER[activeMonth].stateDemand[s] || 0) * volGrowthMultiplier);
+      systemTotalDemand += stateDemand;
+
+      let stateWeightedCapacity = 0;
+      let contributingCliniciansCount = 0;
+      let concurrentAssignedRoster = [];
+
+      clinicianAllocations.forEach(ce => {
+        if (ce.activeStates.includes(s) && ce.denom > 0) {
+          let proportionalWeight = stateDemand / ce.denom;
+          stateWeightedCapacity += (ce.capacity * proportionalWeight);
+          contributingCliniciansCount++;
+          concurrentAssignedRoster.push(ce.name);
         }
+      });
+
+      // Structural Depth Assessment (Sum capacity contribution potential if everyone certified was toggled active)
+      let maximumLicensedPotentialSupply = 0;
+      clinicianAllocations.forEach(ce => {
+        if (ce.masterProfile.includes(s)) {
+          let alternateDenom = ce.denom;
+          if (!ce.activeStates.includes(s)) {
+            alternateDenom += stateDemand;
+          }
+          let possibleWeight = alternateDenom > 0 ? stateDemand / alternateDenom : 0;
+          maximumLicensedPotentialSupply += (ce.capacity * possibleWeight);
+        }
+      });
+
+      systemTotalWeightedSupply += stateWeightedCapacity;
+      stateAllocations[s] = {
+        demand: stateDemand,
+        supply: stateWeightedCapacity,
+        count: contributingCliniciansCount,
+        assigned: concurrentAssignedRoster,
+        maxPotential: maximumLicensedPotentialSupply
+      };
     });
+
+    // 3. Render Executive Global Metric Trackers
+    let aggregateUtilizationIndex = systemTotalWeightedSupply > 0 ? Math.round((systemTotalDemand / systemTotalWeightedSupply) * 100) : 0;
+    let totalPtoPoolSum = clinicianAllocations.reduce((acc, curr) => acc + curr.pto, 0);
+
+    const statsContainer = document.getElementById('top-stats-container');
+    if (statsContainer) {
+      statsContainer.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Accepted App Volume <span title="Aggregated consumer funnel pipeline demand for selected tracking month with growth scaling filter applied." class="info-icon">ⓘ</span></div>
+          <div class="stat-val">${fmt(systemTotalDemand)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Weighted Capacity <span title="Total calculated aggregate slot supply contribution metrics available across active dispatch grid configuration matrices." class="info-icon">ⓘ</span></div>
+          <div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">System Utilization <span title="Primary pipeline processing operations velocity index indicator health check boundary. Baseline thresholds >95% scale immediate staffing burn alerts." class="info-icon">ⓘ</span></div>
+          <div class="stat-val ${aggregateUtilizationIndex > 95 ? 'status-red' : ''}">${aggregateUtilizationIndex}%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Monthly PTO Pool <span title="Sum total of scheduled evaluator resource days out across selected operational calendar frame." class="info-icon">ⓘ</span></div>
+          <div class="stat-val" style="color:#ef4444;">${totalPtoPoolSum} Days</div>
+        </div>
+      `;
+    }
+
+    // 4. Render Cross-Reference Dispatched Matrix Grid View
+    renderLicensureCrossMatrix(clinicianAllocations, stateAllocations);
+
+    // 5. Render Central Heatmap and Coverage Balances
+    renderStateWeightedHeatmap(stateAllocations);
+
+    // 6. Build Narrative Context & Update Long Range Graphical Plots
+    renderExecutiveNarrativeBanner(systemTotalDemand, systemTotalWeightedSupply, activeMonth, targetEnrollment);
+    renderLongRangeWfmChart();
+
+    // 7. Update Full Year PTO Manager Grid
+    renderPtoManagerGrid(wd);
+
+  } catch (err) {
+    console.error("Dashboard Engine Processing Intercept Error: ", err);
+  }
 }
 
-window.onload = () => {
-    loadAll();
-    const bar = document.getElementById('month-selector');
-    MONTH_NAMES.forEach((m,i)=>{
-        const b=document.createElement('button'); b.className=`month-btn ${i===selIdx?'active':''}`; b.innerText=m;
-        b.onclick=()=>{selIdx=i; render();}; bar.appendChild(b);
+function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
+  const headRow = document.getElementById('matrix-head-row');
+  const bodyRows = document.getElementById('matrix-body-rows');
+  const footTotals = document.getElementById('matrix-foot-totals');
+  if (!headRow || !bodyRows || !footTotals) return;
+
+  let currentMonthName = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+
+  // Head Row Build
+  headRow.innerHTML = `<th>Clinical Evaluator Name</th><th style="text-align:center; color:#a5b4fc; font-weight:bold;">Count</th>` + 
+    MASTER_STATE_LIST.map(s => `<th style="text-align:center; font-weight:bold; min-width:44px;">${s}</th>`).join('');
+
+  // Body Row Builds
+  bodyRows.innerHTML = clinicianAllocations.map(ce => {
+    let countActiveOnStates = ce.activeStates.length;
+    let stateCellsHtml = MASTER_STATE_LIST.map(s => {
+      let holdsMasterLicense = ce.masterProfile.includes(s);
+      if (!holdsMasterLicense) {
+        return `<td style="text-align:center; background:#0b0e14; color:#374151;">—</td>`;
+      }
+      let isCurrentlyOn = ce.activeStates.includes(s);
+      return `
+        <td class="${isCurrentlyOn ? 'matrix-cell-on' : 'matrix-cell-off'}" style="text-align:center; padding:2px;">
+          <select class="matrix-select" style="color: inherit;" onchange="updateMonthlyMixToggle('${ce.name}', '${s}', this.value)">
+            <option value="On" ${isCurrentlyOn ? 'selected' : ''}>On</option>
+            <option value="Off" ${!isCurrentlyOn ? 'selected' : ''}>Off</option>
+          </select>
+        </td>
+      `;
+    }).join('');
+
+    return `
+      <tr>
+        <td>
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-weight:700; color:#f1f5f9;">${ce.name}</span>
+            <button class="btn-remove" onclick="deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
+          </div>
+        </td>
+        <td style="text-align:center; font-weight:bold; background:#111521; color:#93c5fd;">${countActiveOnStates}</td>
+        ${stateCellsHtml}
+      </tr>
+    `;
+  }).join('');
+
+  // Foot Row Matrix Summaries Builds
+  let footerHtml = `<tr style="background:#0f1117; font-weight:bold;"><td style="color:#64748b;">Active Providers Dispatched</td><td>—</td>`;
+  MASTER_STATE_LIST.forEach(s => {
+    let count = stateAllocations[s].count;
+    footerHtml += `<td style="text-align:center; color:#f1f5f9; background:#161b26; border-top:1px solid #3d4a63;">${count}</td>`;
+  });
+  footerHtml += '</tr>';
+  footTotals.innerHTML = footerHtml;
+}
+
+function renderStateWeightedHeatmap(stateAllocations) {
+  const heatmapBody = document.getElementById('heatmap-body');
+  if (!heatmapBody) return;
+
+  heatmapBody.innerHTML = MASTER_STATE_LIST.map(s => {
+    let r = stateAllocations[s];
+    let processingPercentage = r.demand > 0 ? (r.supply / r.demand) * 100 : 100;
+    let netBalanceOffset = Math.round(r.supply - r.demand);
+    
+    // License capacity structural shortfall threshold marker diagnostics checks
+    let structuralShortageAlert = r.maxPotential < r.demand;
+
+    return `
+      <tr>
+        <td><strong>${s}</strong></td>
+        <td style="font-weight:600;">${fmt(r.demand)}</td>
+        <td style="color:#a5b4fc; font-weight:600;">${fmt(r.supply)}</td>
+        <td style="text-align:center; font-weight:bold; color:#93c5fd; background:rgba(49,46,129,0.2);">${r.count} CEs</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="width:30px; font-weight:bold;">${Math.round(processingPercentage)}%</span>
+            <div class="progress-bg"><div class="progress-fill" style="width:${Math.min(100, processingPercentage)}%; background:${processingPercentage < 95 ? '#ef4444' : '#22c55e'};"></div></div>
+          </div>
+        </td>
+        <td class="${netBalanceOffset < 0 ? 'status-red' : 'status-green'}" title="Total Unconstrained Potential Licensed Supply Cap Ceiling: ${Math.round(r.maxPotential)} Slots">
+          ${netBalanceOffset > 0 ? '+' : ''}${fmt(netBalanceOffset)} ${structuralShortageAlert ? '<span style="font-size:9px; color:#ef4444; font-weight:900;" title="CRITICAL: Total possible potential capacity across all certified profiles is less than marketing demand. Add licenses.">⚠️ STRUCTURAL</span>' : ''}
+        </td>
+        <td>
+          <div style="max-width:440px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="linkTraceMarker('${n}')" onmouseout="clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, targetEnrollment) {
+  const container = document.getElementById('executive-insight-banner');
+  if (!container) return;
+
+  let clinicianDeficitCount = Math.ceil(Math.max(0, totalDemand - totalSupply) / 64);
+  let aggregateConversionConstant = 0.25; // 25% Blended Baseline Screen-to-Onboard Progression Ratio
+  let expectedTheoreticalEnrollments = Math.round(totalSupply * aggregateConversionConstant);
+  let targetDeficitDelta = targetEnrollment - expectedTheoreticalEnrollments;
+
+  container.innerHTML = `
+    <h3>MONTHLY OPERATIONS SYSTEM ANALYSIS — OPERATIONS PULSE: ${activeMonth.toUpperCase()}</h3>
+    <p>Current scheduling processing constraints indicate marketing pipeline demand vectors require clearing <strong>${fmt(totalDemand)} Phone Screen slots</strong> across active deployment matrices. 
+    Available workforce scheduling models yield <strong>${fmt(totalSupply)} viable production appointments</strong>. 
+    ${totalSupply >= totalDemand 
+      ? `Workforce optimization models indicate tactical allocation strategies match queue depth requirements, remaining <strong>perfectly balanced</strong> against incoming pipeline loads.` 
+      : `Operational gaps identify an immediate shortfall of <strong>${fmt(totalDemand - totalSupply)} required phone screens</strong>. Resolving this pipeline processing boundary requires immediately onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong> or optimizing target licensure distribution mix blocks.`}
+    Downstream conversions projection tracks toward delivering a capacity yield potential of <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to organizational goal commitments of <strong>${fmt(targetEnrollment)}</strong> 
+    ${targetDeficitDelta > 0 
+      ? `(Tracking a structural deficit baseline gap risk of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>. Broaden specialized licensing matrices or drive conversion velocity vectors).` 
+      : `(Positioned safely to cross target baseline goals by a margin buffer of <strong class="status-green">+${fmt(Math.abs(targetDeficitDelta))} enrollments</strong>).`}</p>
+  `;
+}
+
+function renderPtoManagerGrid(currentMonthWorkingDays) {
+  const body = document.getElementById('pto-master-body');
+  const foot = document.getElementById('pto-master-foot');
+  if (!body || !foot) return;
+
+  // Render Core Body Elements
+  body.innerHTML = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
+    let r = CLINICAL_EVALUATORS_ROSTER[name];
+    let columnsHtml = ACTIVE_HORIZON_TIMELINE.map((m, i) => {
+      let ptoValue = r.ptoMap[m] !== undefined ? r.ptoMap[m] : 0;
+      let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
+      let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(r.quota) || 0));
+
+      return `
+        <td><input type="number" step="0.5" value="${ptoValue}" style="width:38px;" onchange="updateClinicianPtoValue('${name}', '${m}', this.value)"></td>
+        <td class="cap-cell">${Math.round(calculatedCapacity)}</td>
+      `;
+    }).join('');
+
+    return `
+      <tr data-ce-row-id="${name}">
+        <td>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding-right:4px;">
+            <strong style="color:#f1f5f9;">${name}</strong>
+            <button class="btn-horizon" style="padding:1px 3px; font-size:7px;" onclick="triggerLicensureAssignmentPrompt('${name}')" title="Configure master credential verification maps for this resource">+ Lic</button>
+          </div>
+        </td>
+        <td><input type="number" value="${r.quota}" style="width:38px; font-weight:bold; color:#6366f1;" onchange="updateClinicianBaseQuota('${name}', this.value)"></td>
+        ${columnsHtml}
+      </tr>
+    `;
+  }).join('');
+
+  // Render Footer Dynamic Aggregates Row
+  let totalsHtml = `<tr class="totals-row"><td>AGGREGATE SUMS</td><td>—</td>`;
+  ACTIVE_HORIZON_TIMELINE.forEach(m => {
+    let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
+    let aggregatePtoDaysSum = 0;
+    let aggregateSlotsCapacitySum = 0;
+
+    Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+      let ptoValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
+      let quotaValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quota) || 0;
+      aggregatePtoDaysSum += ptoValue;
+      aggregateSlotsCapacitySum += Math.max(0, (monthWd - ptoValue) * quotaValue);
     });
-    render();
+
+    totalsHtml += `
+      <td style="text-align:center; color:#f87171;">${aggregatePtoDaysSum}d</td>
+      <td class="cap-cell" style="color:#4ade80; background:rgba(34,197,94,0.1);">${Math.round(aggregateSlotsCapacitySum)}</td>
+    `;
+  });
+  totalsHtml += '</tr>';
+  foot.innerHTML = totalsHtml;
+}
+
+function updateClinicianPtoValue(name, month, value) {
+  CLINICAL_EVALUATORS_ROSTER[name].ptoMap[month] = parseFloat(value) || 0;
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function updateClinicianBaseQuota(name, value) {
+  CLINICAL_EVALUATORS_ROSTER[name].quota = parseFloat(value) || 0;
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function triggerLicensureAssignmentPrompt(name) {
+  let r = CLINICAL_EVALUATORS_ROSTER[name];
+  let promptStr = prompt(`Configure permanent master licensed credentials for ${name}.\nCurrent Profile: ${r.profile.join(', ')}\n\nEnter state codes to add/remove separated by spaces (e.g. 'TX FL'):`);
+  if (promptStr === null) return;
+  
+  let targetStates = promptStr.toUpperCase().trim().split(/\s+/);
+  targetStates.forEach(s => {
+    if (s && MASTER_STATE_LIST.includes(s)) {
+      toggleMasterLicenseInProfile(name, s);
+    }
+  });
+}
+
+// --- LONG RANGE TIMELINE FORECAST CHART SYSTEM ---
+function renderLongRangeWfmChart() {
+  try {
+    const ctx = document.getElementById('wfmAnnualChart');
+    if (!ctx) return;
+
+    const dataLabels = ACTIVE_HORIZON_TIMELINE;
+    const aggregateDemandPoints = [];
+    const aggregateSupplyPoints = [];
+
+    ACTIVE_HORIZON_TIMELINE.forEach(m => {
+      let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
+      
+      // Calculate Demand Curve Point
+      let demandSum = 0;
+      MASTER_STATE_LIST.forEach(s => {
+        demandSum += ((GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0) * volGrowthMultiplier);
+      });
+      aggregateDemandPoints.push(Math.round(demandSum));
+
+      // Calculate Supply Line Point
+      let supplySum = 0;
+      Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+        let pto = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
+        let quota = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quota) || 0;
+        supplySum += Math.max(0, (monthWd - pto) * quota);
+      });
+      aggregateSupplyPoints.push(Math.round(supplySum));
+    });
+
+    if (operationalChartInstance) {
+      operationalChartInstance.destroy();
+    }
+
+    operationalChartInstance = new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: dataLabels,
+        datasets: [
+          {
+            label: 'Total Pipeline Volume Demand',
+            data: aggregateDemandPoints,
+            borderColor: '#ef4444',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            tension: 0.25,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#ef4444'
+          },
+          {
+            label: 'Aggregated Staffing Capacity Supply',
+            data: aggregateSupplyPoints,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.08)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.25,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#6366f1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#64748b', boxWidth: 10, font: { size: 9 } }
+          },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
+          y: { grid: { color: '#1a2030' }, ticks: { color: '#64748b', font: { size: 9 } } }
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Chart.js Pipeline Visualization Execution Intercept Failure: ", err);
+  }
+}
+
+// --- INTERACTIVE VISUAL HOVER TRACE MATRIX LINKS ---
+function linkTraceMarker(name) {
+  let targetRow = document.querySelector(`tr[data-ce-row-id="${name}"]`);
+  if (targetRow) {
+    targetRow.style.backgroundColor = "#312e81";
+    targetRow.style.outline = "1px solid #6366f1";
+  }
+}
+
+function clearTraceMarker() {
+  Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+    let targetRow = document.querySelector(`tr[data-ce-row-id="${name}"]`);
+    if (targetRow) {
+      targetRow.style.backgroundColor = "";
+      targetRow.style.outline = "";
+    }
+  });
+}
+
+// SAFE VALUE SETTER HELPER
+function SafeSetter(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = val;
+}
+
+// WINDOW BOOTLOAD INITIALIZATION
+window.onload = () => {
+  bootstrapDataEngine();
+  buildTimelineControls();
+  recalculateDashboardMetrics();
 };
 </script>
 </body>
