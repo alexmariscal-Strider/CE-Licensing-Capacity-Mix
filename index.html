@@ -1167,8 +1167,10 @@ window.onload = () => {
   buildTimelineControls();
   recalculateDashboardMetrics();
   
-  // Auto-trigger silent cloud sync to ensure Google Sheet is the real-time Source of Truth
-  syncPtoFromGoogleSheets(true);
+  // Only auto-sync if NOT inside an iframe
+  if (window.self === window.top) {
+    syncPtoFromGoogleSheets(true);
+  }
 };
 </script>
 </body>
