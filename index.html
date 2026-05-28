@@ -207,15 +207,25 @@
         <button class="btn-action" onclick="saveGlobalModalParams()">COMMIT PARAMETERS & RECALCULATE</button>
     </div>
     
-    <!-- COMPACT WORKING DAYS SECTION (No Panel Padding) -->
+    <!-- COMPACT WORKING DAYS SECTION -->
     <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <h2 style="margin-bottom: 4px; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Calendar Working Days</h2>
         <div style="overflow-x: auto;">
           <table class="compact-modal-table" id="modal-wd-table" style="width: 100%;"></table>
         </div>
     </div>
+    
+    <!-- COMPACT STATE LIST MANAGER -->
+    <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
+        <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+            <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Active State Territories (Order & Additions)</h2>
+            <button class="btn-action" onclick="updateMasterStateList()" style="padding: 2px 6px; font-size: 8px; background: #6366f1;">APPLY STATES</button>
+        </div>
+        <p style="font-size: 8px; color: #64748b; margin-bottom: 6px;">Enter state codes separated by commas to change tracking order or add new states. Click Apply to update the grid below.</p>
+        <textarea id="modal-state-list-input" style="width: 100%; background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 6px; font-size: 10px; border-radius: 4px; resize: vertical; min-height: 35px;"></textarea>
+    </div>
 
-    <!-- COMPACT DEMAND SECTION (No Panel Padding) -->
+    <!-- COMPACT DEMAND SECTION -->
     <div style="background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
             <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Accepted App Projections & Target Enrollments</h2>
@@ -238,7 +248,7 @@ const fmt = (num) => Math.round(num || 0).toLocaleString();
 
 // --- CORE CONSTANTS & BASELINES ---
 const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const MASTER_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
+const DEFAULT_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
 
 const BASELINE_WD_MAP = { "May":20, "June":21, "July":21, "August":21, "September":21, "October":21, "November":18, "December":22 };
 const BASELINE_TARGETS_MAP = { "May":327, "June":348, "July":349, "August":370, "September":403, "October":466, "November":528, "December":529 };
@@ -288,6 +298,7 @@ let CLINICAL_EVALUATORS_ROSTER = {};
 let volGrowthMultiplier = 1.0;
 let activeSelectedMonthIdx = 0;
 let operationalChartInstance = null;
+let MASTER_STATE_LIST = [];
 
 // --- CRASH-PROOF STRUCTURAL HYDRATION ENGINE ---
 function bootstrapDataEngine() {
@@ -296,6 +307,7 @@ function bootstrapDataEngine() {
     GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v21')) || {};
     CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v21')) || {};
     volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v21')) || 1.0;
+    MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || [...DEFAULT_STATE_LIST];
 
     ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
       if (!GLOBAL_PROJECTIONS_LEDGER[m]) {
@@ -351,6 +363,7 @@ function saveStateToStorage() {
   localStorage.setItem('wfm_ledger_v21', JSON.stringify(GLOBAL_PROJECTIONS_LEDGER));
   localStorage.setItem('wfm_roster_v21', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
   localStorage.setItem('wfm_mult_v21', volGrowthMultiplier.toString());
+  localStorage.setItem('wfm_state_list_v21', JSON.stringify(MASTER_STATE_LIST));
 }
 
 function triggerFactoryResetWfm() {
@@ -431,6 +444,11 @@ function toggleModalEnvelope(id) {
 }
 
 function populateGlobalModalViews() {
+  const stateListInput = document.getElementById('modal-state-list-input');
+  if(stateListInput) {
+      stateListInput.value = MASTER_STATE_LIST.join(', ');
+  }
+
   // Working Days Table
   const wdTable = document.getElementById('modal-wd-table');
   if (wdTable) {
@@ -470,6 +488,25 @@ function populateGlobalModalViews() {
   }
 }
 
+function updateMasterStateList() {
+    let newStateString = document.getElementById('modal-state-list-input').value;
+    let newStates = newStateString.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
+    if(newStates.length === 0) {
+        alert("State list cannot be empty.");
+        return;
+    }
+    newStates.forEach(s => {
+        ACTIVE_HORIZON_TIMELINE.forEach(m => {
+            if(GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] === undefined) {
+                GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = 0;
+            }
+        });
+    });
+    MASTER_STATE_LIST = newStates;
+    saveStateToStorage();
+    populateGlobalModalViews(); 
+}
+
 function attachPasteListeners() {
   const inputs = document.querySelectorAll('.paste-target');
   inputs.forEach(input => {
@@ -499,6 +536,17 @@ function attachPasteListeners() {
 
 function saveGlobalModalParams() {
   try {
+    let newStateString = document.getElementById('modal-state-list-input').value;
+    let newStates = newStateString.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
+    if(newStates.length > 0) {
+        newStates.forEach(s => {
+            ACTIVE_HORIZON_TIMELINE.forEach(m => {
+                if(GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] === undefined) GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = 0;
+            });
+        });
+        MASTER_STATE_LIST = newStates;
+    }
+
     ACTIVE_HORIZON_TIMELINE.forEach(m => {
       const wdEl = document.getElementById(`mod-wd-field-${m}`);
       const tgtEl = document.getElementById(`mod-tgt-field-${m}`);
@@ -830,8 +878,8 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
   const bodyRows = document.getElementById('matrix-body-rows');
   const footTotals = document.getElementById('matrix-foot-totals');
 
-  headRow.innerHTML = `<th style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548; min-width:180px;">Clinical Evaluator Name</th><th style="position:sticky; top:0; background:#1e2330; z-index:1; text-align:center; color:#a5b4fc; font-weight:bold;">Active / Total</th>` + 
-    MASTER_STATE_LIST.map(s => `<th style="text-align:center; font-weight:bold; min-width:48px;">${s}</th>`).join('');
+  headRow.innerHTML = `<th style="position:sticky; left:0; top:0; background:#1e2330; z-index:30; border-right:1px solid #2d3548; min-width:180px; border-bottom:1px solid #2d3548;">Clinical Evaluator Name</th><th style="position:sticky; top:0; background:#1e2330; z-index:20; text-align:center; color:#a5b4fc; font-weight:bold; border-bottom:1px solid #2d3548;">Active / Total</th>` + 
+    MASTER_STATE_LIST.map(s => `<th style="position:sticky; top:0; background:#1e2330; z-index:20; text-align:center; font-weight:bold; min-width:48px; border-bottom:1px solid #2d3548;">${s}</th>`).join('');
 
   bodyRows.innerHTML = clinicianAllocations.map(ce => {
     let countActiveOnStates = ce.activeStates.length;
@@ -852,7 +900,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
 
     return `
       <tr data-ce-row-id="${ce.name}">
-        <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
+        <td style="position:sticky; left:0; background:#1e2330; z-index:10; border-right:1px solid #2d3548;">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <span style="font-weight:700; color:#f1f5f9; font-size: 11px;">${ce.name}</span>
             <button class="btn-remove" onclick="deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
@@ -867,7 +915,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
     `;
   }).join('');
 
-  let footerHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548; color:#64748b;">Active Providers Dispatched</td><td style="text-align:center;">—</td>`;
+  let footerHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:10; border-right:1px solid #2d3548; color:#64748b;">Active Providers Dispatched</td><td style="text-align:center;">—</td>`;
   MASTER_STATE_LIST.forEach(s => {
     footerHtml += `<td style="text-align:center; color:#f1f5f9; background:#161b26; border-top:1px solid #3d4a63;">${stateAllocations[s].count}</td>`;
   });
