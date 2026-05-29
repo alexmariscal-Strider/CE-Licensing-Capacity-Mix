@@ -44,6 +44,12 @@
   .stat-val { font-size: 18px; font-weight: 700; color: #f8fafc; }
   .info-icon { cursor: help; display: inline-flex; justify-content: center; align-items: center; width: 14px; height: 14px; background: #3d4a63; color: #e2e8f0; border-radius: 50%; font-size: 9px; font-weight: bold; margin-left: 4px; text-decoration: none; font-style: normal; }
 
+  /* PURE CSS TOOLTIPS FOR IFRAME COMPATIBILITY */
+  .tooltip-container { position: relative; display: inline-flex; align-items: center; }
+  .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 10px; border: 1px solid #475569; position: absolute; z-index: 1000; bottom: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 10px; font-weight: normal; text-transform: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); pointer-events: none; }
+  .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+  .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #475569 transparent transparent transparent; }
+
   /* TABULAR DATA ARCHITECTURE */
   table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 10px; }
   th { padding: 4px 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; background: #1e2330; white-space: nowrap; }
@@ -151,13 +157,14 @@
       <span>Profile Manager</span>
       <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL TO ALL</button>
     </h2>
-    <div id="ce-controls" style="max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
+    <div id="ce-controls" style="max-height: 420px; overflow-y: auto; padding-right: 5px;"></div>
   </div>
 
   <!-- HEATMAP -->
   <div class="panel span-3">
     <h2 id="heat-title">State Weighted Distribution Balance</h2>
-    <div style="overflow-y: auto; max-height: 350px;">
+    <div id="heatmap-summary" style="display: flex; gap: 8px; margin-bottom: 12px;"></div>
+    <div style="overflow-y: auto; max-height: 360px;">
         <table>
         <thead style="position: sticky; top: 0; background: #1e2330; z-index: 10;">
             <tr>
@@ -231,7 +238,7 @@
     <!-- COMPACT DEMAND SECTION -->
     <div style="background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
-            <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Accepted App Projections & Target Enrollments</h2>
+            <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Accepted App Projections</h2>
             <span style="font-size: 8px; color: #64748b;"><strong>Tip:</strong> Highlight data in Google Sheets, click first box below, and press <strong>CTRL+V</strong></span>
         </div>
         <div style="max-height: 380px; overflow-y: auto; overflow-x: auto; border: 1px solid #2d3548; border-radius: 4px;">
@@ -254,7 +261,6 @@ const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","Jul
 const DEFAULT_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
 
 const BASELINE_WD_MAP = { "May":20, "June":21, "July":21, "August":21, "September":21, "October":21, "November":18, "December":22 };
-const BASELINE_TARGETS_MAP = { "May":327, "June":348, "July":349, "August":370, "September":403, "October":466, "November":528, "December":529 };
 
 const BASELINE_DEMAND_MATRIX = {
   "MA":[306,285,288,303,369,387,356,338],"NJ":[142,135,135,140,169,165,158,151],"NH":[50,45,50,52,63,66,63,60],
@@ -316,7 +322,6 @@ function bootstrapDataEngine() {
       if (!GLOBAL_PROJECTIONS_LEDGER[m]) {
         GLOBAL_PROJECTIONS_LEDGER[m] = {
           workingDays: BASELINE_WD_MAP[m] !== undefined ? BASELINE_WD_MAP[m] : 21,
-          enrollTarget: BASELINE_TARGETS_MAP[m] !== undefined ? BASELINE_TARGETS_MAP[m] : 400,
           stateDemand: {}
         };
         MASTER_STATE_LIST.forEach(s => {
@@ -403,7 +408,7 @@ function appendFutureMonth() {
   }
 
   ACTIVE_HORIZON_TIMELINE.push(nextMonthName);
-  GLOBAL_PROJECTIONS_LEDGER[nextMonthName] = { workingDays: 21, enrollTarget: 400, stateDemand: {} };
+  GLOBAL_PROJECTIONS_LEDGER[nextMonthName] = { workingDays: 21, stateDemand: {} };
   MASTER_STATE_LIST.forEach(s => { GLOBAL_PROJECTIONS_LEDGER[nextMonthName].stateDemand[s] = 0; });
 
   Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
@@ -469,18 +474,11 @@ function populateGlobalModalViews() {
   if (demandTable) {
     let html = `<thead><tr><th style="border-right:1px solid #2d3548;">Territory / Metric</th>${ACTIVE_HORIZON_TIMELINE.map(m => `<th>${m.split('_')[0]}</th>`).join('')}</tr></thead><tbody>`;
     
-    // Row 0: Targets
-    html += `<tr style="background:rgba(99,102,241,0.12);"><td style="border-right:1px solid #2d3548;"><strong>Enrollment Target</strong></td>`;
-    ACTIVE_HORIZON_TIMELINE.forEach((m, cIdx) => {
-        html += `<td><input type="number" class="paste-target" data-row="0" data-col="${cIdx}" id="mod-tgt-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget}" style="color:#a5b4fc; font-weight:700;"></td>`;
-    });
-    html += `</tr>`;
-    
     // Rows 1+: States
     MASTER_STATE_LIST.forEach((s, rIdx) => {
       html += `<tr><td style="border-right:1px solid #2d3548;"><strong>${s} Demand Volume</strong></td>`;
       ACTIVE_HORIZON_TIMELINE.forEach((m, cIdx) => {
-          html += `<td><input type="number" class="paste-target" data-row="${rIdx + 1}" data-col="${cIdx}" id="mod-dem-field-${s}-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0}"></td>`;
+          html += `<td><input type="number" class="paste-target" data-row="${rIdx}" data-col="${cIdx}" id="mod-dem-field-${s}-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0}"></td>`;
       });
       html += `</tr>`;
     });
@@ -552,9 +550,7 @@ function saveGlobalModalParams() {
 
     ACTIVE_HORIZON_TIMELINE.forEach(m => {
       const wdEl = document.getElementById(`mod-wd-field-${m}`);
-      const tgtEl = document.getElementById(`mod-tgt-field-${m}`);
       if (wdEl) GLOBAL_PROJECTIONS_LEDGER[m].workingDays = parseFloat(wdEl.value) || 0;
-      if (tgtEl) GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget = parseInt(tgtEl.value) || 0;
       
       MASTER_STATE_LIST.forEach(s => {
         const demEl = document.getElementById(`mod-dem-field-${s}-${m}`);
@@ -643,7 +639,6 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
     });
 
     // 1. Map Columns to Evaluator Names
-    // We will scan the first 10 rows looking for the Header row that contains Evaluator Names
     let ceColMap = {}; 
     let headerRowIdx = -1;
     
@@ -817,7 +812,6 @@ function recalculateDashboardMetrics() {
     if (!activeMonth) return;
     
     let wd = GLOBAL_PROJECTIONS_LEDGER[activeMonth].workingDays;
-    let targetEnrollment = GLOBAL_PROJECTIONS_LEDGER[activeMonth].enrollTarget;
 
     SafeSetter('matrix-title-label', `${activeMonth.split('_')[0]} State Allocation & Licensure Grid`);
     SafeSetter('heat-title', `${activeMonth.split('_')[0]} State Proportional Distribution`);
@@ -881,19 +875,27 @@ function recalculateDashboardMetrics() {
     if (statsContainer) {
       statsContainer.innerHTML = `
         <div class="stat-card">
-          <div class="stat-label">Accepted App Volume <span title="Aggregated consumer funnel pipeline demand for selected tracking month with growth scaling filter applied." class="info-icon">?</span></div>
+          <div class="stat-label">Accepted App Volume 
+            <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Aggregated consumer funnel pipeline demand for the selected tracking month. Includes volume bump.</span></div>
+          </div>
           <div class="stat-val">${fmt(systemTotalDemand)}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Weighted Capacity <span title="Total calculated aggregate slot supply contribution metrics available across active dispatch grid configuration matrices." class="info-icon">?</span></div>
+          <div class="stat-label">Weighted Capacity 
+            <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Total calculated aggregate slot supply available, distributed proportionally across active states.</span></div>
+          </div>
           <div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">System Utilization <span title="Primary pipeline processing operations velocity index indicator health check boundary. Baseline thresholds >95% scale immediate staffing burn alerts." class="info-icon">?</span></div>
+          <div class="stat-label">System Utilization 
+            <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Primary health check. >95% scales immediate staffing burn alerts.</span></div>
+          </div>
           <div class="stat-val ${aggregateUtilizationIndex > 95 ? 'status-red' : ''}">${aggregateUtilizationIndex}%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Monthly PTO Pool <span title="Sum total of scheduled evaluator resource days out across selected operational calendar frame." class="info-icon">?</span></div>
+          <div class="stat-label">Total Monthly PTO Pool 
+            <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Sum total of scheduled evaluator resource days out across selected operational calendar frame.</span></div>
+          </div>
           <div class="stat-val" style="color:#ef4444;">${totalPtoPoolSum} Days</div>
         </div>
       `;
@@ -1010,31 +1012,41 @@ function removeLicenseFromProfile(name, state) {
 
 function renderStateWeightedHeatmap(stateAllocations) {
   const heatmapBody = document.getElementById('heatmap-body');
-  if (!heatmapBody) return;
+  const heatmapSummary = document.getElementById('heatmap-summary');
+  if (!heatmapBody || !heatmapSummary) return;
 
-  heatmapBody.innerHTML = MASTER_STATE_LIST.map(s => {
+  let countBlue = 0, countGreen = 0, countYellow = 0, countRed = 0;
+
+  let htmlRows = MASTER_STATE_LIST.map(s => {
     let r = stateAllocations[s];
     let processingPercentage = r.demand > 0 ? (r.supply / r.demand) * 100 : 0;
     let netBalanceOffset = Math.round(r.supply - r.demand);
     let structuralShortageAlert = r.maxPotential < r.demand;
     
+    if (r.demand > 0) {
+        if (processingPercentage >= 90) countBlue++;
+        else if (processingPercentage >= 80) countGreen++;
+        else if (processingPercentage >= 70) countYellow++;
+        else countRed++;
+    }
+
     let displayPct = r.demand > 0 ? `${Math.round(processingPercentage)}%` : '-';
     let barWidth = r.demand > 0 ? Math.min(100, processingPercentage) : 0;
-    let barColor = processingPercentage < 80 ? '#ef4444' : (processingPercentage < 95 ? '#f59e0b' : '#22c55e');
+    let barColor = processingPercentage < 70 ? '#ef4444' : (processingPercentage < 80 ? '#eab308' : (processingPercentage < 90 ? '#22c55e' : '#3b82f6'));
 
     return `
       <tr>
         <td><strong>${s}</strong></td>
-        <td style="font-weight:600;">${fmt(r.demand)}</td>
-        <td style="color:#a5b4fc; font-weight:600;">${fmt(r.supply)}</td>
+        <td style="font-weight:600;">${r.demand === 0 ? '-' : fmt(r.demand)}</td>
+        <td style="color:#a5b4fc; font-weight:600;">${r.demand === 0 ? '-' : fmt(r.supply)}</td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
             <span style="width:26px; font-weight:bold; color: ${r.demand === 0 ? '#64748b' : 'inherit'};">${displayPct}</span>
             ${r.demand > 0 ? `<div class="progress-bg"><div class="progress-fill" style="width:${barWidth}%; background:${barColor};"></div></div>` : ''}
           </div>
         </td>
-        <td class="${netBalanceOffset < 0 ? 'status-red' : 'status-green'}" title="Total Unconstrained Potential Licensed Supply Cap Ceiling: ${Math.round(r.maxPotential)} Slots">
-          ${netBalanceOffset > 0 ? '+' : ''}${fmt(netBalanceOffset)} ${structuralShortageAlert ? '<span style="font-size:9px; color:#ef4444; font-weight:900;" title="CRITICAL: Total possible potential capacity across all certified profiles is less than marketing demand. Add licenses.">⚠️ STRUCTURAL</span>' : ''}
+        <td class="${r.demand === 0 ? '' : (netBalanceOffset < 0 ? 'status-red' : 'status-green')}" title="Total Unconstrained Potential Licensed Supply Cap Ceiling: ${Math.round(r.maxPotential)} Slots">
+          ${r.demand === 0 ? '-' : (netBalanceOffset > 0 ? '+' : '') + fmt(netBalanceOffset)} ${r.demand > 0 && structuralShortageAlert ? '<span style="font-size:9px; color:#ef4444; font-weight:900;" title="CRITICAL: Total possible potential capacity across all certified profiles is less than marketing demand. Add licenses.">⚠️ STRUCTURAL</span>' : ''}
         </td>
         <td>
           <div style="max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
@@ -1044,6 +1056,27 @@ function renderStateWeightedHeatmap(stateAllocations) {
       </tr>
     `;
   }).join('');
+
+  heatmapBody.innerHTML = htmlRows;
+
+  heatmapSummary.innerHTML = `
+      <div style="flex:1; background:rgba(59,130,246,0.1); border:1px solid #3b82f6; border-radius:4px; padding:6px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:#93c5fd;">${countBlue}</div>
+        <div style="font-size:8px; color:#60a5fa; text-transform:uppercase; font-weight:bold;">Optimal (≥90%)</div>
+      </div>
+      <div style="flex:1; background:rgba(34,197,94,0.1); border:1px solid #22c55e; border-radius:4px; padding:6px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:#86efac;">${countGreen}</div>
+        <div style="font-size:8px; color:#4ade80; text-transform:uppercase; font-weight:bold;">Healthy (80-89%)</div>
+      </div>
+      <div style="flex:1; background:rgba(234,179,8,0.1); border:1px solid #eab308; border-radius:4px; padding:6px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:#fde047;">${countYellow}</div>
+        <div style="font-size:8px; color:#facc15; text-transform:uppercase; font-weight:bold;">Warning (70-79%)</div>
+      </div>
+      <div style="flex:1; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:4px; padding:6px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:#fca5a5;">${countRed}</div>
+        <div style="font-size:8px; color:#f87171; text-transform:uppercase; font-weight:bold;">Critical (<70%)</div>
+      </div>
+  `;
 }
 
 function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, stateAllocations) {
@@ -1054,15 +1087,15 @@ function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, s
   let criticalStates = Object.keys(stateAllocations).filter(s => stateAllocations[s].demand > 0 && (stateAllocations[s].supply / stateAllocations[s].demand) < 0.80);
 
   let criticalStatesHtml = criticalStates.length > 0 
-    ? `<div style="margin-top: 10px; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 4px; color: #fca5a5;">⚠️ <strong>Major Coverage Concerns (<80%):</strong> ${criticalStates.join(', ')}</div>` 
-    : `<div style="margin-top: 10px; padding: 10px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 4px; color: #86efac;">✅ All active territories are maintaining healthy coverage levels (>80%).</div>`;
+    ? `<div style="margin-top: 10px; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 4px; color: #fca5a5;">⚠️ <strong>Major Coverage Concerns (<80%) — ${criticalStates.length} State(s) Impacted:</strong> ${criticalStates.join(', ')}</div>` 
+    : `<div style="margin-top: 10px; padding: 10px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 4px; color: #86efac;">✅ All active territories are maintaining safe baseline coverage levels (≥80%).</div>`;
 
   container.innerHTML = `
     <h3>MONTHLY OPERATIONS PULSE: ${activeMonth.split('_')[0].toUpperCase()}</h3>
-    <p>Projected volume requires <strong>${fmt(totalDemand)} Phone Screen slots</strong>. Current weighted capacity yields <strong>${fmt(totalSupply)} available slots</strong>.</p>
+    <p>System projections require <strong>${fmt(totalDemand)} Phone Screen slots</strong> against a weighted supply of <strong>${fmt(totalSupply)} available slots</strong>.</p>
     ${totalSupply >= totalDemand 
-      ? `<p style="margin-top: 4px;">System capacity is currently <strong>sufficient</strong> to handle the projected volume.</p>` 
-      : `<p style="margin-top: 4px;">We have a projected shortfall of <strong style="color: #fca5a5;">${fmt(totalDemand - totalSupply)} slots</strong>, requiring roughly <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong>.</p>`}
+      ? `<p style="margin-top: 4px;">Overall aggregate capacity is <strong>sufficient</strong> to clear the pipeline queue for this period.</p>` 
+      : `<p style="margin-top: 4px;">Systemic shortfall of <strong style="color: #fca5a5;">${fmt(totalDemand - totalSupply)} slots</strong> requires onboarding roughly <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong> or re-weighting coverage.</p>`}
     ${criticalStatesHtml}
   `;
 }
