@@ -1254,8 +1254,16 @@ window.onload = () => {
   buildTimelineControls();
   recalculateDashboardMetrics();
   
-  // Only auto-sync if NOT inside an iframe
-  if (window.self === window.top) {
+  // Safely check if we are outside an iframe without triggering cross-origin security errors
+  let isStandalone = false;
+  try {
+    isStandalone = (window.self === window.top);
+  } catch (e) {
+    // If accessing window.top throws an error, we are definitely inside a strict iframe (like Google Sites)
+    isStandalone = false; 
+  }
+
+  if (isStandalone) {
     syncPtoFromGoogleSheets(true);
   }
 };
