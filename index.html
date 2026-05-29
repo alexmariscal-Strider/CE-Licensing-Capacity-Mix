@@ -42,7 +42,7 @@
   .stat-card { background: #252c3f; padding: 10px; border-radius: 6px; border: 1px solid #3d4a63; }
   .stat-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
   .stat-val { font-size: 18px; font-weight: 700; color: #f8fafc; }
-  .info-icon { cursor: help; color: #6366f1; font-weight: bold; font-size: 10px; }
+  .info-icon { cursor: help; display: inline-flex; justify-content: center; align-items: center; width: 14px; height: 14px; background: #3d4a63; color: #e2e8f0; border-radius: 50%; font-size: 9px; font-weight: bold; margin-left: 4px; text-decoration: none; font-style: normal; }
 
   /* TABULAR DATA ARCHITECTURE */
   table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 10px; }
@@ -881,19 +881,19 @@ function recalculateDashboardMetrics() {
     if (statsContainer) {
       statsContainer.innerHTML = `
         <div class="stat-card">
-          <div class="stat-label">Accepted App Volume <span title="Aggregated consumer funnel pipeline demand for selected tracking month with growth scaling filter applied." class="info-icon">ⓘ</span></div>
+          <div class="stat-label">Accepted App Volume <span title="Aggregated consumer funnel pipeline demand for selected tracking month with growth scaling filter applied." class="info-icon">?</span></div>
           <div class="stat-val">${fmt(systemTotalDemand)}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Weighted Capacity <span title="Total calculated aggregate slot supply contribution metrics available across active dispatch grid configuration matrices." class="info-icon">ⓘ</span></div>
+          <div class="stat-label">Weighted Capacity <span title="Total calculated aggregate slot supply contribution metrics available across active dispatch grid configuration matrices." class="info-icon">?</span></div>
           <div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">System Utilization <span title="Primary pipeline processing operations velocity index indicator health check boundary. Baseline thresholds >95% scale immediate staffing burn alerts." class="info-icon">ⓘ</span></div>
+          <div class="stat-label">System Utilization <span title="Primary pipeline processing operations velocity index indicator health check boundary. Baseline thresholds >95% scale immediate staffing burn alerts." class="info-icon">?</span></div>
           <div class="stat-val ${aggregateUtilizationIndex > 95 ? 'status-red' : ''}">${aggregateUtilizationIndex}%</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Monthly PTO Pool <span title="Sum total of scheduled evaluator resource days out across selected operational calendar frame." class="info-icon">ⓘ</span></div>
+          <div class="stat-label">Total Monthly PTO Pool <span title="Sum total of scheduled evaluator resource days out across selected operational calendar frame." class="info-icon">?</span></div>
           <div class="stat-val" style="color:#ef4444;">${totalPtoPoolSum} Days</div>
         </div>
       `;
@@ -901,7 +901,7 @@ function recalculateDashboardMetrics() {
 
     renderLicensureCrossMatrix(clinicianAllocations, stateAllocations);
     renderStateWeightedHeatmap(stateAllocations);
-    renderExecutiveNarrativeBanner(systemTotalDemand, systemTotalWeightedSupply, activeMonth, targetEnrollment);
+    renderExecutiveNarrativeBanner(systemTotalDemand, systemTotalWeightedSupply, activeMonth, stateAllocations);
     renderPtoManagerGrid();
     renderLongRangeWfmChart();
     renderSidebarProfileManager(clinicianAllocations);
@@ -1014,9 +1014,13 @@ function renderStateWeightedHeatmap(stateAllocations) {
 
   heatmapBody.innerHTML = MASTER_STATE_LIST.map(s => {
     let r = stateAllocations[s];
-    let processingPercentage = r.demand > 0 ? (r.supply / r.demand) * 100 : 100;
+    let processingPercentage = r.demand > 0 ? (r.supply / r.demand) * 100 : 0;
     let netBalanceOffset = Math.round(r.supply - r.demand);
     let structuralShortageAlert = r.maxPotential < r.demand;
+    
+    let displayPct = r.demand > 0 ? `${Math.round(processingPercentage)}%` : '-';
+    let barWidth = r.demand > 0 ? Math.min(100, processingPercentage) : 0;
+    let barColor = processingPercentage < 80 ? '#ef4444' : (processingPercentage < 95 ? '#f59e0b' : '#22c55e');
 
     return `
       <tr>
@@ -1025,8 +1029,8 @@ function renderStateWeightedHeatmap(stateAllocations) {
         <td style="color:#a5b4fc; font-weight:600;">${fmt(r.supply)}</td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
-            <span style="width:26px; font-weight:bold;">${Math.round(processingPercentage)}%</span>
-            <div class="progress-bg"><div class="progress-fill" style="width:${Math.min(100, processingPercentage)}%; background:${processingPercentage < 95 ? '#ef4444' : '#22c55e'};"></div></div>
+            <span style="width:26px; font-weight:bold; color: ${r.demand === 0 ? '#64748b' : 'inherit'};">${displayPct}</span>
+            ${r.demand > 0 ? `<div class="progress-bg"><div class="progress-fill" style="width:${barWidth}%; background:${barColor};"></div></div>` : ''}
           </div>
         </td>
         <td class="${netBalanceOffset < 0 ? 'status-red' : 'status-green'}" title="Total Unconstrained Potential Licensed Supply Cap Ceiling: ${Math.round(r.maxPotential)} Slots">
@@ -1042,25 +1046,24 @@ function renderStateWeightedHeatmap(stateAllocations) {
   }).join('');
 }
 
-function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, targetEnrollment) {
+function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, stateAllocations) {
   const container = document.getElementById('executive-insight-banner');
   if (!container) return;
 
   let clinicianDeficitCount = Math.ceil(Math.max(0, totalDemand - totalSupply) / 64);
-  let expectedTheoreticalEnrollments = Math.round(totalSupply * 0.25);
-  let targetDeficitDelta = targetEnrollment - expectedTheoreticalEnrollments;
+  let criticalStates = Object.keys(stateAllocations).filter(s => stateAllocations[s].demand > 0 && (stateAllocations[s].supply / stateAllocations[s].demand) < 0.80);
+
+  let criticalStatesHtml = criticalStates.length > 0 
+    ? `<div style="margin-top: 10px; padding: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 4px; color: #fca5a5;">⚠️ <strong>Major Coverage Concerns (<80%):</strong> ${criticalStates.join(', ')}</div>` 
+    : `<div style="margin-top: 10px; padding: 10px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 4px; color: #86efac;">✅ All active territories are maintaining healthy coverage levels (>80%).</div>`;
 
   container.innerHTML = `
-    <h3>MONTHLY OPERATIONS SYSTEM ANALYSIS — OPERATIONS PULSE: ${activeMonth.split('_')[0].toUpperCase()}</h3>
-    <p>Current scheduling processing constraints indicate marketing pipeline demand vectors require clearing <strong>${fmt(totalDemand)} Phone Screen slots</strong> across active deployment matrices. 
-    Available workforce scheduling models yield <strong>${fmt(totalSupply)} viable production appointments</strong>. 
+    <h3>MONTHLY OPERATIONS PULSE: ${activeMonth.split('_')[0].toUpperCase()}</h3>
+    <p>Projected volume requires <strong>${fmt(totalDemand)} Phone Screen slots</strong>. Current weighted capacity yields <strong>${fmt(totalSupply)} available slots</strong>.</p>
     ${totalSupply >= totalDemand 
-      ? `Workforce optimization models indicate tactical allocation strategies match queue depth requirements, remaining <strong>perfectly balanced</strong> against incoming pipeline loads.` 
-      : `Operational gaps identify an immediate shortfall of <strong>${fmt(totalDemand - totalSupply)} required phone screens</strong>. Resolving this pipeline processing boundary requires immediately onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong> or optimizing target licensure distribution mix blocks.`}
-    Downstream conversions projection tracks toward delivering a capacity yield potential of <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to organizational goal commitments of <strong>${fmt(targetEnrollment)}</strong> 
-    ${targetDeficitDelta > 0 
-      ? `(Tracking a structural deficit baseline gap risk of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>. Broaden specialized licensing matrices or drive conversion velocity vectors).` 
-      : `(Positioned safely to cross target baseline goals by a margin buffer of <strong class="status-green">+${fmt(Math.abs(targetDeficitDelta))} enrollments</strong>).`}</p>
+      ? `<p style="margin-top: 4px;">System capacity is currently <strong>sufficient</strong> to handle the projected volume.</p>` 
+      : `<p style="margin-top: 4px;">We have a projected shortfall of <strong style="color: #fca5a5;">${fmt(totalDemand - totalSupply)} slots</strong>, requiring roughly <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong>.</p>`}
+    ${criticalStatesHtml}
   `;
 }
 
