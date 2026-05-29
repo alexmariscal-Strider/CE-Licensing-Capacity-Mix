@@ -147,7 +147,10 @@
 
   <!-- PROFILE MANAGER -->
   <div class="panel span-1">
-    <h2 id="mix-title">Profile Manager</h2>
+    <h2 id="mix-title" style="align-items: center; display: flex;">
+      <span>Profile Manager</span>
+      <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL TO ALL</button>
+    </h2>
     <div id="ce-controls" style="max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
   </div>
 
@@ -740,10 +743,10 @@ function addNewClinicianToRoster() {
     alert("Resource entity entry already holds assignment constraints inside active tracking namespace registry.");
     return;
   }
-  CLINICAL_EVALUATORS_ROSTER[name] = { quota: 4, profile: [], ptoMap: {}, monthlyToggles: {} };
+  CLINICAL_EVALUATORS_ROSTER[name] = { quota: 4, profile: [...MASTER_STATE_LIST], ptoMap: {}, monthlyToggles: {} };
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
-    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [];
+    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...MASTER_STATE_LIST];
   });
   nameInput.value = '';
   saveStateToStorage();
@@ -768,6 +771,41 @@ function updateMonthlyMixToggle(name, state, action) {
   } else {
     CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[currentMonthName] = mix.filter(s => s !== state);
   }
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+// --- MASS LICENSING PROVISIONING HELPER ROUTINES ---
+function addAllLicenses(name) {
+  if (!confirm(`Add all ${MASTER_STATE_LIST.length} active tracking states to ${name}'s profile?`)) return;
+  MASTER_STATE_LIST.forEach(state => {
+    if (!CLINICAL_EVALUATORS_ROSTER[name].profile.includes(state)) {
+      CLINICAL_EVALUATORS_ROSTER[name].profile.push(state);
+      ACTIVE_HORIZON_TIMELINE.forEach(m => {
+        if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
+          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
+        }
+      });
+    }
+  });
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function addAllStatesToAllProviders() {
+  if(!confirm(`Are you sure you want to provision all ${MASTER_STATE_LIST.length} active tracking states to EVERY evaluator's profile simultaneously?`)) return;
+  Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+      MASTER_STATE_LIST.forEach(state => {
+          if (!CLINICAL_EVALUATORS_ROSTER[name].profile.includes(state)) {
+              CLINICAL_EVALUATORS_ROSTER[name].profile.push(state);
+              ACTIVE_HORIZON_TIMELINE.forEach(m => {
+                  if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
+                      CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
+                  }
+              });
+          }
+      });
+  });
   saveStateToStorage();
   recalculateDashboardMetrics();
 }
@@ -906,7 +944,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
             <button class="btn-remove" onclick="deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
           </div>
           <div style="font-size: 8px; color: #64748b; line-height: 1.2; max-width: 170px; white-space: normal; margin-top:2px;">
-            <strong>Licenses:</strong> ${ce.masterProfile.join(', ') || 'None'}
+            <strong>Licenses:</strong> ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).join(', ') || 'None'}
           </div>
         </td>
         <td style="text-align:center; font-weight:bold; background:#111521; color:#93c5fd;">${countActiveOnStates} / ${ce.masterProfile.length}</td>
@@ -931,16 +969,17 @@ function renderSidebarProfileManager(clinicianAllocations) {
         <span title="Denominator: Total demand of all active states." style="font-size:7px; color:#64748b; cursor:help;">Load: ${Math.round(ce.denom)}</span>
       </div>
       <div style="margin-bottom:6px;">
-        ${ce.masterProfile.map(s => `
+        ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).map(s => `
           <span class="state-pill-toggle ${ce.activeStates.includes(s) ? 'state-on' : 'state-off'}">
             <span onclick="updateMonthlyMixToggle('${ce.name}','${s}', '${ce.activeStates.includes(s) ? 'Off' : 'On'}')">${s}</span>
             <span class="del-btn" onclick="removeLicenseFromProfile('${ce.name}','${s}')" title="Permanently remove license">×</span>
           </span>
         `).join('')}
       </div>
-      <div style="display:flex; gap:4px;">
+      <div style="display:flex; align-items:center; gap:4px;">
         <input type="text" placeholder="ST" style="width:40px;" id="add-${ce.name.replace(/\s/g, '')}">
-        <button class="btn-action" style="padding:2px 6px;" onclick="addLicenseToProfile('${ce.name}')">+</button>
+        <button class="btn-action" style="padding:2px 6px;" onclick="addLicenseToProfile('${ce.name}')" title="Add Single State">+</button>
+        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="addAllLicenses('${ce.name}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
       </div>
     </div>
   `).join('');
