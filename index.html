@@ -83,7 +83,7 @@
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); padding: 10px; }
   .modal-content { background: #1e2330; padding: 16px; border-radius: 8px; border: 1px solid #3d4a63; width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
   
-  .compact-modal-table { border-collapse: collapse; }
+  .compact-modal-table { border-collapse: collapse; width: 100%; }
   .compact-modal-table th { padding: 3px 6px; font-size: 9px; background: #161b26; border-bottom: 1px solid #2d3548; position: sticky; top: 0; z-index: 2; }
   .compact-modal-table td { padding: 2px 6px; border-bottom: 1px solid #1a2030; }
   .compact-modal-table input { width: 50px; padding: 3px; font-size: 10px; border: 1px solid #3d4a63; background: #0f1117; }
@@ -119,7 +119,10 @@
     <div id="month-tabs" style="display: inline-flex; gap: 2px; margin: 0 4px;"></div>
   </div>
   
-  <button class="btn-action" onclick="toggleModalEnvelope('settings-modal')">⚙️ GLOBAL PARAMETERS MANAGER</button>
+  <div style="display: flex; gap: 8px;">
+    <button class="btn-action" style="background: #1e293b; color: #93c5fd; border: 1px solid #3b82f6;" onclick="document.getElementById('summary-modal').style.display='flex'">ℹ️ SUMMARY</button>
+    <button class="btn-action" onclick="toggleModalEnvelope('settings-modal')">⚙️ GLOBAL PARAMETERS MANAGER</button>
+  </div>
 </div>
 
 <!-- REAL-TIME NARRATIVE ENGINE VIEWPORT -->
@@ -277,6 +280,26 @@
 
     <div style="margin-top: 12px; text-align: right;">
         <button class="btn-action" onclick="if(confirm('Wipe all local storage?')) triggerFactoryResetWfm()" style="background:transparent; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; font-size: 9px;">⚠️ INITIALIZE HARD RESET</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY MODAL -->
+<div class="modal-overlay" id="summary-modal">
+  <div class="modal-content" style="max-width: 550px; background: #1e2330; border: 1px solid #3d4a63;">
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #2d3548; padding-bottom: 10px;">
+        <h2 style="margin:0; border:none; color:#fff; font-size:14px;">ℹ️ Dashboard Intent & Summary</h2>
+        <button class="btn-action" style="background:#475569;" onclick="document.getElementById('summary-modal').style.display='none'">CLOSE</button>
+    </div>
+    <div style="color: #cbd5e1; font-size: 12px; line-height: 1.6;">
+        <p style="margin-bottom: 12px;"><strong style="color: #93c5fd;">What it does:</strong> Geographic regulatory compliance and capacity matching.</p>
+        <p style="margin-bottom: 12px;"><strong style="color: #c4b5fd;">Core Focus:</strong> This dashboard answers the question: <em>“Are our clinicians licensed in the right places to handle state-specific demand spikes?”</em></p>
+        <strong style="color: #34d399;">Key Features:</strong>
+        <ul style="margin-top: 6px; margin-left: 20px; color: #94a3b8;">
+            <li style="margin-bottom: 6px;">Maps out a matrix of Clinical Evaluators against the 28+ state territories they are legally allowed to practice in.</li>
+            <li style="margin-bottom: 6px;">Allows you to switch a CE's availability "ON" or "OFF" for specific states, automatically re-weighting their calendar capacity to cover localized backlogs.</li>
+            <li>Provides a rolling strategy graph comparing state-by-state demand against actual state coverage limits.</li>
+        </ul>
     </div>
   </div>
 </div>
@@ -561,6 +584,8 @@ function restoreArchivedMonth(m) {
     renderMonthManagerUI();
     buildTimelineControls();
     recalculateDashboardMetrics();
+    // Refresh modal in case it's open
+    if(document.getElementById('settings-modal').style.display === 'flex') populateGlobalModalViews(); 
 }
 
 function deleteSpecificMonth(m) {
