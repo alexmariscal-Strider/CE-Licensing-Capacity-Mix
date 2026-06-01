@@ -219,6 +219,16 @@
         <div id="archive-manager-container" style="display:flex; gap:8px; flex-wrap:wrap; min-height: 24px; align-items:center;"></div>
     </div>
 
+    <!-- NEW COMPACT TIMELINE MANAGER -->
+    <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
+        <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+            <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Active Horizon Timeline (Order & Additions)</h2>
+            <button class="btn-action" onclick="updateMasterTimeline()" style="padding: 2px 6px; font-size: 8px; background: #6366f1;">APPLY TIMELINE</button>
+        </div>
+        <p style="font-size: 8px; color: #64748b; margin-bottom: 6px;">Enter months separated by commas to reorder, add missing, or restore archived months directly into position. (e.g., May, June, July)</p>
+        <textarea id="modal-timeline-list-input" style="width: 100%; background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 6px; font-size: 10px; border-radius: 4px; resize: vertical; min-height: 35px;"></textarea>
+    </div>
+
     <!-- COMPACT WORKING DAYS SECTION -->
     <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <h2 style="margin-bottom: 4px; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Calendar Working Days</h2>
@@ -406,8 +416,8 @@ function archiveEarliestMonth() {
   let removed = ACTIVE_HORIZON_TIMELINE.shift();
   
   // Save to Archive Vault instead of deleting
-  ARCHIVED_TIMELINE.push(removed);
-  ARCHIVED_LEDGER[removed] = JSON.parse(JSON.stringify(GLOBAL_PROJECTIONS_LEDGER[removed])); // Deep copy
+  if (!ARCHIVED_TIMELINE.includes(removed)) ARCHIVED_TIMELINE.push(removed);
+  ARCHIVED_LEDGER[removed] = JSON.parse(JSON.stringify(GLOBAL_PROJECTIONS_LEDGER[removed])); 
   
   Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
     if (!ARCHIVED_ROSTER[name]) ARCHIVED_ROSTER[name] = { ptoMap: {}, monthlyToggles: {} };
@@ -525,6 +535,11 @@ function populateGlobalModalViews() {
   if(stateListInput) {
       stateListInput.value = MASTER_STATE_LIST.join(', ');
   }
+
+  const timelineListInput = document.getElementById('modal-timeline-list-input');
+  if(timelineListInput) {
+      timelineListInput.value = ACTIVE_HORIZON_TIMELINE.join(', ');
+  }
   
   // Populate Archive Manager
   const archiveContainer = document.getElementById('archive-manager-container');
@@ -597,6 +612,74 @@ function updateMasterStateList() {
     MASTER_STATE_LIST = newStates;
     saveStateToStorage();
     populateGlobalModalViews(); 
+}
+
+function updateMasterTimeline() {
+    let newTimelineStr = document.getElementById('modal-timeline-list-input').value;
+    let newTimeline = newTimelineStr.split(',').map(s => s.trim()).filter(s => s);
+    if(newTimeline.length === 0) {
+        alert("Timeline cannot be empty.");
+        return;
+    }
+
+    // Restore from Archive or Initialize completely new months
+    newTimeline.forEach(m => {
+        if (ARCHIVED_TIMELINE.includes(m)) {
+            // Restore it
+            ARCHIVED_TIMELINE = ARCHIVED_TIMELINE.filter(x => x !== m);
+            if (ARCHIVED_LEDGER[m]) {
+                GLOBAL_PROJECTIONS_LEDGER[m] = JSON.parse(JSON.stringify(ARCHIVED_LEDGER[m]));
+                delete ARCHIVED_LEDGER[m];
+            }
+            Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+                if (ARCHIVED_ROSTER[name] && ARCHIVED_ROSTER[name].ptoMap[m] !== undefined) {
+                    CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = ARCHIVED_ROSTER[name].ptoMap[m];
+                    CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = ARCHIVED_ROSTER[name].monthlyToggles[m] || [...CLINICAL_EVALUATORS_ROSTER[name].profile];
+                    delete ARCHIVED_ROSTER[name].ptoMap[m];
+                    delete ARCHIVED_ROSTER[name].monthlyToggles[m];
+                } else {
+                    if(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] === undefined) CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
+                    if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
+                }
+            });
+        } else if(!GLOBAL_PROJECTIONS_LEDGER[m]) {
+            // Completely new month
+            GLOBAL_PROJECTIONS_LEDGER[m] = { workingDays: 21, enrollTarget: 400, stateDemand: {} };
+            MASTER_STATE_LIST.forEach(s => GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = 0);
+            Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+                CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
+                CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
+            });
+        }
+    });
+
+    // Archive removed ones to keep them safe
+    ACTIVE_HORIZON_TIMELINE.forEach(m => {
+        if(!newTimeline.includes(m)) {
+            if(!ARCHIVED_TIMELINE.includes(m)) ARCHIVED_TIMELINE.push(m);
+            ARCHIVED_LEDGER[m] = JSON.parse(JSON.stringify(GLOBAL_PROJECTIONS_LEDGER[m]));
+            
+            Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+                if (!ARCHIVED_ROSTER[name]) ARCHIVED_ROSTER[name] = { ptoMap: {}, monthlyToggles: {} };
+                if (CLINICAL_EVALUATORS_ROSTER[name].ptoMap) {
+                    ARCHIVED_ROSTER[name].ptoMap[m] = CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m];
+                }
+                if (CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) {
+                    ARCHIVED_ROSTER[name].monthlyToggles[m] = JSON.parse(JSON.stringify(CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]));
+                }
+                delete CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m];
+                delete CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m];
+            });
+            delete GLOBAL_PROJECTIONS_LEDGER[m];
+        }
+    });
+
+    ACTIVE_HORIZON_TIMELINE = newTimeline;
+    activeSelectedMonthIdx = 0;
+    saveStateToStorage();
+    populateGlobalModalViews(); 
+    buildTimelineControls();
+    recalculateDashboardMetrics();
 }
 
 function attachPasteListeners() {
