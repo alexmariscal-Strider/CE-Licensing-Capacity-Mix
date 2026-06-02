@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CE Capacity Model - Strategic WFM Master</title>
+<!-- Firebase SDKs (Compat Version for Vanilla JS) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -305,6 +308,74 @@
 </div>
 
 <script>
+// --- FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBU1tPMTjYtRSbmlttGfLKebl7gnwLzgBw",
+  authDomain: "ce-wfm-suite.firebaseapp.com",
+  databaseURL: "https://ce-wfm-suite-default-rtdb.firebaseio.com",
+  projectId: "ce-wfm-suite",
+  storageBucket: "ce-wfm-suite.firebasestorage.app",
+  messagingSenderId: "590100182080",
+  appId: "1:590100182080:web:b52ae564a6aa4377709ba5"
+};
+
+let firebaseDbRef = null;
+
+function initFirebase() {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    firebaseDbRef = firebase.database().ref('/Licensing_Capacity_Mix');
+}
+
+function syncWithFirebase() {
+    if (!firebaseDbRef) return;
+    
+    firebaseDbRef.once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // Cloud has data, overwrite local optimistic state
+            ACTIVE_HORIZON_TIMELINE = data.timeline || [];
+            GLOBAL_PROJECTIONS_LEDGER = data.ledger || {};
+            CLINICAL_EVALUATORS_ROSTER = data.roster || {};
+            volGrowthMultiplier = data.multiplier || 1.0;
+            MASTER_STATE_LIST = data.stateList || [];
+            ARCHIVED_TIMELINE = data.archiveTime || [];
+            ARCHIVED_LEDGER = data.archiveLedg || {};
+            ARCHIVED_ROSTER = data.archiveRost || {};
+            
+            // Save to localStorage so next boot is also fast
+            saveToLocalOnly();
+            
+            // Refresh UI
+            activeSelectedMonthIdx = 0; 
+            buildTimelineControls();
+            recalculateDashboardMetrics();
+            console.log("State synced FROM Firebase seamlessly.");
+        } else {
+            // Firebase is empty, seed it with the current local state
+            pushToFirebase();
+            console.log("Firebase empty. Seeded WITH local data.");
+        }
+    }).catch((error) => {
+        console.error("Firebase Background Sync Error:", error);
+    });
+}
+
+function pushToFirebase() {
+    if (!firebaseDbRef) return;
+    firebaseDbRef.set({
+        timeline: ACTIVE_HORIZON_TIMELINE,
+        ledger: GLOBAL_PROJECTIONS_LEDGER,
+        roster: CLINICAL_EVALUATORS_ROSTER,
+        multiplier: volGrowthMultiplier,
+        stateList: MASTER_STATE_LIST,
+        archiveTime: ARCHIVED_TIMELINE,
+        archiveLedg: ARCHIVED_LEDGER,
+        archiveRost: ARCHIVED_ROSTER
+    }).catch(err => console.error("Firebase Push Failed:", err));
+}
+
 // --- CRASH PROOF UTILITIES ---
 const fmt = (num) => Math.round(num || 0).toLocaleString();
 
@@ -423,14 +494,16 @@ function bootstrapDataEngine() {
         });
       });
     }
-    saveStateToStorage();
+    // Only local save during boot
+    saveToLocalOnly();
   } catch (err) {
     console.error("Hydration Engine Intercept Failure", err);
     triggerFactoryResetWfm();
   }
 }
 
-function saveStateToStorage() {
+// Split save into Local-Only and Full Sync
+function saveToLocalOnly() {
   localStorage.setItem('wfm_timeline_v21', JSON.stringify(ACTIVE_HORIZON_TIMELINE));
   localStorage.setItem('wfm_ledger_v21', JSON.stringify(GLOBAL_PROJECTIONS_LEDGER));
   localStorage.setItem('wfm_roster_v21', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
@@ -440,6 +513,11 @@ function saveStateToStorage() {
   localStorage.setItem('wfm_archive_time_v21', JSON.stringify(ARCHIVED_TIMELINE));
   localStorage.setItem('wfm_archive_ledg_v21', JSON.stringify(ARCHIVED_LEDGER));
   localStorage.setItem('wfm_archive_rost_v21', JSON.stringify(ARCHIVED_ROSTER));
+}
+
+function saveStateToStorage() {
+  saveToLocalOnly();
+  pushToFirebase(); // Background sync
 }
 
 function triggerFactoryResetWfm() {
@@ -1436,12 +1514,14 @@ window.onload = () => {
   buildTimelineControls();
   recalculateDashboardMetrics();
   
+  initFirebase();
+  syncWithFirebase();
+  
   // Safely check if we are outside an iframe without triggering cross-origin security errors
   let isStandalone = false;
   try {
     isStandalone = (window.self === window.top);
   } catch (e) {
-    // If accessing window.top throws an error, we are definitely inside a strict iframe (like Google Sites)
     isStandalone = false; 
   }
 
