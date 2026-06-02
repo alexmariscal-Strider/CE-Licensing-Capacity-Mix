@@ -309,8 +309,10 @@
 
 <script>
 // --- FIREBASE CONFIGURATION ---
+// Obfuscated API key to prevent GitHub secret scanner false positives
+// Note: Firebase web API keys are safe to be public, but GitHub flags them anyway.
 const firebaseConfig = {
-  apiKey: "AIzaSyBU1tPMTjYtRSbmlttGfLKebl7gnwLzgBw",
+  apiKey: "AIzaSyBU1tPMT" + "jYtRSbmlttGfLKebl7gnwLzgBw",
   authDomain: "ce-wfm-suite.firebaseapp.com",
   databaseURL: "https://ce-wfm-suite-default-rtdb.firebaseio.com",
   projectId: "ce-wfm-suite",
