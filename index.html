@@ -6,6 +6,7 @@
 <title>CE Capacity Model - Strategic WFM Master</title>
 <!-- Firebase SDKs (Compat Version for Vanilla JS) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -112,19 +113,19 @@
   
   <div class="multiplier-wrap">
     <span style="font-size:9px; color:#94a3b8; font-weight:700; padding: 0 8px;">VOLUME BUMP:</span>
-    <button class="m-btn active" id="m-base" onclick="setVolMultiplier(1.0, this)">BASE</button>
-    <button class="m-btn" id="m-5" onclick="setVolMultiplier(1.05, this)">+5%</button>
-    <button class="m-btn" id="m-10" onclick="setVolMultiplier(1.10, this)">+10%</button>
+    <button class="m-btn active" id="m-base" onclick="window.setVolMultiplier(1.0, this)">BASE</button>
+    <button class="m-btn" id="m-5" onclick="window.setVolMultiplier(1.05, this)">+5%</button>
+    <button class="m-btn" id="m-10" onclick="window.setVolMultiplier(1.10, this)">+10%</button>
   </div>
 
   <div class="month-bar">
-    <button class="btn-horizon" style="margin-right: 6px; font-weight: bold; color: #a5b4fc; border-color: #6366f1;" onclick="openMonthManager()">📅 Manage Months</button>
+    <button class="btn-horizon" style="margin-right: 6px; font-weight: bold; color: #a5b4fc; border-color: #6366f1;" onclick="window.openMonthManager()">📅 Manage Months</button>
     <div id="month-tabs" style="display: inline-flex; gap: 2px; margin: 0 4px;"></div>
   </div>
   
   <div style="display: flex; gap: 8px;">
     <button class="btn-action" style="background: #1e293b; color: #93c5fd; border: 1px solid #3b82f6;" onclick="document.getElementById('summary-modal').style.display='flex'">ℹ️ SUMMARY</button>
-    <button class="btn-action" onclick="toggleModalEnvelope('settings-modal')">⚙️ GLOBAL PARAMETERS MANAGER</button>
+    <button class="btn-action" onclick="window.toggleModalEnvelope('settings-modal')">⚙️ GLOBAL PARAMETERS MANAGER</button>
   </div>
 </div>
 
@@ -157,9 +158,12 @@
 
   <!-- PROFILE MANAGER -->
   <div class="panel span-1">
-    <h2 id="mix-title" style="align-items: center; display: flex;">
+    <h2 id="mix-title" style="align-items: center; display: flex; justify-content: space-between;">
       <span>Profile Manager</span>
-      <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL TO ALL</button>
+      <div style="display: flex; gap: 4px;">
+        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="window.addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL TO ALL</button>
+        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #10b981;" onclick="window.syncLicensureFromSheets(false)" title="Sync Licensure Profiles from Google Sheets">🔄 SYNC LICENSURE</button>
+      </div>
     </h2>
     <div id="ce-controls" style="max-height: 380px; overflow-y: auto; padding-right: 5px;"></div>
   </div>
@@ -192,11 +196,11 @@
       <div style="display: flex; gap: 8px; align-items: center;">
           <span style="font-weight: 600; color: #a5b4fc; font-size: 10px;">Roster Onboarding:</span>
           <input type="text" id="new-clinician-name" placeholder="Enter full name of incoming Evaluator" style="width: 220px;">
-          <button class="btn-action" onclick="addNewClinicianToRoster()">+ Provision Evaluator Seat</button>
+          <button class="btn-action" onclick="window.addNewClinicianToRoster()">+ Provision Evaluator Seat</button>
       </div>
       <div style="display: flex; gap: 8px;">
-          <button class="btn-action" id="undo-sync-btn" style="background:#f59e0b; color:#78350f; display:none;" onclick="undoPtoSync()">⏪ UNDO SYNC</button>
-          <button class="btn-action" id="sync-pto-btn" style="background:#10b981; color:#064e3b;" onclick="syncPtoFromGoogleSheets(false)">☁️ CLOUD SYNC PTO FROM SHEETS</button>
+          <button class="btn-action" id="undo-sync-btn" style="background:#f59e0b; color:#78350f; display:none;" onclick="window.undoPtoSync()">⏪ UNDO SYNC</button>
+          <button class="btn-action" id="sync-pto-btn" style="background:#10b981; color:#064e3b;" onclick="window.syncPtoFromGoogleSheets(false)">☁️ CLOUD SYNC PTO FROM SHEETS</button>
       </div>
     </div>
 
@@ -222,7 +226,7 @@
     <div style="display:flex; gap: 8px; margin-bottom: 16px; align-items: center; background: #161b26; padding: 12px; border-radius: 6px; border: 1px solid #2d3548;">
         <span style="font-size: 11px; color: #94a3b8; font-weight: bold;">+ Add New Month:</span>
         <input type="text" id="new-month-input" placeholder="e.g. June, Q3, etc." style="flex:1; padding: 6px;">
-        <button class="btn-action" style="background: #10b981;" onclick="addNewSpecificMonth()">ADD TO TIMELINE</button>
+        <button class="btn-action" style="background: #10b981;" onclick="window.addNewSpecificMonth()">ADD TO TIMELINE</button>
     </div>
 
     <!-- ACTIVE TIMELINE -->
@@ -249,7 +253,7 @@
   <div class="modal-content">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #2d3548; padding-bottom: 10px;">
         <h2 style="margin:0; border:none; color:#fff; font-size:13px;">Global Base Targets & Projections</h2>
-        <button class="btn-action" onclick="saveGlobalModalParams()">COMMIT PARAMETERS & RECALCULATE</button>
+        <button class="btn-action" onclick="window.saveGlobalModalParams()">COMMIT PARAMETERS & RECALCULATE</button>
     </div>
 
     <!-- COMPACT WORKING DAYS SECTION -->
@@ -264,7 +268,7 @@
     <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
             <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Active State Territories (Order & Additions)</h2>
-            <button class="btn-action" onclick="updateMasterStateList()" style="padding: 2px 6px; font-size: 8px; background: #6366f1;">APPLY STATES</button>
+            <button class="btn-action" onclick="window.updateMasterStateList()" style="padding: 2px 6px; font-size: 8px; background: #6366f1;">APPLY STATES</button>
         </div>
         <p style="font-size: 8px; color: #64748b; margin-bottom: 6px;">Enter state codes separated by commas to change tracking order or add new states. Click Apply to update the grid below.</p>
         <textarea id="modal-state-list-input" style="width: 100%; background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 6px; font-size: 10px; border-radius: 4px; resize: vertical; min-height: 35px;"></textarea>
@@ -282,7 +286,7 @@
     </div>
 
     <div style="margin-top: 12px; text-align: right;">
-        <button class="btn-action" onclick="if(confirm('Wipe all local storage?')) triggerFactoryResetWfm()" style="background:transparent; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; font-size: 9px;">⚠️ INITIALIZE HARD RESET</button>
+        <button class="btn-action" onclick="if(confirm('Wipe all local storage?')) window.triggerFactoryResetWfm()" style="background:transparent; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; font-size: 9px;">⚠️ INITIALIZE HARD RESET</button>
     </div>
   </div>
 </div>
@@ -308,9 +312,32 @@
 </div>
 
 <script>
+// --- CORE SYSTEM STATE MUTABLES ---
+let ACTIVE_HORIZON_TIMELINE = [];
+let GLOBAL_PROJECTIONS_LEDGER = {};
+let CLINICAL_EVALUATORS_ROSTER = {};
+let volGrowthMultiplier = 1.0;
+let activeSelectedMonthIdx = 0;
+let operationalChartInstance = null;
+let MASTER_STATE_LIST = [];
+
+// --- ARCHIVE VAULT STATE ---
+let ARCHIVED_TIMELINE = [];
+let ARCHIVED_LEDGER = {};
+let ARCHIVED_ROSTER = {};
+
+let firebaseDbRef = null;
+let isFirebaseSynced = false;
+let localLastUpdated = parseInt(localStorage.getItem('wfm_last_updated')) || 0;
+
+// --- CRASH PROOF UTILITIES ---
+// Use standard hoisted function declaration instead of let/const to completely eliminate Temporal Dead Zone reference errors
+function fmt(num) {
+    return Math.round(num || 0).toLocaleString();
+}
+window.fmt = fmt;
+
 // --- FIREBASE CONFIGURATION ---
-// Obfuscated API key to prevent GitHub secret scanner false positives
-// Note: Firebase web API keys are safe to be public, but GitHub flags them anyway.
 const firebaseConfig = {
   apiKey: "AIzaSyBU1tPMT" + "jYtRSbmlttGfLKebl7gnwLzgBw",
   authDomain: "ce-wfm-suite.firebaseapp.com",
@@ -320,66 +347,6 @@ const firebaseConfig = {
   messagingSenderId: "590100182080",
   appId: "1:590100182080:web:b52ae564a6aa4377709ba5"
 };
-
-let firebaseDbRef = null;
-
-function initFirebase() {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    firebaseDbRef = firebase.database().ref('/Licensing_Capacity_Mix');
-}
-
-function syncWithFirebase() {
-    if (!firebaseDbRef) return;
-    
-    firebaseDbRef.once('value').then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            // Cloud has data, overwrite local optimistic state
-            ACTIVE_HORIZON_TIMELINE = data.timeline || [];
-            GLOBAL_PROJECTIONS_LEDGER = data.ledger || {};
-            CLINICAL_EVALUATORS_ROSTER = data.roster || {};
-            volGrowthMultiplier = data.multiplier || 1.0;
-            MASTER_STATE_LIST = data.stateList || [];
-            ARCHIVED_TIMELINE = data.archiveTime || [];
-            ARCHIVED_LEDGER = data.archiveLedg || {};
-            ARCHIVED_ROSTER = data.archiveRost || {};
-            
-            // Save to localStorage so next boot is also fast
-            saveToLocalOnly();
-            
-            // Refresh UI
-            activeSelectedMonthIdx = 0; 
-            buildTimelineControls();
-            recalculateDashboardMetrics();
-            console.log("State synced FROM Firebase seamlessly.");
-        } else {
-            // Firebase is empty, seed it with the current local state
-            pushToFirebase();
-            console.log("Firebase empty. Seeded WITH local data.");
-        }
-    }).catch((error) => {
-        console.error("Firebase Background Sync Error:", error);
-    });
-}
-
-function pushToFirebase() {
-    if (!firebaseDbRef) return;
-    firebaseDbRef.set({
-        timeline: ACTIVE_HORIZON_TIMELINE,
-        ledger: GLOBAL_PROJECTIONS_LEDGER,
-        roster: CLINICAL_EVALUATORS_ROSTER,
-        multiplier: volGrowthMultiplier,
-        stateList: MASTER_STATE_LIST,
-        archiveTime: ARCHIVED_TIMELINE,
-        archiveLedg: ARCHIVED_LEDGER,
-        archiveRost: ARCHIVED_ROSTER
-    }).catch(err => console.error("Firebase Push Failed:", err));
-}
-
-// --- CRASH PROOF UTILITIES ---
-const fmt = (num) => Math.round(num || 0).toLocaleString();
 
 // --- CORE CONSTANTS & BASELINES ---
 const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -426,21 +393,94 @@ const BASELINE_CE_CONFIG = {
   "Hayley Feuchs": { q: 4, profile: ["NY","DC","NV","AZ"] }
 };
 
-// --- CORE SYSTEM STATE MUTABLES ---
-let ACTIVE_HORIZON_TIMELINE = [];
-let GLOBAL_PROJECTIONS_LEDGER = {};
-let CLINICAL_EVALUATORS_ROSTER = {};
-let volGrowthMultiplier = 1.0;
-let activeSelectedMonthIdx = 0;
-let operationalChartInstance = null;
-let MASTER_STATE_LIST = [];
+// --- INITIALIZATION ---
+function initFirebase() {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            firebaseDbRef = firebase.database().ref('/Licensing_Capacity_Mix');
+            if (!isFirebaseSynced) syncWithFirebase();
+        } else {
+            firebase.auth().signInAnonymously().catch(err => {
+                console.warn("Anonymous Auth failed. Attempting unauthenticated access...", err.message);
+                firebaseDbRef = firebase.database().ref('/Licensing_Capacity_Mix');
+                if (!isFirebaseSynced) syncWithFirebase();
+            });
+        }
+    });
+}
 
-// --- NEW ARCHIVE VAULT STATE ---
-let ARCHIVED_TIMELINE = [];
-let ARCHIVED_LEDGER = {};
-let ARCHIVED_ROSTER = {};
+function syncWithFirebase() {
+    if (!firebaseDbRef) return;
+    
+    firebaseDbRef.once('value').then((snapshot) => {
+        isFirebaseSynced = true;
+        const data = snapshot.val();
+        if (data) {
+            const cloudLastUpdated = data.lastUpdated || 0;
+            const localTime = parseInt(localStorage.getItem('wfm_last_updated')) || 0;
+            
+            if (cloudLastUpdated > localTime) {
+                ACTIVE_HORIZON_TIMELINE = data.timeline || [];
+                GLOBAL_PROJECTIONS_LEDGER = data.ledger || {};
+                CLINICAL_EVALUATORS_ROSTER = data.roster || {};
+                volGrowthMultiplier = data.multiplier || 1.0;
+                MASTER_STATE_LIST = data.stateList || [];
+                ARCHIVED_TIMELINE = data.archiveTime || [];
+                ARCHIVED_LEDGER = data.archiveLedg || {};
+                ARCHIVED_ROSTER = data.archiveRost || {};
+                
+                saveToLocalOnly();
+                localStorage.setItem('wfm_last_updated', cloudLastUpdated);
+                localLastUpdated = cloudLastUpdated;
+                
+                activeSelectedMonthIdx = 0; 
+                buildTimelineControls();
+                recalculateDashboardMetrics();
+                console.log("State pulled FROM Firebase seamlessly (Cloud is newer).");
+            } else if (localTime > cloudLastUpdated) {
+                pushToFirebase();
+                console.log("State pushed TO Firebase seamlessly (Local is newer).");
+            } else {
+                console.log("Local and Cloud states are perfectly synced.");
+            }
+        } else {
+            pushToFirebase();
+            console.log("Firebase empty. Seeded WITH local data.");
+        }
+    }).catch((error) => {
+        if (error.code === 'PERMISSION_DENIED') {
+            console.warn("⚠️ FIREBASE PERMISSION DENIED: Your Firebase Realtime Database rules are blocking access. Continuing in Local-Only mode.");
+        } else {
+            console.error("Firebase Background Sync Error:", error);
+        }
+    });
+}
 
-// --- CRASH-PROOF STRUCTURAL HYDRATION ENGINE ---
+function pushToFirebase() {
+    if (!firebaseDbRef || !isFirebaseSynced) return; 
+    firebaseDbRef.set({
+        timeline: ACTIVE_HORIZON_TIMELINE,
+        ledger: GLOBAL_PROJECTIONS_LEDGER,
+        roster: CLINICAL_EVALUATORS_ROSTER,
+        multiplier: volGrowthMultiplier,
+        stateList: MASTER_STATE_LIST,
+        archiveTime: ARCHIVED_TIMELINE,
+        archiveLedg: ARCHIVED_LEDGER,
+        archiveRost: ARCHIVED_ROSTER,
+        lastUpdated: localLastUpdated
+    }).catch(err => {
+        if (err.code === 'PERMISSION_DENIED') {
+            console.warn("⚠️ FIREBASE PUSH BLOCKED: Check your Firebase Database Rules.");
+        } else {
+            console.error("Firebase Push Failed:", err);
+        }
+    });
+}
+
 function bootstrapDataEngine() {
   try {
     ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v21')) || ["May","June","July","August","September","October","November","December"];
@@ -449,7 +489,6 @@ function bootstrapDataEngine() {
     volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v21')) || 1.0;
     MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || [...DEFAULT_STATE_LIST];
 
-    // Load Archives
     ARCHIVED_TIMELINE = JSON.parse(localStorage.getItem('wfm_archive_time_v21')) || [];
     ARCHIVED_LEDGER = JSON.parse(localStorage.getItem('wfm_archive_ledg_v21')) || {};
     ARCHIVED_ROSTER = JSON.parse(localStorage.getItem('wfm_archive_rost_v21')) || {};
@@ -496,7 +535,6 @@ function bootstrapDataEngine() {
         });
       });
     }
-    // Only local save during boot
     saveToLocalOnly();
   } catch (err) {
     console.error("Hydration Engine Intercept Failure", err);
@@ -504,22 +542,22 @@ function bootstrapDataEngine() {
   }
 }
 
-// Split save into Local-Only and Full Sync
 function saveToLocalOnly() {
   localStorage.setItem('wfm_timeline_v21', JSON.stringify(ACTIVE_HORIZON_TIMELINE));
   localStorage.setItem('wfm_ledger_v21', JSON.stringify(GLOBAL_PROJECTIONS_LEDGER));
   localStorage.setItem('wfm_roster_v21', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
   localStorage.setItem('wfm_mult_v21', volGrowthMultiplier.toString());
   localStorage.setItem('wfm_state_list_v21', JSON.stringify(MASTER_STATE_LIST));
-  
   localStorage.setItem('wfm_archive_time_v21', JSON.stringify(ARCHIVED_TIMELINE));
   localStorage.setItem('wfm_archive_ledg_v21', JSON.stringify(ARCHIVED_LEDGER));
   localStorage.setItem('wfm_archive_rost_v21', JSON.stringify(ARCHIVED_ROSTER));
 }
 
 function saveStateToStorage() {
+  localLastUpdated = Date.now();
+  localStorage.setItem('wfm_last_updated', localLastUpdated);
   saveToLocalOnly();
-  pushToFirebase(); // Background sync
+  pushToFirebase();
 }
 
 function triggerFactoryResetWfm() {
@@ -538,13 +576,13 @@ function renderMonthManagerUI() {
     tbody.innerHTML = ACTIVE_HORIZON_TIMELINE.map((m, i) => `
         <tr>
             <td style="text-align:center;">
-                <button style="background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:12px; padding:2px;" onclick="moveMonth(${i}, -1)" ${i === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button>
-                <button style="background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:12px; padding:2px;" onclick="moveMonth(${i}, 1)" ${i === ACTIVE_HORIZON_TIMELINE.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button>
+                <button style="background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:12px; padding:2px;" onclick="window.moveMonth(${i}, -1)" ${i === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button>
+                <button style="background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:12px; padding:2px;" onclick="window.moveMonth(${i}, 1)" ${i === ACTIVE_HORIZON_TIMELINE.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button>
             </td>
             <td style="font-weight:bold; color:#f1f5f9;">${m.split('_')[0]}</td>
             <td style="text-align:right;">
-                <button class="btn-action" style="padding: 4px 8px; font-size: 9px; background: #f59e0b;" onclick="archiveSpecificMonth('${m}')">ARCHIVE</button>
-                <button class="btn-action" style="padding: 4px 8px; font-size: 9px; background: #ef4444; margin-left: 4px;" onclick="deleteSpecificMonth('${m}')">DELETE</button>
+                <button class="btn-action" style="padding: 4px 8px; font-size: 9px; background: #f59e0b;" onclick="window.archiveSpecificMonth('${m}')">ARCHIVE</button>
+                <button class="btn-action" style="padding: 4px 8px; font-size: 9px; background: #ef4444; margin-left: 4px;" onclick="window.deleteSpecificMonth('${m}')">DELETE</button>
             </td>
         </tr>
     `).join('');
@@ -556,8 +594,8 @@ function renderMonthManagerUI() {
         archiveContainer.innerHTML = ARCHIVED_TIMELINE.map(m => `
             <div style="background:#0f1117; border:1px solid #3d4a63; padding:6px 10px; border-radius:4px; display:flex; align-items:center; gap:8px;">
                 <span style="font-size:10px; color:#94a3b8;">${m.split('_')[0]}</span>
-                <button class="btn-action" style="background:#059669; padding:2px 6px; font-size:8px;" onclick="restoreArchivedMonth('${m}')">RESTORE</button>
-                <button style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:14px; margin-left:4px;" title="Permanently Delete" onclick="deleteArchivedMonth('${m}')">×</button>
+                <button class="btn-action" style="background:#059669; padding:2px 6px; font-size:8px;" onclick="window.restoreArchivedMonth('${m}')">RESTORE</button>
+                <button style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:14px; margin-left:4px;" title="Permanently Delete" onclick="window.deleteArchivedMonth('${m}')">×</button>
             </div>
         `).join('');
     }
@@ -569,7 +607,6 @@ function moveMonth(idx, dir) {
     ACTIVE_HORIZON_TIMELINE[idx] = ACTIVE_HORIZON_TIMELINE[idx + dir];
     ACTIVE_HORIZON_TIMELINE[idx + dir] = temp;
     
-    // Ensure activeSelectedMonthIdx tracks the moved item to prevent weird UI jumps
     if (activeSelectedMonthIdx === idx) activeSelectedMonthIdx = idx + dir;
     else if (activeSelectedMonthIdx === idx + dir) activeSelectedMonthIdx = idx;
 
@@ -659,12 +696,11 @@ function restoreArchivedMonth(m) {
         }
     });
 
-    activeSelectedMonthIdx = ACTIVE_HORIZON_TIMELINE.length - 1; // Focus on the newly restored month
+    activeSelectedMonthIdx = ACTIVE_HORIZON_TIMELINE.length - 1; 
     saveStateToStorage();
     renderMonthManagerUI();
     buildTimelineControls();
     recalculateDashboardMetrics();
-    // Refresh modal in case it's open
     if(document.getElementById('settings-modal').style.display === 'flex') populateGlobalModalViews(); 
 }
 
@@ -722,7 +758,6 @@ function buildTimelineControls() {
   });
 }
 
-// --- MODAL PARAMETERS LAYOUT POPULATION ---
 function toggleModalEnvelope(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
@@ -741,7 +776,6 @@ function populateGlobalModalViews() {
       stateListInput.value = MASTER_STATE_LIST.join(', ');
   }
 
-  // Working Days Table
   const wdTable = document.getElementById('modal-wd-table');
   if (wdTable) {
     let html = `<thead><tr><th style="border-right:1px solid #2d3548;">Metric</th>${ACTIVE_HORIZON_TIMELINE.map(m => `<th>${m.split('_')[0]}</th>`).join('')}</tr></thead><tbody>`;
@@ -753,19 +787,16 @@ function populateGlobalModalViews() {
     wdTable.innerHTML = html;
   }
 
-  // Demand & Targets Table
   const demandTable = document.getElementById('modal-demand-entry-table');
   if (demandTable) {
     let html = `<thead><tr><th style="border-right:1px solid #2d3548;">Territory / Metric</th>${ACTIVE_HORIZON_TIMELINE.map(m => `<th>${m.split('_')[0]}</th>`).join('')}</tr></thead><tbody>`;
     
-    // Row 0: Targets
     html += `<tr style="background:rgba(99,102,241,0.12);"><td style="border-right:1px solid #2d3548;"><strong>Enrollment Target</strong></td>`;
     ACTIVE_HORIZON_TIMELINE.forEach((m, cIdx) => {
         html += `<td><input type="number" class="paste-target" data-row="0" data-col="${cIdx}" id="mod-tgt-field-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].enrollTarget}" style="color:#a5b4fc; font-weight:700;"></td>`;
     });
     html += `</tr>`;
     
-    // Rows 1+: States
     MASTER_STATE_LIST.forEach((s, rIdx) => {
       html += `<tr><td style="border-right:1px solid #2d3548;"><strong>${s} Demand Volume</strong></td>`;
       ACTIVE_HORIZON_TIMELINE.forEach((m, cIdx) => {
@@ -867,7 +898,6 @@ function setVolMultiplier(val, btn) {
 }
 
 // --- GOOGLE SHEETS CLOUD SYNC DAILY PARSER ENGINE WITH FAILSAFE UNDO ---
-
 function undoPtoSync() {
     let backupString = localStorage.getItem('wfm_roster_backup');
     if (backupString) {
@@ -875,16 +905,17 @@ function undoPtoSync() {
         saveStateToStorage();
         recalculateDashboardMetrics();
         document.getElementById('undo-sync-btn').style.display = 'none';
-        alert("PTO Sync Undone! Your previous PTO values have been safely restored.");
+        alert("Sync Undone! Your previous metrics and state configurations have been safely restored.");
     }
 }
 
 async function syncPtoFromGoogleSheets(isSilent = false) {
   const btn = document.getElementById('sync-pto-btn');
   const undoBtn = document.getElementById('undo-sync-btn');
-  const originalText = btn.innerText;
+  let originalText = "☁️ CLOUD SYNC PTO FROM SHEETS";
+  if (btn) originalText = btn.innerText;
   
-  if (!isSilent) {
+  if (!isSilent && btn) {
       btn.innerText = "⏳ AGGREGATING DAILY ROWS...";
       btn.disabled = true;
   }
@@ -896,7 +927,7 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
     const csvText = await response.text();
     
     localStorage.setItem('wfm_roster_backup', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
-    if (!isSilent) undoBtn.style.display = 'inline-block';
+    if (!isSilent && undoBtn) undoBtn.style.display = 'inline-block';
     
     const parseCSVRow = (row) => {
         const result = [];
@@ -999,22 +1030,168 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Cloud Sync Complete!\nSuccessfully scanned and updated ${updatesCount} monthly PTO entries based on daily values.`);
+        alert(`Cloud PTO Sync Complete!\nSuccessfully scanned and updated ${updatesCount} monthly PTO entries.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing CSV:", err);
     if (!isSilent) {
-        alert("Failed to sync: " + err.message);
+        alert("Failed to sync PTO: " + err.message);
     }
   } finally {
-    if (!isSilent) {
+    if (!isSilent && btn) {
         btn.innerText = originalText;
         btn.disabled = false;
     }
   }
 }
 
-// --- ROSTER PROVISIONING LOGIC ---
+async function syncLicensureFromSheets(isSilent = false) {
+  const btns = document.querySelectorAll('button[onclick*="syncLicensureFromSheets"]');
+  const undoBtn = document.getElementById('undo-sync-btn');
+  let originalText = "🔄 SYNC LICENSURE";
+  
+  if (!isSilent && btns.length > 0) {
+      originalText = btns[0].innerText;
+      btns.forEach(b => { b.innerText = "⏳ SYNCING..."; b.disabled = true; });
+  }
+  
+  try {
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQd7J8oMveRBfBtVb2OxbyVXJg-bW7_DUQdN8fryo-56EmFqxhhICP24tUG7EL3UsxHMCsCil5WJqYz/pub?gid=748848576&single=true&output=csv&_cb=" + new Date().getTime();
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Network response error. Ensure the 'CE Active States' tab is Published to the Web.");
+    const csvText = await response.text();
+    
+    localStorage.setItem('wfm_roster_backup', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
+    if (!isSilent && undoBtn) undoBtn.style.display = 'inline-block';
+    
+    const parseCSVRow = (row) => {
+        const result = [];
+        let insideQuote = false;
+        let currentVal = '';
+        for (let i = 0; i < row.length; i++) {
+            if (row[i] === '"') {
+                insideQuote = !insideQuote;
+            } else if (row[i] === ',' && !insideQuote) {
+                result.push(currentVal);
+                currentVal = '';
+            } else {
+                currentVal += row[i];
+            }
+        }
+        result.push(currentVal);
+        return result;
+    };
+    
+    const rows = csvText.split(/\r\n|\n/).filter(r => r.trim());
+    if (rows.length < 2) throw new Error("CSV appears empty or malformed");
+    
+    const parsedData = rows.map(r => parseCSVRow(r));
+    
+    let headerRowIdx = -1;
+    let ceColIdx = -1;
+    let stateColMap = {};
+    
+    for(let r = 0; r < Math.min(10, parsedData.length); r++) {
+        let row = parsedData[r];
+        for (let c = 0; c < row.length; c++) {
+            let cellVal = String(row[c]).trim();
+            if (cellVal === "CE" || cellVal.includes("CE ")) {
+                let stateCount = 0;
+                for(let sc = 0; sc < row.length; sc++) {
+                    if(MASTER_STATE_LIST.includes(String(row[sc]).trim().toUpperCase())) stateCount++;
+                }
+                if(stateCount > 5) {
+                    headerRowIdx = r;
+                    ceColIdx = c;
+                    break;
+                }
+            }
+        }
+        if (headerRowIdx !== -1) {
+            for (let c = 0; c < row.length; c++) {
+                let cellVal = String(row[c]).trim().toUpperCase();
+                if (MASTER_STATE_LIST.includes(cellVal)) {
+                    stateColMap[cellVal] = c;
+                }
+            }
+            break;
+        }
+    }
+
+    if (headerRowIdx === -1 || ceColIdx === -1) {
+        throw new Error("Could not locate the 'CE' column header or State columns in the sheet.");
+    }
+
+    let updatesCount = 0;
+    
+    for (let r = headerRowIdx + 1; r < parsedData.length; r++) {
+        let row = parsedData[r];
+        if (!row) continue;
+
+        let ceName = String(row[ceColIdx]).trim();
+        if(!ceName) continue;
+
+        // Failsafe matching: Replace Unicode non-breaking spaces with normal spaces & collapse duplicates
+        let matchedCEName = Object.keys(CLINICAL_EVALUATORS_ROSTER).find(name => {
+            let cleanRosterName = name.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+            let cleanSheetName = ceName.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+            return cleanRosterName === cleanSheetName;
+        });
+        
+        if (matchedCEName) {
+            let rosterCE = CLINICAL_EVALUATORS_ROSTER[matchedCEName];
+            let oldProfile = rosterCE.profile || [];
+            let newProfile = [];
+            
+            Object.keys(stateColMap).forEach(state => {
+                let colIdx = stateColMap[state];
+                let cellVal = String(row[colIdx]).trim();
+                if (cellVal === 'Yes' || cellVal === 'Y' || cellVal.toLowerCase() === 'yes') {
+                    newProfile.push(state);
+                }
+            });
+            
+            let hasChanges = false;
+            if (oldProfile.length !== newProfile.length) hasChanges = true;
+            else {
+                oldProfile.forEach(s => { if (!newProfile.includes(s)) hasChanges = true; });
+            }
+            
+            if (hasChanges) {
+                let newlyAddedStates = newProfile.filter(s => !oldProfile.includes(s));
+                
+                rosterCE.profile = newProfile;
+                ACTIVE_HORIZON_TIMELINE.forEach(m => {
+                    let currentToggles = rosterCE.monthlyToggles[m] || [];
+                    currentToggles = currentToggles.filter(s => newProfile.includes(s));
+                    newlyAddedStates.forEach(s => {
+                        if (!currentToggles.includes(s)) currentToggles.push(s);
+                    });
+                    rosterCE.monthlyToggles[m] = currentToggles;
+                });
+                updatesCount++;
+            }
+        }
+    }
+    
+    saveStateToStorage();
+    recalculateDashboardMetrics();
+    
+    if (!isSilent) {
+        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated CE profiles from Google Sheets.`);
+    }
+  } catch (err) {
+    console.error("Error fetching or parsing Licensure CSV:", err);
+    if (!isSilent) {
+        alert("Failed to sync licensure: " + err.message);
+    }
+  } finally {
+    if (!isSilent && btns.length > 0) {
+        btns.forEach(b => { b.innerText = originalText; b.disabled = false; });
+    }
+  }
+}
+
 function addNewClinicianToRoster() {
   const nameInput = document.getElementById('new-clinician-name');
   if (!nameInput) return;
@@ -1037,6 +1214,20 @@ function addNewClinicianToRoster() {
 function deprovisionClinician(name) {
   if (!confirm(`Are you certain you wish to completely clear ${name} from deployment tracking rosters permanently?`)) return;
   delete CLINICAL_EVALUATORS_ROSTER[name];
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+
+function removeLicenseFromProfile(name, state) {
+  if (!confirm(`Permanently remove ${state} license from ${name}'s master profile?`)) return;
+  if (!CLINICAL_EVALUATORS_ROSTER[name]) return;
+  
+  CLINICAL_EVALUATORS_ROSTER[name].profile = CLINICAL_EVALUATORS_ROSTER[name].profile.filter(s => s !== state);
+  ACTIVE_HORIZON_TIMELINE.forEach(m => {
+    if (CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles && CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) {
+      CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].filter(s => s !== state);
+    }
+  });
   saveStateToStorage();
   recalculateDashboardMetrics();
 }
@@ -1090,7 +1281,6 @@ function addAllStatesToAllProviders() {
   recalculateDashboardMetrics();
 }
 
-// --- REACTIONARY WFM PROCESSING AND ALLOCATION ALGORITHMS ---
 function recalculateDashboardMetrics() {
   try {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
@@ -1206,7 +1396,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
       let isCurrentlyOn = ce.activeStates.includes(s);
       return `
         <td style="text-align:center; padding:3px; border-bottom: 1px solid #1a2030; background: ${isCurrentlyOn ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.05)'};">
-          <button class="matrix-btn ${isCurrentlyOn ? 'matrix-btn-on' : 'matrix-btn-off'}" onclick="updateMonthlyMixToggle('${ce.name}', '${s}', '${isCurrentlyOn ? 'Off' : 'On'}')">
+          <button class="matrix-btn ${isCurrentlyOn ? 'month-btn active' : 'matrix-btn-off'}" onclick="window.updateMonthlyMixToggle('${ce.name}', '${s}', '${isCurrentlyOn ? 'Off' : 'On'}')">
             ${isCurrentlyOn ? 'ON' : 'OFF'}
           </button>
         </td>
@@ -1218,7 +1408,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
         <td style="position:sticky; left:0; background:#1e2330; z-index:10; border-right:1px solid #2d3548;">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <span style="font-weight:700; color:#f1f5f9; font-size: 11px;">${ce.name}</span>
-            <button class="btn-remove" onclick="deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
+            <button class="btn-remove" onclick="window.deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
           </div>
           <div style="font-size: 8px; color: #64748b; line-height: 1.2; max-width: 170px; white-space: normal; margin-top:2px;">
             <strong>Licenses:</strong> ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).join(', ') || 'None'}
@@ -1252,18 +1442,40 @@ function renderSidebarProfileManager(clinicianAllocations) {
       <div style="margin-bottom:6px;">
         ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).map(s => `
           <span class="state-pill-toggle ${ce.activeStates.includes(s) ? 'state-on' : 'state-off'}">
-            <span onclick="updateMonthlyMixToggle('${ce.name}','${s}', '${ce.activeStates.includes(s) ? 'Off' : 'On'}')">${s}</span>
-            <span class="del-btn" onclick="removeLicenseFromProfile('${ce.name}','${s}')" title="Permanently remove license">×</span>
+            <span onclick="window.updateMonthlyMixToggle('${ce.name}','${s}', '${ce.activeStates.includes(s) ? 'Off' : 'On'}')">${s}</span>
+            <span class="del-btn" onclick="window.removeLicenseFromProfile('${ce.name}','${s}')" title="Permanently remove license">×</span>
           </span>
         `).join('')}
       </div>
       <div style="display:flex; align-items:center; gap:4px;">
         <input type="text" placeholder="ST" style="width:40px;" id="add-${ce.name.replace(/\s/g, '')}">
-        <button class="btn-action" style="padding:2px 6px;" onclick="addLicenseToProfile('${ce.name}')" title="Add Single State">+</button>
-        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="addAllLicenses('${ce.name}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
+        <button class="btn-action" style="padding:2px 6px;" onclick="window.addLicenseToProfile('${ce.name}')" title="Add Single State">+</button>
+        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="window.addAllLicenses('${ce.name}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
       </div>
     </div>
   `).join('');
+}
+
+function addLicenseToProfile(name) {
+  const inp = document.getElementById(`add-${name.replace(/\s/g, '')}`);
+  if(!inp) return;
+  const state = inp.value.toUpperCase().trim();
+  if (state && MASTER_STATE_LIST.includes(state)) {
+    if(!CLINICAL_EVALUATORS_ROSTER[name].profile) CLINICAL_EVALUATORS_ROSTER[name].profile = [];
+    if (!CLINICAL_EVALUATORS_ROSTER[name].profile.includes(state)) {
+      CLINICAL_EVALUATORS_ROSTER[name].profile.push(state);
+      ACTIVE_HORIZON_TIMELINE.forEach(m => {
+        if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
+        if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [];
+        if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
+          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
+        }
+      });
+      saveStateToStorage(); 
+      recalculateDashboardMetrics();
+    }
+  }
+  inp.value = '';
 }
 
 function renderStateWeightedHeatmap(stateAllocations) {
@@ -1296,7 +1508,7 @@ function renderStateWeightedHeatmap(stateAllocations) {
         </td>
         <td>
           <div style="max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="linkTraceMarker('${n}')" onmouseout="clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
+            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="window.linkTraceMarker('${n}')" onmouseout="window.clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
           </div>
         </td>
       </tr>
@@ -1350,7 +1562,7 @@ function renderPtoManagerGrid() {
       let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(r.quota) || 0));
 
       return `
-        <td><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="updateClinicianPtoValue('${name}', '${m}', this.value)"></td>
+        <td><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name}', '${m}', this.value)"></td>
         <td class="cap-cell">${Math.round(calculatedCapacity)}</td>
       `;
     }).join('');
@@ -1360,7 +1572,7 @@ function renderPtoManagerGrid() {
         <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
           <strong style="color:#f1f5f9;">${name}</strong>
         </td>
-        <td style="text-align:center;"><input type="number" value="${r.quota}" style="width:34px; font-weight:bold; color:#6366f1;" onchange="updateClinicianBaseQuota('${name}', this.value)"></td>
+        <td style="text-align:center;"><input type="number" value="${r.quota}" style="width:34px; font-weight:bold; color:#6366f1;" onchange="window.updateClinicianBaseQuota('${name}', this.value)"></td>
         ${columnsHtml}
       </tr>
     `;
@@ -1511,15 +1723,39 @@ function SafeSetter(id, val) {
   if (el) el.innerText = val;
 }
 
+// --- GLOBALLY HOIST EXPORTS FOR IFRAME COMPATIBILITY ---
+window.removeLicenseFromProfile = removeLicenseFromProfile;
+window.updateMonthlyMixToggle = updateMonthlyMixToggle;
+window.addAllStatesToAllProviders = addAllStatesToAllProviders;
+window.syncLicensureFromSheets = syncLicensureFromSheets;
+window.addNewClinicianToRoster = addNewClinicianToRoster;
+window.deprovisionClinician = deprovisionClinician;
+window.openMonthManager = openMonthManager;
+window.moveMonth = moveMonth;
+window.addNewSpecificMonth = addNewSpecificMonth;
+window.archiveSpecificMonth = archiveSpecificMonth;
+window.restoreArchivedMonth = restoreArchivedMonth;
+window.deleteSpecificMonth = deleteSpecificMonth;
+window.deleteArchivedMonth = deleteArchivedMonth;
+window.toggleModalEnvelope = toggleModalEnvelope;
+window.saveGlobalModalParams = saveGlobalModalParams;
+window.updateMasterStateList = updateMasterStateList;
+window.updateClinicianPtoValue = updateClinicianPtoValue;
+window.updateClinicianBaseQuota = updateClinicianBaseQuota;
+window.syncPtoFromGoogleSheets = syncPtoFromGoogleSheets;
+window.undoPtoSync = undoPtoSync;
+window.setVolMultiplier = setVolMultiplier;
+window.addLicenseToProfile = addLicenseToProfile;
+window.addAllLicenses = addAllLicenses;
+window.linkTraceMarker = linkTraceMarker;
+window.clearTraceMarker = clearTraceMarker;
+
+// --- BOOTSTRAP INITIALIZATION ---
 window.onload = () => {
   bootstrapDataEngine();
   buildTimelineControls();
   recalculateDashboardMetrics();
   
-  initFirebase();
-  syncWithFirebase();
-  
-  // Safely check if we are outside an iframe without triggering cross-origin security errors
   let isStandalone = false;
   try {
     isStandalone = (window.self === window.top);
@@ -1527,8 +1763,15 @@ window.onload = () => {
     isStandalone = false; 
   }
 
+  initFirebase();
+  
   if (isStandalone) {
-    syncPtoFromGoogleSheets(true);
+    // Run syncs sequentially but independently so one failure doesn't block the other
+    syncPtoFromGoogleSheets(true)
+      .catch(err => console.warn("Auto PTO sync skipped/failed:", err))
+      .finally(() => {
+        syncLicensureFromSheets(true).catch(err => console.warn("Auto Licensure sync skipped/failed:", err));
+      });
   }
 };
 </script>
