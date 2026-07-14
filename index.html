@@ -331,7 +331,6 @@ let isFirebaseSynced = false;
 let localLastUpdated = parseInt(localStorage.getItem('wfm_last_updated')) || 0;
 
 // --- CRASH PROOF UTILITIES ---
-// Use standard hoisted function declaration instead of let/const to completely eliminate Temporal Dead Zone reference errors
 function fmt(num) {
     return Math.round(num || 0).toLocaleString();
 }
@@ -565,7 +564,6 @@ function triggerFactoryResetWfm() {
   location.reload();
 }
 
-// --- DYNAMIC MONTH MANAGER & ARCHIVE ENGINE ---
 function openMonthManager() {
     renderMonthManagerUI();
     document.getElementById('month-manager-modal').style.display = 'flex';
@@ -897,7 +895,6 @@ function setVolMultiplier(val, btn) {
   recalculateDashboardMetrics();
 }
 
-// --- GOOGLE SHEETS CLOUD SYNC DAILY PARSER ENGINE WITH FAILSAFE UNDO ---
 function undoPtoSync() {
     let backupString = localStorage.getItem('wfm_roster_backup');
     if (backupString) {
@@ -921,7 +918,7 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
   }
   
   try {
-    const url = "https://docs.google.com/spreadsheets/d/1R9gyVy1FXbSQz5P0YugdHW58YckNx-o7847w4SCXbdQ/export?format=csv&gid=1443603617&_cb=" + new Date().getTime();
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQd7J8oMveRBfBtVb2OxbyVXJg-bW7_DUQdN8fryo-56EmFqxhhICP24tUG7EL3UsxHMCsCil5WJqYz/pub?gid=1443603617&single=true&output=csv&_cb=" + new Date().getTime();
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error("Network response was not ok");
     const csvText = await response.text();
@@ -1035,7 +1032,7 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
   } catch (err) {
     console.error("Error fetching or parsing CSV:", err);
     if (!isSilent) {
-        alert("Failed to sync PTO: " + err.message + "\n\nPlease ensure your Google Sheet is set to 'Anyone with the link can view' so the dashboard can read it.");
+        alert("Failed to sync PTO: " + err.message + "\n\nPlease ensure your Google Sheet is published to the web.");
     }
   } finally {
     if (!isSilent && btn) {
@@ -1056,9 +1053,9 @@ async function syncLicensureFromSheets(isSilent = false) {
   }
   
   try {
-    const url = "https://docs.google.com/spreadsheets/d/1R9gyVy1FXbSQz5P0YugdHW58YckNx-o7847w4SCXbdQ/export?format=csv&gid=748848576&_cb=" + new Date().getTime();
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQd7J8oMveRBfBtVb2OxbyVXJg-bW7_DUQdN8fryo-56EmFqxhhICP24tUG7EL3UsxHMCsCil5WJqYz/pub?gid=748848576&single=true&output=csv&_cb=" + new Date().getTime();
     const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Network response error. Please ensure the Google Sheet is set to 'Anyone with the link can view'.");
+    if (!response.ok) throw new Error("Network response error. Ensure the 'CE Active States' tab is Published to the Web.");
     const csvText = await response.text();
     
     localStorage.setItem('wfm_roster_backup', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
@@ -1131,7 +1128,6 @@ async function syncLicensureFromSheets(isSilent = false) {
         let ceName = String(row[ceColIdx]).trim();
         if(!ceName) continue;
 
-        // Failsafe matching: Replace Unicode non-breaking spaces with normal spaces & collapse duplicates
         let matchedCEName = Object.keys(CLINICAL_EVALUATORS_ROSTER).find(name => {
             let cleanRosterName = name.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
             let cleanSheetName = ceName.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
