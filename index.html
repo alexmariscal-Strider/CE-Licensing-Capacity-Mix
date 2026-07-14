@@ -921,7 +921,7 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
   }
   
   try {
-    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQd7J8oMveRBfBtVb2OxbyVXJg-bW7_DUQdN8fryo-56EmFqxhhICP24tUG7EL3UsxHMCsCil5WJqYz/pub?gid=1443603617&single=true&output=csv&_cb=" + new Date().getTime();
+    const url = "https://docs.google.com/spreadsheets/d/1R9gyVy1FXbSQz5P0YugdHW58YckNx-o7847w4SCXbdQ/export?format=csv&gid=1443603617&_cb=" + new Date().getTime();
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error("Network response was not ok");
     const csvText = await response.text();
@@ -1035,7 +1035,7 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
   } catch (err) {
     console.error("Error fetching or parsing CSV:", err);
     if (!isSilent) {
-        alert("Failed to sync PTO: " + err.message);
+        alert("Failed to sync PTO: " + err.message + "\n\nPlease ensure your Google Sheet is set to 'Anyone with the link can view' so the dashboard can read it.");
     }
   } finally {
     if (!isSilent && btn) {
@@ -1056,9 +1056,9 @@ async function syncLicensureFromSheets(isSilent = false) {
   }
   
   try {
-    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQd7J8oMveRBfBtVb2OxbyVXJg-bW7_DUQdN8fryo-56EmFqxhhICP24tUG7EL3UsxHMCsCil5WJqYz/pub?gid=748848576&single=true&output=csv&_cb=" + new Date().getTime();
+    const url = "https://docs.google.com/spreadsheets/d/1R9gyVy1FXbSQz5P0YugdHW58YckNx-o7847w4SCXbdQ/export?format=csv&gid=748848576&_cb=" + new Date().getTime();
     const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Network response error. Ensure the 'CE Active States' tab is Published to the Web.");
+    if (!response.ok) throw new Error("Network response error. Please ensure the Google Sheet is set to 'Anyone with the link can view'.");
     const csvText = await response.text();
     
     localStorage.setItem('wfm_roster_backup', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
@@ -1178,12 +1178,12 @@ async function syncLicensureFromSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated CE profiles from Google Sheets.`);
+        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated ${updatesCount} CE profiles from Google Sheets.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing Licensure CSV:", err);
     if (!isSilent) {
-        alert("Failed to sync licensure: " + err.message);
+        alert("Failed to sync licensure: " + err.message + "\n\nPlease ensure your Google Sheet is set to 'Anyone with the link can view' so the dashboard can read it.");
     }
   } finally {
     if (!isSilent && btns.length > 0) {
@@ -1245,6 +1245,28 @@ function updateMonthlyMixToggle(name, state, action) {
   }
   saveStateToStorage();
   recalculateDashboardMetrics();
+}
+
+function addLicenseToProfile(name) {
+  const inp = document.getElementById(`add-${name.replace(/\s/g, '')}`);
+  if(!inp) return;
+  const state = inp.value.toUpperCase().trim();
+  if (state && MASTER_STATE_LIST.includes(state)) {
+    if(!CLINICAL_EVALUATORS_ROSTER[name].profile) CLINICAL_EVALUATORS_ROSTER[name].profile = [];
+    if (!CLINICAL_EVALUATORS_ROSTER[name].profile.includes(state)) {
+      CLINICAL_EVALUATORS_ROSTER[name].profile.push(state);
+      ACTIVE_HORIZON_TIMELINE.forEach(m => {
+        if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
+        if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [];
+        if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
+          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
+        }
+      });
+      saveStateToStorage(); 
+      recalculateDashboardMetrics();
+    }
+  }
+  inp.value = '';
 }
 
 function addAllLicenses(name) {
@@ -1396,7 +1418,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
       let isCurrentlyOn = ce.activeStates.includes(s);
       return `
         <td style="text-align:center; padding:3px; border-bottom: 1px solid #1a2030; background: ${isCurrentlyOn ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.05)'};">
-          <button class="matrix-btn ${isCurrentlyOn ? 'month-btn active' : 'matrix-btn-off'}" onclick="window.updateMonthlyMixToggle('${ce.name}', '${s}', '${isCurrentlyOn ? 'Off' : 'On'}')">
+          <button class="matrix-btn ${isCurrentlyOn ? 'month-btn active' : 'matrix-btn-off'}" onclick="window.updateMonthlyMixToggle('${ce.name.replace(/'/g, "\\'")}', '${s}', '${isCurrentlyOn ? 'Off' : 'On'}')">
             ${isCurrentlyOn ? 'ON' : 'OFF'}
           </button>
         </td>
@@ -1408,7 +1430,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
         <td style="position:sticky; left:0; background:#1e2330; z-index:10; border-right:1px solid #2d3548;">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <span style="font-weight:700; color:#f1f5f9; font-size: 11px;">${ce.name}</span>
-            <button class="btn-remove" onclick="window.deprovisionClinician('${ce.name}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
+            <button class="btn-remove" onclick="window.deprovisionClinician('${ce.name.replace(/'/g, "\\'")}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
           </div>
           <div style="font-size: 8px; color: #64748b; line-height: 1.2; max-width: 170px; white-space: normal; margin-top:2px;">
             <strong>Licenses:</strong> ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).join(', ') || 'None'}
@@ -1442,40 +1464,18 @@ function renderSidebarProfileManager(clinicianAllocations) {
       <div style="margin-bottom:6px;">
         ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).map(s => `
           <span class="state-pill-toggle ${ce.activeStates.includes(s) ? 'state-on' : 'state-off'}">
-            <span onclick="window.updateMonthlyMixToggle('${ce.name}','${s}', '${ce.activeStates.includes(s) ? 'Off' : 'On'}')">${s}</span>
-            <span class="del-btn" onclick="window.removeLicenseFromProfile('${ce.name}','${s}')" title="Permanently remove license">×</span>
+            <span onclick="window.updateMonthlyMixToggle('${ce.name.replace(/'/g, "\\'")}','${s}', '${ce.activeStates.includes(s) ? 'Off' : 'On'}')">${s}</span>
+            <span class="del-btn" onclick="event.stopPropagation(); window.removeLicenseFromProfile('${ce.name.replace(/'/g, "\\'")}','${s}')" title="Permanently remove license">×</span>
           </span>
         `).join('')}
       </div>
       <div style="display:flex; align-items:center; gap:4px;">
         <input type="text" placeholder="ST" style="width:40px;" id="add-${ce.name.replace(/\s/g, '')}">
-        <button class="btn-action" style="padding:2px 6px;" onclick="window.addLicenseToProfile('${ce.name}')" title="Add Single State">+</button>
-        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="window.addAllLicenses('${ce.name}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
+        <button class="btn-action" style="padding:2px 6px;" onclick="window.addLicenseToProfile('${ce.name.replace(/'/g, "\\'")}')" title="Add Single State">+</button>
+        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="window.addAllLicenses('${ce.name.replace(/'/g, "\\'")}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
       </div>
     </div>
   `).join('');
-}
-
-function addLicenseToProfile(name) {
-  const inp = document.getElementById(`add-${name.replace(/\s/g, '')}`);
-  if(!inp) return;
-  const state = inp.value.toUpperCase().trim();
-  if (state && MASTER_STATE_LIST.includes(state)) {
-    if(!CLINICAL_EVALUATORS_ROSTER[name].profile) CLINICAL_EVALUATORS_ROSTER[name].profile = [];
-    if (!CLINICAL_EVALUATORS_ROSTER[name].profile.includes(state)) {
-      CLINICAL_EVALUATORS_ROSTER[name].profile.push(state);
-      ACTIVE_HORIZON_TIMELINE.forEach(m => {
-        if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
-        if(!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [];
-        if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].includes(state)) {
-          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m].push(state);
-        }
-      });
-      saveStateToStorage(); 
-      recalculateDashboardMetrics();
-    }
-  }
-  inp.value = '';
 }
 
 function renderStateWeightedHeatmap(stateAllocations) {
@@ -1508,7 +1508,7 @@ function renderStateWeightedHeatmap(stateAllocations) {
         </td>
         <td>
           <div style="max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="window.linkTraceMarker('${n}')" onmouseout="window.clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
+            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="window.linkTraceMarker('${n.replace(/'/g, "\\'")}')" onmouseout="window.clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
           </div>
         </td>
       </tr>
@@ -1562,7 +1562,7 @@ function renderPtoManagerGrid() {
       let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(r.quota) || 0));
 
       return `
-        <td><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name}', '${m}', this.value)"></td>
+        <td><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
         <td class="cap-cell">${Math.round(calculatedCapacity)}</td>
       `;
     }).join('');
@@ -1572,7 +1572,7 @@ function renderPtoManagerGrid() {
         <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
           <strong style="color:#f1f5f9;">${name}</strong>
         </td>
-        <td style="text-align:center;"><input type="number" value="${r.quota}" style="width:34px; font-weight:bold; color:#6366f1;" onchange="window.updateClinicianBaseQuota('${name}', this.value)"></td>
+        <td style="text-align:center;"><input type="number" value="${r.quota}" style="width:34px; font-weight:bold; color:#6366f1;" onchange="window.updateClinicianBaseQuota('${name.replace(/'/g, "\\'")}', this.value)"></td>
         ${columnsHtml}
       </tr>
     `;
