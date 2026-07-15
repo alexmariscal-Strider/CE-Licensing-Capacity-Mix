@@ -51,7 +51,7 @@
   /* PURE CSS TOOLTIPS */
   .tooltip-container { position: relative; display: inline-flex; align-items: center; }
   .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 10px; border: 1px solid #475569; position: absolute; z-index: 1000; bottom: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 10px; font-weight: normal; text-transform: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); pointer-events: none; }
-  .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+  .tooltip-container:hover .tooltip-text, .summary-box:hover .tooltip-text { visibility: visible; opacity: 1; }
   .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #475569 transparent transparent transparent; }
 
   /* TABULAR DATA ARCHITECTURE */
@@ -77,6 +77,7 @@
   
   input, select { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 2px; border-radius: 3px; text-align: center; font-size: 10px; }
   input[type="text"] { text-align: left; padding: 2px 4px; }
+  input[type="date"] { text-align: center; padding: 2px; color: #93c5fd; }
   .btn-action { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 600; white-space: nowrap; transition: 0.2s; }
   .btn-action:hover { background: #2563eb; }
   .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -106,7 +107,7 @@
   .del-btn { color: #ef4444; font-size: 9px; margin-left: 2px; cursor: pointer; opacity: 0.5; }
 
   /* HEATMAP SUMMARY BOXES */
-  .summary-box { flex: 1; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid transparent; }
+  .summary-box { flex: 1; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid transparent; position: relative; cursor: help; }
   .summary-box .val { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
   .summary-box .lbl { font-size: 8px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; }
   
@@ -160,7 +161,10 @@
 
   <!-- STATE ALLOCATION GRID -->
   <div class="panel full-width">
-    <h2 id="matrix-title-label">State Allocation & Licensure Grid</h2>
+    <h2 id="matrix-title-label">
+      <span>State Allocation & Licensure Grid</span>
+      <button class="btn-action" style="padding: 2px 8px; font-size: 8px; background: #475569; border: 1px solid #64748b;" onclick="window.copyMatrixToClipboard()" title="Copies grid to your clipboard for instant Google Sheets pasting">📋 COPY TO SHEETS</button>
+    </h2>
     <p style="font-size: 9px; color: #94a3b8; margin-bottom: 8px;">The grid below displays all evaluators. Dark cells mean the CE is unlicensed in that state. Click any <span style="background:#3d4a63; color:#f1f5f9; padding:1px 3px; border-radius:3px;">OFF</span> button to instantly route capacity.</p>
     <div style="overflow-x: auto; width: 100%; max-height: 400px; overflow-y: auto;">
       <table class="hover-row-trace" id="matrix-licensure-table" style="min-width: 1200px;">
@@ -178,8 +182,8 @@
     <h2 id="mix-title" style="align-items: center; display: flex; justify-content: space-between;">
       <span>Profile Manager</span>
       <div style="display: flex; gap: 4px;">
-        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="window.addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL TO ALL</button>
-        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #10b981;" onclick="window.syncLicensureFromSheets(false)" title="Sync Licensure Profiles from Google Sheets">🔄 SYNC LICENSURE</button>
+        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="window.addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL</button>
+        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #10b981;" onclick="window.syncLicensureFromSheets(false)" title="Sync Licensure Profiles from Google Sheets">🔄 SYNC</button>
       </div>
     </h2>
     <div id="ce-controls" style="max-height: 380px; overflow-y: auto; padding-right: 5px;"></div>
@@ -214,7 +218,7 @@
 
   <!-- DYNAMIC ROSTER AND PTO ALLOCATION LEDGER -->
   <div class="panel full-width">
-    <h2>Rolling PTO & Capacity Management Ledger</h2>
+    <h2>Rolling PTO, Quota & Capacity Management Ledger</h2>
     
     <div style="display: flex; justify-content: space-between; align-items: center; background: #161b26; padding: 8px 12px; border-radius: 6px; border: 1px solid #2d3548; margin-bottom: 12px;">
       <div style="display: flex; gap: 8px; align-items: center;">
@@ -233,6 +237,24 @@
         <thead id="pto-ledger-head" style="position: sticky; top: 0; z-index: 10; background: #1e2330;"></thead>
         <tbody id="pto-ledger-body"></tbody>
         <tfoot id="pto-ledger-foot" style="position: sticky; bottom: 0; z-index: 10;"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- WEEKLY CAPACITY VOLATILITY -->
+  <div class="panel full-width">
+    <h2 style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Weekly Evaluation Volatility & Capacity</span>
+        <button class="btn-action" style="padding: 4px 8px; font-size: 8px; background: #6366f1;" onclick="window.saveWeeklyDates()">💾 SAVE DATES</button>
+    </h2>
+    <p style="font-size: 9px; color: #94a3b8; margin-bottom: 8px;">Define the strict work weeks for the active month below. The engine calculates precise weekly capacity by reading exact PTO dates synced from Google Sheets.</p>
+    
+    <div id="weekly-dates-container" style="display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap;"></div>
+    
+    <div style="overflow-x: auto; width: 100%; max-height: 400px; overflow-y: auto;">
+      <table class="hover-row-trace" style="min-width: 800px;">
+        <thead id="weekly-cap-head" style="position: sticky; top: 0; background: #1e2330; z-index: 10;"></thead>
+        <tbody id="weekly-cap-body"></tbody>
       </table>
     </div>
   </div>
@@ -344,6 +366,7 @@ let volGrowthMultiplier = 1.0;
 let activeSelectedMonthIdx = 0;
 let operationalChartInstance = null;
 let MASTER_STATE_LIST = [];
+let ROSTER_ORDER = [];
 
 // --- ARCHIVE VAULT STATE ---
 let ARCHIVED_TIMELINE = [];
@@ -369,6 +392,52 @@ const firebaseConfig = {
   storageBucket: "ce-wfm-suite.firebasestorage.app",
   messagingSenderId: "590100182080",
   appId: "1:590100182080:web:b52ae564a6aa4377709ba5"
+};
+
+// --- CORE CONSTANTS & BASELINES ---
+const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+// Appended VT to baselines natively
+const DEFAULT_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK","VT"];
+
+const BASELINE_WD_MAP = { "May":20, "June":21, "July":21, "August":21, "September":21, "October":21, "November":18, "December":22 };
+const BASELINE_TARGETS_MAP = { "May":327, "June":348, "July":349, "August":370, "September":403, "October":466, "November":528, "December":529 };
+
+const BASELINE_DEMAND_MATRIX = {
+  "MA":[306,285,288,303,369,387,356,338],"NJ":[142,135,135,140,169,165,158,151],"NH":[50,45,50,52,63,66,63,60],
+  "CT":[37,33,35,37,48,50,47,45],"NY":[169,160,155,162,191,200,191,182],"PA":[67,64,64,66,74,78,75,74],
+  "RI":[20,18,20,21,23,24,23,22],"ME":[26,25,25,26,29,31,29,28],"VA":[54,45,51,54,67,64,61,58],
+  "OH":[29,30,28,29,35,36,35,34],"TX":[82,75,56,59,71,75,70,66],"IL":[42,42,41,44,52,55,51,48],
+  "DC":[9,9,10,10,12,13,12,13],"FL":[28,32,33,41,54,70,70,70],"NC":[20,20,19,20,22,24,22,23],
+  "GA":[9,13,16,17,16,17,18,19],"SC":[2,5,4,5,4,5,5,5],"MD":[0,0,7,11,13,14,13,14],
+  "DE":[0,0,1,2,2,2,2,2],"WV":[0,0,1,1,1,1,1,1],"MO":[0,0,0,3,4,6,7,6],
+  "WI":[0,0,0,5,6,10,12,12],"NV":[0,0,0,0,5,6,11,11],"AZ":[0,0,0,0,5,9,13,14],
+  "CO":[0,0,0,0,5,9,13,14],"NM":[0,0,0,0,0,2,2,4],"MT":[0,0,0,0,0,2,2,2],"OK":[0,0,0,0,0,4,5,6], "VT":[0,0,0,0,0,0,0,0]
+};
+
+const BASELINE_PTO_MAP = {
+  "Brian Richter":[8,0,1,0,1,1,3,1],"Charlotte Lively":[2,6,0,0,0,0,2,0],"Dina Siegel":[1,0,0,0,0,0,0,0],
+  "Dylan Abrams":[6,0,0,0,0,0,0,0],"Gabby Suihkonen-Gross":[0,0,0,0,0,0,0,0],"Sheila Rouzitalab":[0,0,0,0,0,0,0,0],
+  "Tori Mahoney":[1,4,2,0,0,0,5,0],"Mackenzie Sheridan":[2,0,6,0,5,0,0,0],"Sarah Lee":[0,0,0,10,0,0,0,0],
+  "Larisa Zaleta":[5,0,0,0,2,0,0,0],"Simon Jencius":[2,0,0,0,0,0,0,0],"Charlie Snyder":[3,0,0,0,0,0,0,0],
+  "Grace Rezendes":[0,0,0,0,0,0,0,0],"Michelle Zalewski":[3,2,1,1,2,0,0,1],"Hayley Feuchs":[0,2,0,1,4,0,0,0]
+};
+
+const BASELINE_CE_CONFIG = {
+  "Brian Richter": { q: 3, profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
+  "Charlotte Lively": { q: 4, profile: ["NH","CT","PA","RI","VA","OH","TX"] },
+  "Dina Siegel": { q: 4, profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
+  "Dylan Abrams": { q: 3, profile: ["NJ","OH","TX","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
+  "Gabby Suihkonen-Gross": { q: 4, profile: ["MA","NH","RI","ME"] },
+  "Sheila Rouzitalab": { q: 4, profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
+  "Tori Mahoney": { q: 4, profile: ["MA","NH","RI","ME","VA","OH"] },
+  "Mackenzie Sheridan": { q: 4, profile: ["MA","NH","CT","ME","OH"] },
+  "Sarah Lee": { q: 4, profile: ["MA","NJ","CT","VA"] },
+  "Larisa Zaleta": { q: 4, profile: ["NJ","CT","NY","IL","DC","FL"] },
+  "Simon Jencius": { q: 4, profile: ["MA","NJ","OH","IL"] },
+  "Charlie Snyder": { q: 4, profile: ["NY","TX","NV"] },
+  "Grace Rezendes": { q: 4, profile: ["MA","NH","RI","ME"] },
+  "Michelle Zalewski": { q: 4, profile: ["MA","PA","IL"] },
+  "Hayley Feuchs": { q: 4, profile: ["NY","DC","NV","AZ"] }
 };
 
 function initFirebase() {
@@ -406,6 +475,7 @@ function syncWithFirebase() {
                 CLINICAL_EVALUATORS_ROSTER = data.roster || {};
                 volGrowthMultiplier = data.multiplier || 1.0;
                 MASTER_STATE_LIST = data.stateList || [];
+                ROSTER_ORDER = data.rosterOrder || Object.keys(CLINICAL_EVALUATORS_ROSTER);
                 ARCHIVED_TIMELINE = data.archiveTime || [];
                 ARCHIVED_LEDGER = data.archiveLedg || {};
                 ARCHIVED_ROSTER = data.archiveRost || {};
@@ -445,6 +515,7 @@ function pushToFirebase() {
         roster: CLINICAL_EVALUATORS_ROSTER,
         multiplier: volGrowthMultiplier,
         stateList: MASTER_STATE_LIST,
+        rosterOrder: ROSTER_ORDER,
         archiveTime: ARCHIVED_TIMELINE,
         archiveLedg: ARCHIVED_LEDGER,
         archiveRost: ARCHIVED_ROSTER,
@@ -465,7 +536,10 @@ function bootstrapDataEngine() {
     GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v21')) || {};
     CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v21')) || {};
     volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v21')) || 1.0;
-    MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
+    MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || [...DEFAULT_STATE_LIST];
+    
+    // Inject VT for older environments if missing
+    if(!MASTER_STATE_LIST.includes("VT")) MASTER_STATE_LIST.push("VT");
 
     ARCHIVED_TIMELINE = JSON.parse(localStorage.getItem('wfm_archive_time_v21')) || [];
     ARCHIVED_LEDGER = JSON.parse(localStorage.getItem('wfm_archive_ledg_v21')) || {};
@@ -474,30 +548,74 @@ function bootstrapDataEngine() {
     ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
       if (!GLOBAL_PROJECTIONS_LEDGER[m]) {
         GLOBAL_PROJECTIONS_LEDGER[m] = {
-          workingDays: 21,
-          enrollTarget: 400,
-          stateDemand: {}
+          workingDays: BASELINE_WD_MAP[m] !== undefined ? BASELINE_WD_MAP[m] : 21,
+          enrollTarget: BASELINE_TARGETS_MAP[m] !== undefined ? BASELINE_TARGETS_MAP[m] : 400,
+          stateDemand: {},
+          weeks: [] // Initialize empty weeks array
         };
-        MASTER_STATE_LIST.forEach(s => {
-          GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = 0;
-        });
       }
+      if (!GLOBAL_PROJECTIONS_LEDGER[m].weeks) GLOBAL_PROJECTIONS_LEDGER[m].weeks = [];
+      MASTER_STATE_LIST.forEach(s => {
+        if(GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] === undefined) {
+          let baselineArray = BASELINE_DEMAND_MATRIX[s];
+          GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = (baselineArray && baselineArray[idx] !== undefined) ? baselineArray[idx] : 0;
+        }
+      });
     });
 
-    if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length > 0) {
+    if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length === 0) {
+      Object.keys(BASELINE_CE_CONFIG).forEach(name => {
+        CLINICAL_EVALUATORS_ROSTER[name] = {
+          quotaMap: {},
+          exactPto: {}, // Storage for strict weekly date checking
+          profile: [...BASELINE_CE_CONFIG[name].profile],
+          ptoMap: {},
+          monthlyToggles: {}
+        };
+        ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
+          let basePtoArray = BASELINE_PTO_MAP[name];
+          CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = (basePtoArray && basePtoArray[idx] !== undefined) ? basePtoArray[idx] : 0;
+          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...BASELINE_CE_CONFIG[name].profile];
+          CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = BASELINE_CE_CONFIG[name].q;
+        });
+      });
+    } else {
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
-        if (!CLINICAL_EVALUATORS_ROSTER[name].ptoMap) CLINICAL_EVALUATORS_ROSTER[name].ptoMap = {};
-        if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
-        if (!CLINICAL_EVALUATORS_ROSTER[name].profile) CLINICAL_EVALUATORS_ROSTER[name].profile = [];
+        let r = CLINICAL_EVALUATORS_ROSTER[name];
+        if (!r.ptoMap) r.ptoMap = {};
+        if (!r.monthlyToggles) r.monthlyToggles = {};
+        if (!r.profile) r.profile = [];
+        if (!r.exactPto) r.exactPto = {};
+        
+        // Migration from global static quota to monthly quota map
+        if (!r.quotaMap) {
+            r.quotaMap = {};
+            ACTIVE_HORIZON_TIMELINE.forEach(m => r.quotaMap[m] = r.quota || 4);
+            delete r.quota;
+        }
         
         ACTIVE_HORIZON_TIMELINE.forEach(m => {
-          if (CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] === undefined) CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
-          if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]) {
-            CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
+          if (r.ptoMap[m] === undefined) r.ptoMap[m] = 0;
+          if (r.quotaMap[m] === undefined) r.quotaMap[m] = 4;
+          if (!r.monthlyToggles[m]) {
+            r.monthlyToggles[m] = [...r.profile];
           }
         });
       });
     }
+
+    // Set ROSTER ORDER properly
+    if (!localStorage.getItem('wfm_roster_order_v21')) {
+        ROSTER_ORDER = Object.keys(CLINICAL_EVALUATORS_ROSTER);
+    } else {
+        ROSTER_ORDER = JSON.parse(localStorage.getItem('wfm_roster_order_v21'));
+        // Sync order array with actual roster keys
+        Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(k => {
+           if (!ROSTER_ORDER.includes(k)) ROSTER_ORDER.push(k);
+        });
+        ROSTER_ORDER = ROSTER_ORDER.filter(k => CLINICAL_EVALUATORS_ROSTER[k]);
+    }
+
     saveToLocalOnly();
   } catch (err) {
     console.error("Hydration Engine Intercept Failure", err);
@@ -511,6 +629,7 @@ function saveToLocalOnly() {
   localStorage.setItem('wfm_roster_v21', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
   localStorage.setItem('wfm_mult_v21', volGrowthMultiplier.toString());
   localStorage.setItem('wfm_state_list_v21', JSON.stringify(MASTER_STATE_LIST));
+  localStorage.setItem('wfm_roster_order_v21', JSON.stringify(ROSTER_ORDER));
   localStorage.setItem('wfm_archive_time_v21', JSON.stringify(ARCHIVED_TIMELINE));
   localStorage.setItem('wfm_archive_ledg_v21', JSON.stringify(ARCHIVED_LEDGER));
   localStorage.setItem('wfm_archive_rost_v21', JSON.stringify(ARCHIVED_ROSTER));
@@ -539,15 +658,13 @@ function runAutoOptimize(allMonths) {
             demands[s] = Math.round((GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0) * volGrowthMultiplier);
         });
 
-        // Parse CEs into simulation objects and wipe their toggles clean
         let ces = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
             let r = CLINICAL_EVALUATORS_ROSTER[name];
             let pto = parseFloat(r.ptoMap[m]) || 0;
-            let cap = Math.max(0, (wd - pto) * (parseFloat(r.quota) || 0));
+            let cap = Math.max(0, (wd - pto) * (parseFloat(r.quotaMap[m]) || 0));
             return { name: name, cap: cap, profile: r.profile, active: [] }; 
         });
 
-        // 1. SAFETY NET: Give every state that has demand at least 2 top-capacity CEs
         MASTER_STATE_LIST.forEach(s => {
             if (demands[s] <= 0) return; 
             let available = ces.filter(ce => ce.profile.includes(s)).sort((a,b) => b.cap - a.cap);
@@ -556,7 +673,6 @@ function runAutoOptimize(allMonths) {
             }
         });
 
-        // Coverage simulator helper
         const getCoverage = (state, simCEs) => {
             if(demands[state] === 0) return 100;
             let supply = 0;
@@ -576,7 +692,6 @@ function runAutoOptimize(allMonths) {
         let madeChanges = true;
         let circuitBreaker = 25; 
         
-        // 2. THE GREEDY ASCENT
         while(madeChanges && circuitBreaker > 0) {
             madeChanges = false;
             circuitBreaker--;
@@ -590,21 +705,16 @@ function runAutoOptimize(allMonths) {
 
                 for(let ce of ces) {
                     if (ce.profile.includes(s) && !ce.active.includes(s)) {
-                        // Simulate adding this state to this CE
                         ce.active.push(s);
                         let newCov = getCoverage(s, ces);
                         let boost = newCov - currentCov;
                         
-                        // Protect the Top 5 logic
                         let safeMove = true;
                         for(let t5 of top5States) {
-                            if (t5 === s) continue; // Don't test against itself
-                            if (ce.active.includes(t5)) { // Only matters if the CE was holding up a top 5 state
-                                // What was the Top 5 coverage before I simulated this?
+                            if (t5 === s) continue; 
+                            if (ce.active.includes(t5)) { 
                                 let t5OldCov = getCoverage(t5, ces.map(c => c.name === ce.name ? {...c, active: c.active.filter(x => x!==s)} : c));
                                 let t5NewCov = getCoverage(t5, ces);
-                                
-                                // Do not drop a healthy Top 5 state below thresholds
                                 if (t5OldCov >= targetCoverage && t5NewCov < targetCoverage) safeMove = false;
                                 else if (t5OldCov >= 80 && t5NewCov < 80) safeMove = false;
                             }
@@ -614,8 +724,6 @@ function runAutoOptimize(allMonths) {
                             bestBoost = boost;
                             bestCE = ce;
                         }
-                        
-                        // Revert simulation
                         ce.active.pop(); 
                     }
                 }
@@ -627,7 +735,6 @@ function runAutoOptimize(allMonths) {
             }
         }
 
-        // Apply final optimized configurations back to the global roster
         ces.forEach(ce => {
             CLINICAL_EVALUATORS_ROSTER[ce.name].monthlyToggles[m] = [...ce.active];
         });
@@ -637,6 +744,32 @@ function runAutoOptimize(allMonths) {
     recalculateDashboardMetrics();
 }
 
+function copyMatrixToClipboard() {
+    let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+    let tsv = "CE Name\t" + MASTER_STATE_LIST.join("\t") + "\n";
+    
+    ROSTER_ORDER.forEach(name => {
+        let r = CLINICAL_EVALUATORS_ROSTER[name];
+        let mix = r.monthlyToggles[activeMonth] || [];
+        let row = [name];
+        MASTER_STATE_LIST.forEach(s => {
+            row.push(mix.includes(s) ? "Yes" : "");
+        });
+        tsv += row.join("\t") + "\n";
+    });
+
+    let textarea = document.createElement("textarea");
+    textarea.value = tsv;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand("copy");
+        alert("State Matrix copied to clipboard successfully! You can now paste directly into your Google Sheet.");
+    } catch (err) {
+        alert("Failed to copy automatically.");
+    }
+    document.body.removeChild(textarea);
+}
 
 // --- DYNAMIC MONTH MANAGER & ARCHIVE ENGINE ---
 function openMonthManager() {
@@ -700,11 +833,12 @@ function addNewSpecificMonth() {
     }
 
     ACTIVE_HORIZON_TIMELINE.push(newM);
-    GLOBAL_PROJECTIONS_LEDGER[newM] = { workingDays: 21, enrollTarget: 400, stateDemand: {} };
+    GLOBAL_PROJECTIONS_LEDGER[newM] = { workingDays: 21, enrollTarget: 400, stateDemand: {}, weeks: [] };
     MASTER_STATE_LIST.forEach(s => { GLOBAL_PROJECTIONS_LEDGER[newM].stateDemand[s] = 0; });
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         CLINICAL_EVALUATORS_ROSTER[name].ptoMap[newM] = 0;
+        CLINICAL_EVALUATORS_ROSTER[name].quotaMap[newM] = 4;
         CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[newM] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
     });
 
@@ -726,14 +860,18 @@ function archiveSpecificMonth(m) {
     ARCHIVED_LEDGER[m] = JSON.parse(JSON.stringify(GLOBAL_PROJECTIONS_LEDGER[m])); 
     
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
-        if (!ARCHIVED_ROSTER[name]) ARCHIVED_ROSTER[name] = { ptoMap: {}, monthlyToggles: {} };
+        if (!ARCHIVED_ROSTER[name]) ARCHIVED_ROSTER[name] = { ptoMap: {}, quotaMap: {}, monthlyToggles: {} };
         if (CLINICAL_EVALUATORS_ROSTER[name].ptoMap) {
             ARCHIVED_ROSTER[name].ptoMap[m] = CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m];
+        }
+        if (CLINICAL_EVALUATORS_ROSTER[name].quotaMap) {
+            ARCHIVED_ROSTER[name].quotaMap[m] = CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m];
         }
         if (CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) {
             ARCHIVED_ROSTER[name].monthlyToggles[m] = JSON.parse(JSON.stringify(CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m]));
         }
         delete CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m];
+        delete CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m];
         delete CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m];
     });
     
@@ -753,18 +891,21 @@ function restoreArchivedMonth(m) {
         GLOBAL_PROJECTIONS_LEDGER[m] = JSON.parse(JSON.stringify(ARCHIVED_LEDGER[m]));
         delete ARCHIVED_LEDGER[m];
     } else {
-        GLOBAL_PROJECTIONS_LEDGER[m] = { workingDays: 21, enrollTarget: 400, stateDemand: {} };
+        GLOBAL_PROJECTIONS_LEDGER[m] = { workingDays: 21, enrollTarget: 400, stateDemand: {}, weeks: [] };
         MASTER_STATE_LIST.forEach(s => GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = 0);
     }
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         if (ARCHIVED_ROSTER[name] && ARCHIVED_ROSTER[name].ptoMap[m] !== undefined) {
             CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = ARCHIVED_ROSTER[name].ptoMap[m];
+            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = ARCHIVED_ROSTER[name].quotaMap[m] || 4;
             CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = ARCHIVED_ROSTER[name].monthlyToggles[m] || [...CLINICAL_EVALUATORS_ROSTER[name].profile];
             delete ARCHIVED_ROSTER[name].ptoMap[m];
+            delete ARCHIVED_ROSTER[name].quotaMap[m];
             delete ARCHIVED_ROSTER[name].monthlyToggles[m];
         } else {
             CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
+            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = 4;
             CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
         }
     });
@@ -789,6 +930,7 @@ function deleteSpecificMonth(m) {
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         if (CLINICAL_EVALUATORS_ROSTER[name]) {
             delete CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m];
+            delete CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m];
             delete CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m];
         }
     });
@@ -807,6 +949,7 @@ function deleteArchivedMonth(m) {
     Object.keys(ARCHIVED_ROSTER).forEach(name => {
         if(ARCHIVED_ROSTER[name]) {
             delete ARCHIVED_ROSTER[name].ptoMap[m];
+            delete ARCHIVED_ROSTER[name].quotaMap[m];
             delete ARCHIVED_ROSTER[name].monthlyToggles[m];
         }
     });
@@ -1029,6 +1172,8 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(ce => {
         ptoCounts[ce] = {};
         ACTIVE_HORIZON_TIMELINE.forEach(m => ptoCounts[ce][m] = 0);
+        // Wipe exactPto map entirely to prep for fresh, clean sheet load
+        CLINICAL_EVALUATORS_ROSTER[ce].exactPto = {};
     });
 
     let ceColMap = {}; 
@@ -1075,17 +1220,21 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
                 let monthName = ALL_KNOWN_MONTHS[parsedDate.getMonth()];
                 let timelineMonth = ACTIVE_HORIZON_TIMELINE.find(m => m.startsWith(monthName));
                 
-                if (timelineMonth) {
-                    Object.keys(ceColMap).forEach(cIdx => {
-                        let ceName = ceColMap[cIdx];
-                        let valStr = String(row[cIdx]).trim();
-                        let floatVal = parseFloat(valStr);
-                        
-                        if (!isNaN(floatVal) && floatVal > 0) {
+                // Store exact date string for Weekly view parsing (Format: YYYY-MM-DD local)
+                let dateKey = parsedDate.getFullYear() + '-' + String(parsedDate.getMonth()+1).padStart(2,'0') + '-' + String(parsedDate.getDate()).padStart(2,'0');
+
+                Object.keys(ceColMap).forEach(cIdx => {
+                    let ceName = ceColMap[cIdx];
+                    let valStr = String(row[cIdx]).trim();
+                    let floatVal = parseFloat(valStr);
+                    
+                    if (!isNaN(floatVal) && floatVal > 0) {
+                        if (timelineMonth) {
                             ptoCounts[ceName][timelineMonth] += floatVal;
                         }
-                    });
-                }
+                        CLINICAL_EVALUATORS_ROSTER[ceName].exactPto[dateKey] = (CLINICAL_EVALUATORS_ROSTER[ceName].exactPto[dateKey] || 0) + floatVal;
+                    }
+                });
             }
         }
     }
@@ -1103,7 +1252,7 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Cloud PTO Sync Complete!\nSuccessfully scanned and updated ${updatesCount} monthly PTO entries.`);
+        alert(`Cloud PTO Sync Complete!\nSuccessfully scanned and updated ${updatesCount} monthly PTO entries and registered specific dates for Weekly Views.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing CSV:", err);
@@ -1204,7 +1353,6 @@ async function syncLicensureFromSheets(isSilent = false) {
         let ceName = String(row[ceColIdx]).trim();
         if(!ceName) continue;
 
-        // Failsafe matching: Replace Unicode non-breaking spaces with normal spaces & collapse duplicates
         let matchedCEName = Object.keys(CLINICAL_EVALUATORS_ROSTER).find(name => {
             let cleanRosterName = name.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
             let cleanSheetName = ceName.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -1251,7 +1399,7 @@ async function syncLicensureFromSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated CE profiles from Google Sheets.`);
+        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated ${updatesCount} CE profiles from Google Sheets.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing Licensure CSV:", err);
@@ -1265,6 +1413,18 @@ async function syncLicensureFromSheets(isSilent = false) {
   }
 }
 
+function moveCE(name, dir) {
+    let idx = ROSTER_ORDER.indexOf(name);
+    if (idx < 0) return;
+    let target = idx + dir;
+    if (target < 0 || target >= ROSTER_ORDER.length) return;
+    let temp = ROSTER_ORDER[idx];
+    ROSTER_ORDER[idx] = ROSTER_ORDER[target];
+    ROSTER_ORDER[target] = temp;
+    saveStateToStorage();
+    recalculateDashboardMetrics();
+}
+
 function addNewClinicianToRoster() {
   const nameInput = document.getElementById('new-clinician-name');
   if (!nameInput) return;
@@ -1274,11 +1434,13 @@ function addNewClinicianToRoster() {
     alert("Resource entity entry already holds assignment constraints inside active tracking namespace registry.");
     return;
   }
-  CLINICAL_EVALUATORS_ROSTER[name] = { quota: 4, profile: [...MASTER_STATE_LIST], ptoMap: {}, monthlyToggles: {} };
+  CLINICAL_EVALUATORS_ROSTER[name] = { quotaMap: {}, exactPto: {}, profile: [...MASTER_STATE_LIST], ptoMap: {}, monthlyToggles: {} };
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
+    CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = 4;
     CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...MASTER_STATE_LIST];
   });
+  ROSTER_ORDER.push(name);
   nameInput.value = '';
   saveStateToStorage();
   recalculateDashboardMetrics();
@@ -1287,6 +1449,7 @@ function addNewClinicianToRoster() {
 function deprovisionClinician(name) {
   if (!confirm(`Are you certain you wish to completely clear ${name} from deployment tracking rosters permanently?`)) return;
   delete CLINICAL_EVALUATORS_ROSTER[name];
+  ROSTER_ORDER = ROSTER_ORDER.filter(n => n !== name);
   saveStateToStorage();
   recalculateDashboardMetrics();
 }
@@ -1387,7 +1550,8 @@ function recalculateDashboardMetrics() {
     let clinicianAllocations = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
       let r = CLINICAL_EVALUATORS_ROSTER[name];
       let pto = parseFloat(r.ptoMap[activeMonth]) || 0;
-      let totalCapacity = Math.max(0, (wd - pto) * (parseFloat(r.quota) || 0));
+      let qta = parseFloat(r.quotaMap[activeMonth]) || 0;
+      let totalCapacity = Math.max(0, (wd - pto) * qta);
       
       let activeStatesThisMonth = r.monthlyToggles[activeMonth] || [];
       let totalDemandDenom = 0;
@@ -1396,7 +1560,7 @@ function recalculateDashboardMetrics() {
       });
 
       return {
-        name: name, quota: r.quota, pto: pto, capacity: totalCapacity, 
+        name: name, quota: qta, pto: pto, capacity: totalCapacity, 
         activeStates: activeStatesThisMonth, denom: totalDemandDenom, masterProfile: r.profile
       };
     });
@@ -1465,6 +1629,7 @@ function recalculateDashboardMetrics() {
     renderStateWeightedHeatmap(stateAllocations);
     renderExecutiveNarrativeBanner(systemTotalDemand, systemTotalWeightedSupply, activeMonth, targetEnrollment);
     renderPtoManagerGrid();
+    renderWeeklyVolatility();
     renderLongRangeWfmChart();
     renderSidebarProfileManager(clinicianAllocations);
 
@@ -1481,7 +1646,9 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
   headRow.innerHTML = `<th style="position:sticky; left:0; top:0; background:#1e2330; z-index:30; border-right:1px solid #2d3548; min-width:180px; border-bottom:1px solid #2d3548;">Clinical Evaluator Name</th><th style="position:sticky; top:0; left:180px; background:#1e2330; z-index:30; text-align:center; color:#a5b4fc; font-weight:bold; border-bottom:1px solid #2d3548; border-right:1px solid #2d3548;">Active/Total</th>` + 
     MASTER_STATE_LIST.map(s => `<th style="position:sticky; top:0; background:#1e2330; z-index:20; text-align:center; font-weight:bold; min-width:48px; border-bottom:1px solid #2d3548;">${s}</th>`).join('');
 
-  bodyRows.innerHTML = clinicianAllocations.map(ce => {
+  bodyRows.innerHTML = ROSTER_ORDER.map(name => {
+    let ce = clinicianAllocations.find(c => c.name === name);
+    if(!ce) return '';
     let countActiveOnStates = ce.activeStates.length;
     let stateCellsHtml = MASTER_STATE_LIST.map(s => {
       let holdsMasterLicense = ce.masterProfile.includes(s);
@@ -1528,11 +1695,20 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
 function renderSidebarProfileManager(clinicianAllocations) {
   const container = document.getElementById('ce-controls');
   if(!container) return;
-  container.innerHTML = clinicianAllocations.map(ce => `
+  container.innerHTML = ROSTER_ORDER.map(name => {
+    let ce = clinicianAllocations.find(c => c.name === name);
+    if(!ce) return '';
+    return `
     <div class="ce-row">
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; align-items: center;">
         <strong>${ce.name}</strong> 
-        <span title="Denominator: Total demand of all active states." style="font-size:7px; color:#64748b; cursor:help;">Load: ${Math.round(ce.denom)}</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+            <span title="Denominator: Total demand of all active states." style="font-size:7px; color:#64748b; cursor:help;">Load: ${Math.round(ce.denom)}</span>
+            <div style="display:flex; flex-direction:column; gap:1px;">
+                <button class="btn-action" style="padding:0 3px; font-size:6px; background:#334155; line-height:1;" onclick="window.moveCE('${ce.name.replace(/'/g, "\\'")}', -1)">▲</button>
+                <button class="btn-action" style="padding:0 3px; font-size:6px; background:#334155; line-height:1;" onclick="window.moveCE('${ce.name.replace(/'/g, "\\'")}', 1)">▼</button>
+            </div>
+        </div>
       </div>
       <div style="margin-bottom:6px;">
         ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).map(s => `
@@ -1548,7 +1724,7 @@ function renderSidebarProfileManager(clinicianAllocations) {
         <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="window.addAllLicenses('${ce.name.replace(/'/g, "\\'")}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function renderStateWeightedHeatmap(stateAllocations) {
@@ -1556,6 +1732,7 @@ function renderStateWeightedHeatmap(stateAllocations) {
   if (!heatmapBody) return;
 
   let optCount = 0, hltCount = 0, wrnCount = 0, crtCount = 0;
+  let optStates = [], hltStates = [], wrnStates = [], crtStates = [];
 
   heatmapBody.innerHTML = MASTER_STATE_LIST.map(s => {
     let r = stateAllocations[s];
@@ -1568,10 +1745,10 @@ function renderStateWeightedHeatmap(stateAllocations) {
     let barColor = processingPercentage < 80 ? '#ef4444' : (processingPercentage < 95 ? '#f59e0b' : '#22c55e');
 
     if (r.demand > 0) {
-        if (processingPercentage >= 90) optCount++;
-        else if (processingPercentage >= 80) hltCount++;
-        else if (processingPercentage >= 70) wrnCount++;
-        else crtCount++;
+        if (processingPercentage >= 90) { optCount++; optStates.push(s); }
+        else if (processingPercentage >= 80) { hltCount++; hltStates.push(s); }
+        else if (processingPercentage >= 70) { wrnCount++; wrnStates.push(s); }
+        else { crtCount++; crtStates.push(s); }
     }
 
     return `
@@ -1597,25 +1774,28 @@ function renderStateWeightedHeatmap(stateAllocations) {
     `;
   }).join('');
 
-  // Update Summary Boxes
   const summaryContainer = document.getElementById('heatmap-summary');
   if (summaryContainer) {
       summaryContainer.innerHTML = `
         <div class="summary-box box-opt">
           <div class="val">${optCount}</div>
           <div class="lbl">Optimal Phone Screen Cov (≥90%)</div>
+          <div class="tooltip-text" style="bottom:auto; top:110%;">${optStates.length ? optStates.join(', ') : 'None'}</div>
         </div>
         <div class="summary-box box-hlt">
           <div class="val">${hltCount}</div>
           <div class="lbl">Healthy Phone Screen Cov (80-89%)</div>
+          <div class="tooltip-text" style="bottom:auto; top:110%;">${hltStates.length ? hltStates.join(', ') : 'None'}</div>
         </div>
         <div class="summary-box box-wrn">
           <div class="val">${wrnCount}</div>
           <div class="lbl">Warning Phone Screen Cov (70-79%)</div>
+          <div class="tooltip-text" style="bottom:auto; top:110%;">${wrnStates.length ? wrnStates.join(', ') : 'None'}</div>
         </div>
         <div class="summary-box box-crt">
           <div class="val">${crtCount}</div>
           <div class="lbl">Critical Phone Screen Cov (<70%)</div>
+          <div class="tooltip-text" style="bottom:auto; top:110%;">${crtStates.length ? crtStates.join(', ') : 'None'}</div>
         </div>
       `;
   }
@@ -1648,26 +1828,29 @@ function renderPtoManagerGrid() {
   const body = document.getElementById('pto-ledger-body');
   const foot = document.getElementById('pto-ledger-foot');
 
-  let headHtml = `<tr><th rowspan="2" style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548; min-width:140px;">Clinical Evaluator</th><th rowspan="2" style="width:50px; text-align:center;">Daily Quota</th>`;
+  let headHtml = `<tr><th rowspan="2" style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548; min-width:140px;">Clinical Evaluator</th>`;
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
-    headHtml += `<th colspan="2" class="pto-grid-header">${m.split('_')[0]}</th>`;
+    headHtml += `<th colspan="3" class="pto-grid-header" style="text-align:center; border-left:1px solid #2d3548;">${m.split('_')[0]}</th>`;
   });
   headHtml += `</tr><tr>`;
   ACTIVE_HORIZON_TIMELINE.forEach(() => {
-    headHtml += `<th class="sub-head">PTO</th><th class="sub-head">CAP</th>`;
+    headHtml += `<th class="sub-head" style="border-left:1px solid #2d3548; text-align:center;">PTO</th><th class="sub-head" style="text-align:center;">QTA</th><th class="sub-head" style="text-align:center;">CAP</th>`;
   });
   headHtml += `</tr>`;
   thead.innerHTML = headHtml;
 
-  body.innerHTML = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
+  body.innerHTML = ROSTER_ORDER.map(name => {
     let r = CLINICAL_EVALUATORS_ROSTER[name];
+    if(!r) return '';
     let columnsHtml = ACTIVE_HORIZON_TIMELINE.map((m) => {
       let ptoValue = r.ptoMap[m] !== undefined ? r.ptoMap[m] : 0;
+      let qtaValue = r.quotaMap[m] !== undefined ? r.quotaMap[m] : 4;
       let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
-      let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(r.quota) || 0));
+      let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(qtaValue) || 0));
 
       return `
-        <td><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
+        <td style="border-left:1px solid #2d3548; text-align:center;"><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
+        <td style="text-align:center;"><input type="number" step="0.5" value="${qtaValue}" style="width:34px; color:#6366f1;" onchange="window.updateClinicianBaseQuota('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
         <td class="cap-cell">${Math.round(calculatedCapacity)}</td>
       `;
     }).join('');
@@ -1677,13 +1860,12 @@ function renderPtoManagerGrid() {
         <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
           <strong style="color:#f1f5f9;">${name}</strong>
         </td>
-        <td style="text-align:center;"><input type="number" value="${r.quota}" style="width:34px; font-weight:bold; color:#6366f1;" onchange="window.updateClinicianBaseQuota('${name.replace(/'/g, "\\'")}', this.value)"></td>
         ${columnsHtml}
       </tr>
     `;
   }).join('');
 
-  let totalsHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548;">AGGREGATE SUMS</td><td style="text-align:center;">—</td>`;
+  let totalsHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548;">AGGREGATE SUMS</td>`;
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
     let aggregatePtoDaysSum = 0;
@@ -1691,13 +1873,14 @@ function renderPtoManagerGrid() {
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
       let ptoValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
-      let quotaValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quota) || 0;
+      let quotaValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || 0;
       aggregatePtoDaysSum += ptoValue;
       aggregateSlotsCapacitySum += Math.max(0, (monthWd - ptoValue) * quotaValue);
     });
 
     totalsHtml += `
-      <td style="text-align:center; color:#f87171;">${aggregatePtoDaysSum}</td>
+      <td style="text-align:center; color:#f87171; border-left:1px solid #2d3548;">${aggregatePtoDaysSum}</td>
+      <td style="text-align:center; color:#64748b;">-</td>
       <td class="cap-cell" style="color:#4ade80; background:rgba(34,197,94,0.1);">${Math.round(aggregateSlotsCapacitySum)}</td>
     `;
   });
@@ -1711,11 +1894,99 @@ function updateClinicianPtoValue(name, month, value) {
   recalculateDashboardMetrics();
 }
 
-function updateClinicianBaseQuota(name, value) {
-  CLINICAL_EVALUATORS_ROSTER[name].quota = parseFloat(value) || 0;
+function updateClinicianBaseQuota(name, month, value) {
+  CLINICAL_EVALUATORS_ROSTER[name].quotaMap[month] = parseFloat(value) || 0;
   saveStateToStorage();
   recalculateDashboardMetrics();
 }
+
+// --- WEEKLY CAPACITY VOLATILITY ---
+function renderWeeklyVolatility() {
+    let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+    if (!GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks || GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks.length === 0) {
+        GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks = [
+            {label: "Week 1", start: "", end: ""},
+            {label: "Week 2", start: "", end: ""},
+            {label: "Week 3", start: "", end: ""},
+            {label: "Week 4", start: "", end: ""},
+            {label: "Week 5", start: "", end: ""}
+        ];
+    }
+    let weeks = GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks;
+
+    let container = document.getElementById('weekly-dates-container');
+    if (container) {
+        container.innerHTML = weeks.map((w, i) => `
+            <div style="background:#1a2030; padding:6px; border-radius:4px; border:1px solid #2d3548; font-size:9px;">
+                <div style="color:#a5b4fc; margin-bottom:4px; font-weight:bold; font-size:10px;">${w.label}</div>
+                <span style="color:#64748b;">Start:</span> <input type="date" value="${w.start}" id="wk-s-${i}" style="width:105px; margin-bottom:4px;"><br>
+                <span style="color:#64748b;">End:</span> &nbsp;&nbsp;<input type="date" value="${w.end}" id="wk-e-${i}" style="width:105px;">
+            </div>
+        `).join('');
+    }
+
+    let thead = document.getElementById('weekly-cap-head');
+    let tbody = document.getElementById('weekly-cap-body');
+    
+    if(thead) {
+        thead.innerHTML = `<tr><th style="position:sticky; left:0; background:#1e2330; z-index:2; min-width:140px; border-right:1px solid #2d3548;">Clinical Evaluator</th>` + 
+            weeks.map(w => `<th style="text-align:center;">${w.label} CAP</th>`).join('') + `</tr>`;
+    }
+
+    if(tbody) {
+        tbody.innerHTML = ROSTER_ORDER.map(name => {
+            let r = CLINICAL_EVALUATORS_ROSTER[name];
+            if(!r) return '';
+            let quota = parseFloat(r.quotaMap[activeMonth]) || 0;
+            
+            let cells = weeks.map(w => {
+                if(!w.start || !w.end) return `<td style="text-align:center; color:#64748b;">-</td>`;
+                
+                let startD = new Date(w.start + 'T00:00:00');
+                let endD = new Date(w.end + 'T23:59:59');
+                let daysInWeek = 0;
+                
+                let curr = new Date(startD);
+                while(curr <= endD) {
+                    let day = curr.getDay();
+                    if(day !== 0 && day !== 6) daysInWeek++; // count weekdays natively
+                    curr.setDate(curr.getDate() + 1);
+                }
+
+                let ptoInWeek = 0;
+                Object.keys(r.exactPto || {}).forEach(dKey => {
+                    // dKey is formatted YYYY-MM-DD
+                    let pDate = new Date(dKey + 'T00:00:00');
+                    if (pDate >= startD && pDate <= endD) {
+                        ptoInWeek += r.exactPto[dKey];
+                    }
+                });
+
+                let weekCap = Math.max(0, (daysInWeek - ptoInWeek) * quota);
+                return `<td style="text-align:center; font-weight:bold; color:#4ade80;">${Math.round(weekCap)}</td>`;
+            }).join('');
+
+            return `<tr><td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;"><strong>${name}</strong></td>${cells}</tr>`;
+        }).join('');
+    }
+}
+
+function saveWeeklyDates() {
+    let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
+    let weeks = GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks || [];
+    for(let i=0; i<5; i++) {
+        let sEl = document.getElementById(`wk-s-${i}`);
+        let eEl = document.getElementById(`wk-e-${i}`);
+        if(!weeks[i]) weeks[i] = {label: `Week ${i+1}`};
+        weeks[i].start = sEl ? sEl.value : "";
+        weeks[i].end = eEl ? eEl.value : "";
+    }
+    GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks = weeks;
+    saveStateToStorage();
+    recalculateDashboardMetrics();
+    alert("Weekly Date ranges successfully saved to Ledger!");
+}
+
 
 function renderLongRangeWfmChart() {
   try {
@@ -1737,7 +2008,7 @@ function renderLongRangeWfmChart() {
       let supplySum = 0;
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         let pto = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
-        let quota = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quota) || 0;
+        let quota = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || 0;
         supplySum += Math.max(0, (monthWd - pto) * quota);
       });
       aggregateSupplyPoints.push(Math.round(supplySum));
@@ -1855,6 +2126,9 @@ window.addAllLicenses = addAllLicenses;
 window.linkTraceMarker = linkTraceMarker;
 window.clearTraceMarker = clearTraceMarker;
 window.runAutoOptimize = runAutoOptimize;
+window.moveCE = moveCE;
+window.copyMatrixToClipboard = copyMatrixToClipboard;
+window.saveWeeklyDates = saveWeeklyDates;
 
 // --- BOOTSTRAP INITIALIZATION ---
 window.onload = () => {
