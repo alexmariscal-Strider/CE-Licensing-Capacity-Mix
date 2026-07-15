@@ -104,6 +104,23 @@
   .state-on { background: #1e3a5f; color: #93c5fd; border-color: #3b82f6; }
   .state-off { background: #0f1117; color: #475569; border-color: #1a2030; }
   .del-btn { color: #ef4444; font-size: 9px; margin-left: 2px; cursor: pointer; opacity: 0.5; }
+
+  /* HEATMAP SUMMARY BOXES */
+  .summary-box { flex: 1; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid transparent; }
+  .summary-box .val { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
+  .summary-box .lbl { font-size: 8px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; }
+  
+  .box-opt { background: rgba(59,130,246,0.1); border-color: #3b82f6; }
+  .box-opt .val { color: #93c5fd; } .box-opt .lbl { color: #60a5fa; }
+  
+  .box-hlt { background: rgba(34,197,94,0.1); border-color: #22c55e; }
+  .box-hlt .val { color: #86efac; } .box-hlt .lbl { color: #4ade80; }
+  
+  .box-wrn { background: rgba(234,179,8,0.1); border-color: #eab308; }
+  .box-wrn .val { color: #fde047; } .box-wrn .lbl { color: #facc15; }
+  
+  .box-crt { background: rgba(239,68,68,0.1); border-color: #ef4444; }
+  .box-crt .val { color: #fca5a5; } .box-crt .lbl { color: #f87171; }
 </style>
 </head>
 <body>
@@ -170,7 +187,14 @@
 
   <!-- HEATMAP -->
   <div class="panel span-3">
-    <h2 id="heat-title">State Weighted Distribution Balance</h2>
+    <h2 id="heat-title" style="align-items: center; display: flex; justify-content: space-between;">
+      <span>State Weighted Distribution Balance</span>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-action" style="background: #8b5cf6;" onclick="window.runAutoOptimize(false)" title="Clears and mathematically recalculates optimal alignments for currently selected month.">✨ OPTIMIZE MONTH</button>
+        <button class="btn-action" style="background: #6d28d9;" onclick="if(confirm('This will wipe all manual toggles and generate mathematically optimized capacity assignments for EVERY month tracking in your horizon simultaneously. Proceed?')) window.runAutoOptimize(true)" title="Generates optimums for ALL active months simultaneously">✨ OPTIMIZE ALL</button>
+      </div>
+    </h2>
+    <div id="heatmap-summary" style="display: flex; gap: 8px; margin-bottom: 12px; margin-top: 6px;"></div>
     <div style="overflow-y: auto; max-height: 380px;">
         <table>
         <thead style="position: sticky; top: 0; background: #1e2330; z-index: 10;">
@@ -347,52 +371,6 @@ const firebaseConfig = {
   appId: "1:590100182080:web:b52ae564a6aa4377709ba5"
 };
 
-// --- CORE CONSTANTS & BASELINES ---
-const ALL_KNOWN_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const DEFAULT_STATE_LIST = ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
-
-const BASELINE_WD_MAP = { "May":20, "June":21, "July":21, "August":21, "September":21, "October":21, "November":18, "December":22 };
-const BASELINE_TARGETS_MAP = { "May":327, "June":348, "July":349, "August":370, "September":403, "October":466, "November":528, "December":529 };
-
-const BASELINE_DEMAND_MATRIX = {
-  "MA":[306,285,288,303,369,387,356,338],"NJ":[142,135,135,140,169,165,158,151],"NH":[50,45,50,52,63,66,63,60],
-  "CT":[37,33,35,37,48,50,47,45],"NY":[169,160,155,162,191,200,191,182],"PA":[67,64,64,66,74,78,75,74],
-  "RI":[20,18,20,21,23,24,23,22],"ME":[26,25,25,26,29,31,29,28],"VA":[54,45,51,54,67,64,61,58],
-  "OH":[29,30,28,29,35,36,35,34],"TX":[82,75,56,59,71,75,70,66],"IL":[42,42,41,44,52,55,51,48],
-  "DC":[9,9,10,10,12,13,12,13],"FL":[28,32,33,41,54,70,70,70],"NC":[20,20,19,20,22,24,22,23],
-  "GA":[9,13,16,17,16,17,18,19],"SC":[2,5,4,5,4,5,5,5],"MD":[0,0,7,11,13,14,13,14],
-  "DE":[0,0,1,2,2,2,2,2],"WV":[0,0,1,1,1,1,1,1],"MO":[0,0,0,3,4,6,7,6],
-  "WI":[0,0,0,5,6,10,12,12],"NV":[0,0,0,0,5,6,11,11],"AZ":[0,0,0,0,5,9,13,14],
-  "CO":[0,0,0,0,5,9,13,14],"NM":[0,0,0,0,0,2,2,4],"MT":[0,0,0,0,0,2,2,2],"OK":[0,0,0,0,0,4,5,6]
-};
-
-const BASELINE_PTO_MAP = {
-  "Brian Richter":[8,0,1,0,1,1,3,1],"Charlotte Lively":[2,6,0,0,0,0,2,0],"Dina Siegel":[1,0,0,0,0,0,0,0],
-  "Dylan Abrams":[6,0,0,0,0,0,0,0],"Gabby Suihkonen-Gross":[0,0,0,0,0,0,0,0],"Sheila Rouzitalab":[0,0,0,0,0,0,0,0],
-  "Tori Mahoney":[1,4,2,0,0,0,5,0],"Mackenzie Sheridan":[2,0,6,0,5,0,0,0],"Sarah Lee":[0,0,0,10,0,0,0,0],
-  "Larisa Zaleta":[5,0,0,0,2,0,0,0],"Simon Jencius":[2,0,0,0,0,0,0,0],"Charlie Snyder":[3,0,0,0,0,0,0,0],
-  "Grace Rezendes":[0,0,0,0,0,0,0,0],"Michelle Zalewski":[3,2,1,1,2,0,0,1],"Hayley Feuchs":[0,2,0,1,4,0,0,0]
-};
-
-const BASELINE_CE_CONFIG = {
-  "Brian Richter": { q: 3, profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
-  "Charlotte Lively": { q: 4, profile: ["NH","CT","PA","RI","VA","OH","TX"] },
-  "Dina Siegel": { q: 4, profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
-  "Dylan Abrams": { q: 3, profile: ["NJ","OH","TX","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
-  "Gabby Suihkonen-Gross": { q: 4, profile: ["MA","NH","RI","ME"] },
-  "Sheila Rouzitalab": { q: 4, profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
-  "Tori Mahoney": { q: 4, profile: ["MA","NH","RI","ME","VA","OH"] },
-  "Mackenzie Sheridan": { q: 4, profile: ["MA","NH","CT","ME","OH"] },
-  "Sarah Lee": { q: 4, profile: ["MA","NJ","CT","VA"] },
-  "Larisa Zaleta": { q: 4, profile: ["NJ","CT","NY","IL","DC","FL"] },
-  "Simon Jencius": { q: 4, profile: ["MA","NJ","OH","IL"] },
-  "Charlie Snyder": { q: 4, profile: ["NY","TX","NV"] },
-  "Grace Rezendes": { q: 4, profile: ["MA","NH","RI","ME"] },
-  "Michelle Zalewski": { q: 4, profile: ["MA","PA","IL"] },
-  "Hayley Feuchs": { q: 4, profile: ["NY","DC","NV","AZ"] }
-};
-
-// --- INITIALIZATION ---
 function initFirebase() {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -404,7 +382,7 @@ function initFirebase() {
             if (!isFirebaseSynced) syncWithFirebase();
         } else {
             firebase.auth().signInAnonymously().catch(err => {
-                console.warn("Anonymous Auth failed. Attempting unauthenticated access...", err.message);
+                console.warn("Anonymous Auth failed. Ensure it is enabled in your Firebase Console if rules require it. Attempting unauthenticated access...", err.message);
                 firebaseDbRef = firebase.database().ref('/Licensing_Capacity_Mix');
                 if (!isFirebaseSynced) syncWithFirebase();
             });
@@ -480,13 +458,14 @@ function pushToFirebase() {
     });
 }
 
+// --- CRASH-PROOF STRUCTURAL HYDRATION ENGINE ---
 function bootstrapDataEngine() {
   try {
     ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v21')) || ["May","June","July","August","September","October","November","December"];
     GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v21')) || {};
     CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v21')) || {};
     volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v21')) || 1.0;
-    MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || [...DEFAULT_STATE_LIST];
+    MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || ["MA","NJ","NH","CT","NY","PA","RI","ME","VA","OH","TX","IL","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI","NV","AZ","CO","NM","MT","OK"];
 
     ARCHIVED_TIMELINE = JSON.parse(localStorage.getItem('wfm_archive_time_v21')) || [];
     ARCHIVED_LEDGER = JSON.parse(localStorage.getItem('wfm_archive_ledg_v21')) || {};
@@ -495,32 +474,17 @@ function bootstrapDataEngine() {
     ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
       if (!GLOBAL_PROJECTIONS_LEDGER[m]) {
         GLOBAL_PROJECTIONS_LEDGER[m] = {
-          workingDays: BASELINE_WD_MAP[m] !== undefined ? BASELINE_WD_MAP[m] : 21,
-          enrollTarget: BASELINE_TARGETS_MAP[m] !== undefined ? BASELINE_TARGETS_MAP[m] : 400,
+          workingDays: 21,
+          enrollTarget: 400,
           stateDemand: {}
         };
         MASTER_STATE_LIST.forEach(s => {
-          let baselineArray = BASELINE_DEMAND_MATRIX[s];
-          GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = (baselineArray && baselineArray[idx] !== undefined) ? baselineArray[idx] : 0;
+          GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] = 0;
         });
       }
     });
 
-    if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length === 0) {
-      Object.keys(BASELINE_CE_CONFIG).forEach(name => {
-        CLINICAL_EVALUATORS_ROSTER[name] = {
-          quota: BASELINE_CE_CONFIG[name].q,
-          profile: [...BASELINE_CE_CONFIG[name].profile],
-          ptoMap: {},
-          monthlyToggles: {}
-        };
-        ACTIVE_HORIZON_TIMELINE.forEach((m, idx) => {
-          let basePtoArray = BASELINE_PTO_MAP[name];
-          CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = (basePtoArray && basePtoArray[idx] !== undefined) ? basePtoArray[idx] : 0;
-          CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...BASELINE_CE_CONFIG[name].profile];
-        });
-      });
-    } else {
+    if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length > 0) {
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         if (!CLINICAL_EVALUATORS_ROSTER[name].ptoMap) CLINICAL_EVALUATORS_ROSTER[name].ptoMap = {};
         if (!CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles) CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles = {};
@@ -564,6 +528,117 @@ function triggerFactoryResetWfm() {
   location.reload();
 }
 
+// --- INTELLIGENT AUTO-OPTIMIZE ENGINE ---
+function runAutoOptimize(allMonths) {
+    let monthsToProcess = allMonths ? ACTIVE_HORIZON_TIMELINE : [ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx]];
+    
+    monthsToProcess.forEach(m => {
+        let wd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
+        let demands = {};
+        MASTER_STATE_LIST.forEach(s => {
+            demands[s] = Math.round((GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0) * volGrowthMultiplier);
+        });
+
+        // Parse CEs into simulation objects and wipe their toggles clean
+        let ces = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
+            let r = CLINICAL_EVALUATORS_ROSTER[name];
+            let pto = parseFloat(r.ptoMap[m]) || 0;
+            let cap = Math.max(0, (wd - pto) * (parseFloat(r.quota) || 0));
+            return { name: name, cap: cap, profile: r.profile, active: [] }; 
+        });
+
+        // 1. SAFETY NET: Give every state that has demand at least 2 top-capacity CEs
+        MASTER_STATE_LIST.forEach(s => {
+            if (demands[s] <= 0) return; 
+            let available = ces.filter(ce => ce.profile.includes(s)).sort((a,b) => b.cap - a.cap);
+            for(let i=0; i < Math.min(2, available.length); i++) {
+                available[i].active.push(s);
+            }
+        });
+
+        // Coverage simulator helper
+        const getCoverage = (state, simCEs) => {
+            if(demands[state] === 0) return 100;
+            let supply = 0;
+            simCEs.forEach(ce => {
+                if(ce.active.includes(state)) {
+                    let totalDenom = ce.active.reduce((sum, st) => sum + demands[st], 0);
+                    supply += (ce.cap * (demands[state] / totalDenom));
+                }
+            });
+            return (supply / demands[state]) * 100;
+        };
+
+        let sortedStatesByDemand = [...MASTER_STATE_LIST].filter(s => demands[s] > 0).sort((a,b) => demands[b] - demands[a]);
+        let top5States = sortedStatesByDemand.slice(0, 5);
+
+        let targetCoverage = 90;
+        let madeChanges = true;
+        let circuitBreaker = 25; 
+        
+        // 2. THE GREEDY ASCENT
+        while(madeChanges && circuitBreaker > 0) {
+            madeChanges = false;
+            circuitBreaker--;
+
+            for(let s of sortedStatesByDemand) {
+                let currentCov = getCoverage(s, ces);
+                if (currentCov >= targetCoverage) continue; 
+
+                let bestCE = null;
+                let bestBoost = 0;
+
+                for(let ce of ces) {
+                    if (ce.profile.includes(s) && !ce.active.includes(s)) {
+                        // Simulate adding this state to this CE
+                        ce.active.push(s);
+                        let newCov = getCoverage(s, ces);
+                        let boost = newCov - currentCov;
+                        
+                        // Protect the Top 5 logic
+                        let safeMove = true;
+                        for(let t5 of top5States) {
+                            if (t5 === s) continue; // Don't test against itself
+                            if (ce.active.includes(t5)) { // Only matters if the CE was holding up a top 5 state
+                                // What was the Top 5 coverage before I simulated this?
+                                let t5OldCov = getCoverage(t5, ces.map(c => c.name === ce.name ? {...c, active: c.active.filter(x => x!==s)} : c));
+                                let t5NewCov = getCoverage(t5, ces);
+                                
+                                // Do not drop a healthy Top 5 state below thresholds
+                                if (t5OldCov >= targetCoverage && t5NewCov < targetCoverage) safeMove = false;
+                                else if (t5OldCov >= 80 && t5NewCov < 80) safeMove = false;
+                            }
+                        }
+
+                        if (safeMove && boost > bestBoost) {
+                            bestBoost = boost;
+                            bestCE = ce;
+                        }
+                        
+                        // Revert simulation
+                        ce.active.pop(); 
+                    }
+                }
+
+                if (bestCE) {
+                    bestCE.active.push(s);
+                    madeChanges = true;
+                }
+            }
+        }
+
+        // Apply final optimized configurations back to the global roster
+        ces.forEach(ce => {
+            CLINICAL_EVALUATORS_ROSTER[ce.name].monthlyToggles[m] = [...ce.active];
+        });
+    });
+
+    saveStateToStorage();
+    recalculateDashboardMetrics();
+}
+
+
+// --- DYNAMIC MONTH MANAGER & ARCHIVE ENGINE ---
 function openMonthManager() {
     renderMonthManagerUI();
     document.getElementById('month-manager-modal').style.display = 'flex';
@@ -895,6 +970,7 @@ function setVolMultiplier(val, btn) {
   recalculateDashboardMetrics();
 }
 
+// --- GOOGLE SHEETS CLOUD SYNC DAILY PARSER ENGINE WITH FAILSAFE UNDO ---
 function undoPtoSync() {
     let backupString = localStorage.getItem('wfm_roster_backup');
     if (backupString) {
@@ -1128,6 +1204,7 @@ async function syncLicensureFromSheets(isSilent = false) {
         let ceName = String(row[ceColIdx]).trim();
         if(!ceName) continue;
 
+        // Failsafe matching: Replace Unicode non-breaking spaces with normal spaces & collapse duplicates
         let matchedCEName = Object.keys(CLINICAL_EVALUATORS_ROSTER).find(name => {
             let cleanRosterName = name.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
             let cleanSheetName = ceName.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -1174,7 +1251,7 @@ async function syncLicensureFromSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated ${updatesCount} CE profiles from Google Sheets.`);
+        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated CE profiles from Google Sheets.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing Licensure CSV:", err);
@@ -1478,6 +1555,8 @@ function renderStateWeightedHeatmap(stateAllocations) {
   const heatmapBody = document.getElementById('heatmap-body');
   if (!heatmapBody) return;
 
+  let optCount = 0, hltCount = 0, wrnCount = 0, crtCount = 0;
+
   heatmapBody.innerHTML = MASTER_STATE_LIST.map(s => {
     let r = stateAllocations[s];
     let processingPercentage = r.demand > 0 ? (r.supply / r.demand) * 100 : 0;
@@ -1487,6 +1566,13 @@ function renderStateWeightedHeatmap(stateAllocations) {
     let displayPct = r.demand > 0 ? `${Math.round(processingPercentage)}%` : '-';
     let barWidth = r.demand > 0 ? Math.min(100, processingPercentage) : 0;
     let barColor = processingPercentage < 80 ? '#ef4444' : (processingPercentage < 95 ? '#f59e0b' : '#22c55e');
+
+    if (r.demand > 0) {
+        if (processingPercentage >= 90) optCount++;
+        else if (processingPercentage >= 80) hltCount++;
+        else if (processingPercentage >= 70) wrnCount++;
+        else crtCount++;
+    }
 
     return `
       <tr>
@@ -1510,6 +1596,29 @@ function renderStateWeightedHeatmap(stateAllocations) {
       </tr>
     `;
   }).join('');
+
+  // Update Summary Boxes
+  const summaryContainer = document.getElementById('heatmap-summary');
+  if (summaryContainer) {
+      summaryContainer.innerHTML = `
+        <div class="summary-box box-opt">
+          <div class="val">${optCount}</div>
+          <div class="lbl">Optimal Phone Screen Cov (≥90%)</div>
+        </div>
+        <div class="summary-box box-hlt">
+          <div class="val">${hltCount}</div>
+          <div class="lbl">Healthy Phone Screen Cov (80-89%)</div>
+        </div>
+        <div class="summary-box box-wrn">
+          <div class="val">${wrnCount}</div>
+          <div class="lbl">Warning Phone Screen Cov (70-79%)</div>
+        </div>
+        <div class="summary-box box-crt">
+          <div class="val">${crtCount}</div>
+          <div class="lbl">Critical Phone Screen Cov (<70%)</div>
+        </div>
+      `;
+  }
 }
 
 function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, targetEnrollment) {
@@ -1745,6 +1854,7 @@ window.addLicenseToProfile = addLicenseToProfile;
 window.addAllLicenses = addAllLicenses;
 window.linkTraceMarker = linkTraceMarker;
 window.clearTraceMarker = clearTraceMarker;
+window.runAutoOptimize = runAutoOptimize;
 
 // --- BOOTSTRAP INITIALIZATION ---
 window.onload = () => {
