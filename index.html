@@ -29,12 +29,8 @@
   .insight-banner p { font-size: 12px; line-height: 1.5; color: #cbd5e1; }
   .insight-banner strong { color: #fff; font-weight: 700; }
 
-  /* HEADER CONTROLS (NOW STICKY) */
-  .header-flex { 
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%; 
-      position: sticky; top: 0; z-index: 1500; background: rgba(15, 17, 23, 0.95); backdrop-filter: blur(5px); 
-      margin: -12px -12px 14px -12px; padding: 12px 16px; border-bottom: 1px solid #2d3548;
-  }
+  /* HEADER CONTROLS */
+  .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; width: 100%; }
   .multiplier-wrap { display: flex; background: #0f1117; padding: 2px; border-radius: 6px; border: 1px solid #2d3548; align-items: center; }
   .m-btn { border: none; background: transparent; color: #64748b; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.15s; }
   .m-btn.active { background: #334155; color: #fff; }
@@ -81,12 +77,11 @@
   
   input, select { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 2px; border-radius: 3px; text-align: center; font-size: 10px; }
   input[type="text"] { text-align: left; padding: 2px 4px; }
-  /* ADDED color-scheme: dark to fix invisible calendar icon in webkit browsers */
-  input[type="date"] { text-align: center; padding: 2px; color: #93c5fd; color-scheme: dark; }
+  input[type="date"] { text-align: center; padding: 2px; color: #93c5fd; }
   .btn-action { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 600; white-space: nowrap; transition: 0.2s; }
   .btn-action:hover { background: #2563eb; }
   .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-remove { color: #ef4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; transition: 0.2s; }
+  .btn-remove { color: #ef4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; }
   .btn-remove:hover { color: #f87171; }
 
   /* ULTRA-COMPACT MODAL VIEWS */
@@ -260,7 +255,6 @@
       <table class="hover-row-trace" style="min-width: 800px;">
         <thead id="weekly-cap-head" style="position: sticky; top: 0; background: #1e2330; z-index: 10;"></thead>
         <tbody id="weekly-cap-body"></tbody>
-        <tfoot id="weekly-cap-foot" style="position: sticky; bottom: 0; z-index: 10;"></tfoot>
       </table>
     </div>
   </div>
@@ -1359,7 +1353,6 @@ async function syncLicensureFromSheets(isSilent = false) {
         let ceName = String(row[ceColIdx]).trim();
         if(!ceName) continue;
 
-        // Failsafe matching: Replace Unicode non-breaking spaces with normal spaces & collapse duplicates
         let matchedCEName = Object.keys(CLINICAL_EVALUATORS_ROSTER).find(name => {
             let cleanRosterName = name.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
             let cleanSheetName = ceName.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -1934,14 +1927,11 @@ function renderWeeklyVolatility() {
 
     let thead = document.getElementById('weekly-cap-head');
     let tbody = document.getElementById('weekly-cap-body');
-    let tfoot = document.getElementById('weekly-cap-foot');
     
     if(thead) {
         thead.innerHTML = `<tr><th style="position:sticky; left:0; background:#1e2330; z-index:2; min-width:140px; border-right:1px solid #2d3548;">Clinical Evaluator</th>` + 
             weeks.map(w => `<th style="text-align:center;">${w.label} CAP</th>`).join('') + `</tr>`;
     }
-
-    let weeklyTotals = [0, 0, 0, 0, 0];
 
     if(tbody) {
         tbody.innerHTML = ROSTER_ORDER.map(name => {
@@ -1949,7 +1939,7 @@ function renderWeeklyVolatility() {
             if(!r) return '';
             let quota = parseFloat(r.quotaMap[activeMonth]) || 0;
             
-            let cells = weeks.map((w, i) => {
+            let cells = weeks.map(w => {
                 if(!w.start || !w.end) return `<td style="text-align:center; color:#64748b;">-</td>`;
                 
                 let startD = new Date(w.start + 'T00:00:00');
@@ -1973,17 +1963,11 @@ function renderWeeklyVolatility() {
                 });
 
                 let weekCap = Math.max(0, (daysInWeek - ptoInWeek) * quota);
-                weeklyTotals[i] += weekCap;
                 return `<td style="text-align:center; font-weight:bold; color:#4ade80;">${Math.round(weekCap)}</td>`;
             }).join('');
 
             return `<tr><td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;"><strong>${name}</strong></td>${cells}</tr>`;
         }).join('');
-    }
-
-    if(tfoot) {
-        tfoot.innerHTML = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548; color:#93c5fd;">WEEKLY SYSTEM TOTALS</td>` +
-            weeks.map((w, i) => `<td class="cap-cell" style="color:#4ade80; background:rgba(34,197,94,0.1);">${Math.round(weeklyTotals[i])}</td>`).join('') + `</tr>`;
     }
 }
 
