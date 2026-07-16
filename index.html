@@ -752,14 +752,15 @@ function runAutoOptimize(allMonths) {
 
 function copyMatrixToClipboard() {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
-    let tsv = "CE Name\t" + MASTER_STATE_LIST.join("\t") + "\n";
+    let tsv = "CE Name\tCount\t" + MASTER_STATE_LIST.join("\t") + "\n";
     
     ROSTER_ORDER.forEach(name => {
         let r = CLINICAL_EVALUATORS_ROSTER[name];
         let mix = r.monthlyToggles[activeMonth] || [];
-        let row = [name];
+        let onCount = mix.length;
+        let row = [name, onCount];
         MASTER_STATE_LIST.forEach(s => {
-            row.push(mix.includes(s) ? "Yes" : "");
+            row.push(mix.includes(s) ? "On" : "Off");
         });
         tsv += row.join("\t") + "\n";
     });
