@@ -11,11 +11,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-  /* IFRAME-SAFE NORMALIZATION */
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   body { background: #0f1117; color: #e2e8f0; padding: 12px; font-size: 11px; line-height: 1.3; width: 100%; max-width: 100vw; overflow-x: hidden; }
   
-  /* GRID ARRANGEMENT */
   .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: start; width: 100%; }
   .panel { background: #1e2330; border-radius: 8px; padding: 12px; border: 1px solid #2d3548; height: 100%; position: relative; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
   .panel h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px; border-bottom: 1px solid #2d3548; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
@@ -23,14 +21,16 @@
   .span-3 { grid-column: span 3; }
   .span-1 { grid-column: span 1; }
 
-  /* EXECUTIVE NARRATIVE INSIGHT BANNER */
   .insight-banner { background: #1a1f2e; border-left: 4px solid #6366f1; padding: 14px; border-radius: 6px; margin-bottom: 16px; border-top: 1px solid #2d3548; border-right: 1px solid #2d3548; border-bottom: 1px solid #2d3548; width: 100%; }
   .insight-banner h3 { font-size: 10px; text-transform: uppercase; color: #a5b4fc; margin-bottom: 6px; letter-spacing: 0.05em; }
   .insight-banner p { font-size: 12px; line-height: 1.5; color: #cbd5e1; }
   .insight-banner strong { color: #fff; font-weight: 700; }
 
-  /* HEADER CONTROLS */
-  .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; width: 100%; }
+  .header-flex { 
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%; 
+      position: sticky; top: 0; z-index: 1500; background: rgba(15, 17, 23, 0.95); backdrop-filter: blur(5px); 
+      margin: -12px -12px 14px -12px; padding: 12px 16px; border-bottom: 1px solid #2d3548;
+  }
   .multiplier-wrap { display: flex; background: #0f1117; padding: 2px; border-radius: 6px; border: 1px solid #2d3548; align-items: center; }
   .m-btn { border: none; background: transparent; color: #64748b; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.15s; }
   .m-btn.active { background: #334155; color: #fff; }
@@ -41,26 +41,22 @@
   .btn-horizon { background: #111827; border: 1px dashed #4b5563; color: #9ca3af; padding: 4px 6px; border-radius: 4px; font-size: 9px; cursor: pointer; transition: 0.2s; }
   .btn-horizon:hover { border-color: #6366f1; color: #f3f4f6; background: #1e293b; }
 
-  /* HIGH LEVEL METRICS SUMMARY CARDS */
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; width: 100%; }
   .stat-card { background: #252c3f; padding: 10px; border-radius: 6px; border: 1px solid #3d4a63; }
   .stat-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
   .stat-val { font-size: 18px; font-weight: 700; color: #f8fafc; }
   .info-icon { cursor: help; display: inline-flex; justify-content: center; align-items: center; width: 14px; height: 14px; background: #3d4a63; color: #e2e8f0; border-radius: 50%; font-size: 9px; font-weight: bold; margin-left: 4px; text-decoration: none; font-style: normal; }
 
-  /* PURE CSS TOOLTIPS */
   .tooltip-container { position: relative; display: inline-flex; align-items: center; }
   .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 10px; border: 1px solid #475569; position: absolute; z-index: 1000; bottom: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 10px; font-weight: normal; text-transform: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); pointer-events: none; }
   .tooltip-container:hover .tooltip-text, .summary-box:hover .tooltip-text { visibility: visible; opacity: 1; }
   .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #475569 transparent transparent transparent; }
 
-  /* TABULAR DATA ARCHITECTURE */
   table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 10px; }
   th { padding: 4px 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; background: #1e2330; white-space: nowrap; }
   td { padding: 3px 6px; border-bottom: 1px solid #1a2030; }
   .hover-row-trace tbody tr:hover td { background-color: #242b3d !important; }
   
-  /* MATRIX ARBITRAGE COLOR MATRIX SCHEMES */
   .matrix-btn { width: 100%; border: none; border-radius: 3px; font-size: 9px; font-weight: 700; cursor: pointer; padding: 3px 0; transition: 0.2s; }
   .matrix-btn-on { background: #22c55e; color: #0f1117; }
   .matrix-btn-on:hover { background: #16a34a; }
@@ -77,14 +73,13 @@
   
   input, select { background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 2px; border-radius: 3px; text-align: center; font-size: 10px; }
   input[type="text"] { text-align: left; padding: 2px 4px; }
-  input[type="date"] { text-align: center; padding: 2px; color: #93c5fd; }
+  input[type="date"] { text-align: center; padding: 2px; color: #93c5fd; color-scheme: dark; }
   .btn-action { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 600; white-space: nowrap; transition: 0.2s; }
   .btn-action:hover { background: #2563eb; }
   .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-remove { color: #ef4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; }
+  .btn-remove { color: #ef4444; background: transparent; border: none; cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; transition: 0.2s; }
   .btn-remove:hover { color: #f87171; }
 
-  /* ULTRA-COMPACT MODAL VIEWS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); padding: 10px; }
   .modal-content { background: #1e2330; padding: 16px; border-radius: 8px; border: 1px solid #3d4a63; width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
   
@@ -99,14 +94,12 @@
   .cap-cell { font-weight: 700; color: #6366f1; text-align: center; border-right: 1px solid #2d3548; background: rgba(0,0,0,0.2); }
   .chart-container { height: 150px; width: 100%; margin-bottom: 4px; }
 
-  /* SIDEBAR STYLES */
   .ce-row { margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #2d3548; }
   .state-pill-toggle { display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px; border-radius: 3px; font-size: 8px; cursor: pointer; margin: 1px; font-weight: 700; border: 1px solid transparent; }
   .state-on { background: #1e3a5f; color: #93c5fd; border-color: #3b82f6; }
   .state-off { background: #0f1117; color: #475569; border-color: #1a2030; }
   .del-btn { color: #ef4444; font-size: 9px; margin-left: 2px; cursor: pointer; opacity: 0.5; }
 
-  /* HEATMAP SUMMARY BOXES */
   .summary-box { flex: 1; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid transparent; position: relative; cursor: help; }
   .summary-box .val { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
   .summary-box .lbl { font-size: 8px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; }
@@ -147,7 +140,6 @@
   </div>
 </div>
 
-<!-- REAL-TIME NARRATIVE ENGINE VIEWPORT -->
 <div class="insight-banner" id="executive-insight-banner"></div>
 
 <div class="stat-grid" id="top-stats-container"></div>
@@ -183,7 +175,7 @@
       <span>Profile Manager</span>
       <div style="display: flex; gap: 4px;">
         <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #6366f1;" onclick="window.addAllStatesToAllProviders()" title="Adds all active tracking states to EVERY provider's profile">+ ALL</button>
-        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #10b981;" onclick="window.syncLicensureFromSheets(false)" title="Sync Licensure Profiles from Google Sheets">🔄 SYNC</button>
+        <button class="btn-action" style="padding: 2px 6px; font-size: 8px; background: #10b981;" onclick="window.syncLicensureFromSheets(false)" title="Sync Licensure Profiles from Google Sheets">🔄 SYNC LICENSURE</button>
       </div>
     </h2>
     <div id="ce-controls" style="max-height: 380px; overflow-y: auto; padding-right: 5px;"></div>
@@ -255,6 +247,7 @@
       <table class="hover-row-trace" style="min-width: 800px;">
         <thead id="weekly-cap-head" style="position: sticky; top: 0; background: #1e2330; z-index: 10;"></thead>
         <tbody id="weekly-cap-body"></tbody>
+        <tfoot id="weekly-cap-foot" style="position: sticky; bottom: 0; z-index: 10;"></tfoot>
       </table>
     </div>
   </div>
@@ -378,10 +371,9 @@ let isFirebaseSynced = false;
 let localLastUpdated = parseInt(localStorage.getItem('wfm_last_updated')) || 0;
 
 // --- CRASH PROOF UTILITIES ---
-function fmt(num) {
+window.fmt = function(num) {
     return Math.round(num || 0).toLocaleString();
 }
-window.fmt = fmt;
 
 // --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -440,6 +432,7 @@ const BASELINE_CE_CONFIG = {
   "Hayley Feuchs": { q: 4, profile: ["NY","DC","NV","AZ"] }
 };
 
+// --- STREAMING_CHUNK:Firebase Sync Logic... ---
 function initFirebase() {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -529,7 +522,7 @@ function pushToFirebase() {
     });
 }
 
-// --- CRASH-PROOF STRUCTURAL HYDRATION ENGINE ---
+// --- STREAMING_CHUNK:Hydration Data Engine... ---
 function bootstrapDataEngine() {
   try {
     ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v21')) || ["May","June","July","August","September","October","November","December"];
@@ -647,7 +640,7 @@ function triggerFactoryResetWfm() {
   location.reload();
 }
 
-// --- INTELLIGENT AUTO-OPTIMIZE ENGINE ---
+// --- STREAMING_CHUNK:AI Auto Optimize Engine... ---
 function runAutoOptimize(allMonths) {
     let monthsToProcess = allMonths ? ACTIVE_HORIZON_TIMELINE : [ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx]];
     
@@ -771,7 +764,7 @@ function copyMatrixToClipboard() {
     document.body.removeChild(textarea);
 }
 
-// --- DYNAMIC MONTH MANAGER & ARCHIVE ENGINE ---
+// --- STREAMING_CHUNK:Dynamic Month Management... ---
 function openMonthManager() {
     renderMonthManagerUI();
     document.getElementById('month-manager-modal').style.display = 'flex';
@@ -986,6 +979,7 @@ function toggleModalEnvelope(id) {
   }
 }
 
+// --- STREAMING_CHUNK:Global Settings Population... ---
 function populateGlobalModalViews() {
   const stateListInput = document.getElementById('modal-state-list-input');
   if(stateListInput) {
@@ -1113,7 +1107,7 @@ function setVolMultiplier(val, btn) {
   recalculateDashboardMetrics();
 }
 
-// --- GOOGLE SHEETS CLOUD SYNC DAILY PARSER ENGINE WITH FAILSAFE UNDO ---
+// --- STREAMING_CHUNK:Google Sheets Sync Engine... ---
 function undoPtoSync() {
     let backupString = localStorage.getItem('wfm_roster_backup');
     if (backupString) {
@@ -1353,6 +1347,7 @@ async function syncLicensureFromSheets(isSilent = false) {
         let ceName = String(row[ceColIdx]).trim();
         if(!ceName) continue;
 
+        // Failsafe matching: Replace Unicode non-breaking spaces with normal spaces & collapse duplicates
         let matchedCEName = Object.keys(CLINICAL_EVALUATORS_ROSTER).find(name => {
             let cleanRosterName = name.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
             let cleanSheetName = ceName.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -1367,7 +1362,8 @@ async function syncLicensureFromSheets(isSilent = false) {
             Object.keys(stateColMap).forEach(state => {
                 let colIdx = stateColMap[state];
                 let cellVal = String(row[colIdx]).trim();
-                if (cellVal === 'Yes' || cellVal === 'Y' || cellVal.toLowerCase() === 'yes') {
+                // Add explicit logic to capture "On" and "Yes" to handle the user's specific spreadsheet format
+                if (cellVal === 'Yes' || cellVal === 'Y' || cellVal.toLowerCase() === 'yes' || cellVal.toLowerCase() === 'on') {
                     newProfile.push(state);
                 }
             });
@@ -1413,6 +1409,7 @@ async function syncLicensureFromSheets(isSilent = false) {
   }
 }
 
+// --- STREAMING_CHUNK:Roster Management & Toggling... ---
 function moveCE(name, dir) {
     let idx = ROSTER_ORDER.indexOf(name);
     if (idx < 0) return;
@@ -1539,6 +1536,7 @@ function addAllStatesToAllProviders() {
   recalculateDashboardMetrics();
 }
 
+// --- STREAMING_CHUNK:Math Algorithms & Dashboard Re-renders... ---
 function recalculateDashboardMetrics() {
   try {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
@@ -1900,7 +1898,7 @@ function updateClinicianBaseQuota(name, month, value) {
   recalculateDashboardMetrics();
 }
 
-// --- WEEKLY CAPACITY VOLATILITY ---
+// --- STREAMING_CHUNK:Weekly Capacity Volatility Engine... ---
 function renderWeeklyVolatility() {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
     if (!GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks || GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks.length === 0) {
@@ -1927,11 +1925,14 @@ function renderWeeklyVolatility() {
 
     let thead = document.getElementById('weekly-cap-head');
     let tbody = document.getElementById('weekly-cap-body');
+    let tfoot = document.getElementById('weekly-cap-foot');
     
     if(thead) {
         thead.innerHTML = `<tr><th style="position:sticky; left:0; background:#1e2330; z-index:2; min-width:140px; border-right:1px solid #2d3548;">Clinical Evaluator</th>` + 
             weeks.map(w => `<th style="text-align:center;">${w.label} CAP</th>`).join('') + `</tr>`;
     }
+
+    let weeklyTotals = [0, 0, 0, 0, 0];
 
     if(tbody) {
         tbody.innerHTML = ROSTER_ORDER.map(name => {
@@ -1939,7 +1940,7 @@ function renderWeeklyVolatility() {
             if(!r) return '';
             let quota = parseFloat(r.quotaMap[activeMonth]) || 0;
             
-            let cells = weeks.map(w => {
+            let cells = weeks.map((w, i) => {
                 if(!w.start || !w.end) return `<td style="text-align:center; color:#64748b;">-</td>`;
                 
                 let startD = new Date(w.start + 'T00:00:00');
@@ -1963,11 +1964,17 @@ function renderWeeklyVolatility() {
                 });
 
                 let weekCap = Math.max(0, (daysInWeek - ptoInWeek) * quota);
+                weeklyTotals[i] += weekCap;
                 return `<td style="text-align:center; font-weight:bold; color:#4ade80;">${Math.round(weekCap)}</td>`;
             }).join('');
 
             return `<tr><td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;"><strong>${name}</strong></td>${cells}</tr>`;
         }).join('');
+    }
+
+    if(tfoot) {
+        tfoot.innerHTML = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548; color:#93c5fd;">WEEKLY SYSTEM TOTALS</td>` +
+            weeks.map((w, i) => `<td class="cap-cell" style="color:#4ade80; background:rgba(34,197,94,0.1);">${Math.round(weeklyTotals[i])}</td>`).join('') + `</tr>`;
     }
 }
 
