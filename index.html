@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
   body { background: #0f1117; color: #e2e8f0; padding: 12px; font-size: 11px; line-height: 1.3; width: 100%; max-width: 100vw; overflow-x: hidden; }
   
   .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: start; width: 100%; }
@@ -31,7 +31,7 @@
       position: sticky; top: 0; z-index: 1500; background: rgba(15, 17, 23, 0.95); backdrop-filter: blur(5px); 
       margin: -12px -12px 14px -12px; padding: 12px 16px; border-bottom: 1px solid #2d3548;
   }
-  .multiplier-wrap { display: flex; background: #0f1117; padding: 2px; border-radius: 6px; border: 1px solid #2d3548; align-items: center; }
+  .multiplier-wrap { display: flex; background: #0f1117; padding: 2px 4px; border-radius: 6px; border: 1px solid #2d3548; align-items: center; }
   .m-btn { border: none; background: transparent; color: #64748b; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 700; transition: 0.15s; }
   .m-btn.active { background: #334155; color: #fff; }
 
@@ -45,12 +45,11 @@
   .stat-card { background: #252c3f; padding: 10px; border-radius: 6px; border: 1px solid #3d4a63; }
   .stat-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
   .stat-val { font-size: 18px; font-weight: 700; color: #f8fafc; }
-  .info-icon { cursor: help; display: inline-flex; justify-content: center; align-items: center; width: 14px; height: 14px; background: #3d4a63; color: #e2e8f0; border-radius: 50%; font-size: 9px; font-weight: bold; margin-left: 4px; text-decoration: none; font-style: normal; }
+  .info-tag { cursor: help; display: inline-flex; justify-content: center; align-items: center; width: 13px; height: 13px; background: #3d4a63; color: #cbd5e1; border-radius: 50%; font-size: 9px; font-weight: bold; text-decoration: none; }
 
-  .tooltip-container { position: relative; display: inline-flex; align-items: center; }
-  .tooltip-text { visibility: hidden; width: 220px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 10px; border: 1px solid #475569; position: absolute; z-index: 1000; bottom: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 10px; font-weight: normal; text-transform: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); pointer-events: none; }
-  .tooltip-container:hover .tooltip-text, .summary-box:hover .tooltip-text { visibility: visible; opacity: 1; }
-  .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #475569 transparent transparent transparent; }
+  .role-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 8px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+  .role-lead { background: #4338ca; color: #e0e7ff; border: 1px solid #6366f1; }
+  .role-ce { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
 
   table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 10px; }
   th { padding: 4px 6px; color: #64748b; border-bottom: 1px solid #2d3548; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; background: #1e2330; white-space: nowrap; }
@@ -64,7 +63,7 @@
   .matrix-btn-off:hover { background: #475569; color: #f1f5f9; }
   .matrix-cell-empty { background: #0b0e14; text-align: center; color: #2d3548; font-size: 10px; }
 
-  .provider-pill { display: inline-block; background: #312e81; color: #c7d2fe; padding: 2px 6px; border-radius: 10px; font-size: 8px; font-weight: 600; margin: 1px; white-space: nowrap; }
+  .provider-pill { display: inline-block; background: #312e81; color: #c7d2fe; padding: 2px 6px; border-radius: 10px; font-size: 8px; font-weight: 600; margin: 1px; white-space: nowrap; cursor: pointer; }
   .progress-bg { background: #0f1117; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 3px; width: 100%; min-width: 40px; }
   .progress-fill { height: 100%; transition: width 0.3s ease; }
   
@@ -106,13 +105,10 @@
   
   .box-opt { background: rgba(59,130,246,0.1); border-color: #3b82f6; }
   .box-opt .val { color: #93c5fd; } .box-opt .lbl { color: #60a5fa; }
-  
   .box-hlt { background: rgba(34,197,94,0.1); border-color: #22c55e; }
   .box-hlt .val { color: #86efac; } .box-hlt .lbl { color: #4ade80; }
-  
   .box-wrn { background: rgba(234,179,8,0.1); border-color: #eab308; }
   .box-wrn .val { color: #fde047; } .box-wrn .lbl { color: #facc15; }
-  
   .box-crt { background: rgba(239,68,68,0.1); border-color: #ef4444; }
   .box-crt .val { color: #fca5a5; } .box-crt .lbl { color: #f87171; }
 </style>
@@ -120,20 +116,22 @@
 <body>
 
 <div class="header-flex">
-  <div><h1 style="font-size: 15px; margin: 0;">CE Capacity Model <span style="font-weight:400; color:#64748b;">· Strategic WFM Suite</span></h1></div>
+  <div>
+    <h1 style="font-size: 15px; margin: 0;">CE Capacity Model <span style="font-weight:400; color:#64748b;">· Strategic WFM Suite</span></h1>
+  </div>
   
   <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-    <div class="multiplier-wrap">
-      <span style="font-size:9px; color:#94a3b8; font-weight:700; padding: 0 8px;">VOLUME BUMP:</span>
+    <div class="multiplier-wrap" title="Stress-test top-of-funnel application volume by +5% or +10%">
+      <span style="font-size:9px; color:#94a3b8; font-weight:700; padding: 0 8px;">APP BUMP:</span>
       <button class="m-btn active" id="m-base" onclick="window.setVolMultiplier(1.0, this)">BASE</button>
       <button class="m-btn" id="m-5" onclick="window.setVolMultiplier(1.05, this)">+5%</button>
       <button class="m-btn" id="m-10" onclick="window.setVolMultiplier(1.10, this)">+10%</button>
     </div>
 
-    <!-- NEW DEMAND REALIZATION / SCALING FACTOR INPUT -->
-    <div class="multiplier-wrap" title="Scales monthly state demand projections without altering enrollment targets. E.g., 90% or 95% haircut.">
-      <span style="font-size:9px; color:#a5b4fc; font-weight:700; padding: 0 6px;">DEMAND SCALE:</span>
-      <input type="number" id="demand-scale-input" value="100" min="1" max="250" step="1" style="width: 44px; padding: 2px; font-weight: bold; color: #93c5fd; text-align: center;" onchange="window.setDemandScale(this.value)">
+    <!-- APP TO PHONE SCREEN CONVERSION / DEMAND REALIZATION FACTOR -->
+    <div class="multiplier-wrap" title="Historical conversion rate from incoming Accepted Applications into scheduled Phone Screens. Default is 90%.">
+      <span style="font-size:9px; color:#a5b4fc; font-weight:700; padding: 0 6px;">APP → PS CONV:</span>
+      <input type="number" id="demand-scale-input" value="90" min="1" max="250" step="1" style="width: 44px; padding: 2px; font-weight: bold; color: #93c5fd; text-align: center;" onchange="window.setDemandScale(this.value)">
       <span style="font-size:9px; color:#64748b; padding-right: 6px; font-weight: 700;">%</span>
     </div>
   </div>
@@ -149,14 +147,16 @@
   </div>
 </div>
 
+<!-- EXECUTIVE NARRATIVE INSIGHT BANNER -->
 <div class="insight-banner" id="executive-insight-banner"></div>
 
+<!-- TOP KPI STAT CARDS -->
 <div class="stat-grid" id="top-stats-container"></div>
 
 <div class="dashboard-grid">
   <!-- FORECAST PROJECTION -->
   <div class="panel full-width">
-    <h2>Rolling Horizon Strategy Graph (Capacity Supply Line vs Demand Curve)</h2>
+    <h2>Rolling Horizon Strategy Graph (Capacity Supply Line vs Phone Screen Demand Curve)</h2>
     <div class="chart-container"><canvas id="wfmAnnualChart"></canvas></div>
   </div>
 
@@ -164,14 +164,12 @@
   <div class="panel full-width">
     <h2 id="matrix-title-label">
       <span>State Allocation & Licensure Grid</span>
-      <button class="btn-action" style="padding: 2px 8px; font-size: 8px; background: #475569; border: 1px solid #64748b;" onclick="window.copyMatrixToClipboard()" title="Copies grid to your clipboard for instant Google Sheets pasting">📋 COPY TO SHEETS</button>
+      <button class="btn-action" style="padding: 2px 8px; font-size: 8px; background: #475569; border: 1px solid #64748b;" onclick="window.copyMatrixToClipboard()" title="Copies grid to clipboard for Google Sheets pasting">📋 COPY TO SHEETS</button>
     </h2>
-    <p style="font-size: 9px; color: #94a3b8; margin-bottom: 8px;">The grid below displays all evaluators. Dark cells mean the CE is unlicensed in that state. Click any <span style="background:#3d4a63; color:#f1f5f9; padding:1px 3px; border-radius:3px;">OFF</span> button to instantly route capacity.</p>
+    <p style="font-size: 9px; color: #94a3b8; margin-bottom: 8px;">The grid below displays all clinical evaluators and leads. Toggling an evaluator ON proportionally directs their calendar capacity to clear localized Phone Screen backlogs.</p>
     <div style="overflow-x: auto; width: 100%; max-height: 400px; overflow-y: auto;">
       <table class="hover-row-trace" id="matrix-licensure-table" style="min-width: 1200px;">
-        <thead>
-          <tr id="matrix-head-row"></tr>
-        </thead>
+        <thead><tr id="matrix-head-row"></tr></thead>
         <tbody id="matrix-body-rows"></tbody>
         <tfoot id="matrix-foot-totals"></tfoot>
       </table>
@@ -190,10 +188,10 @@
     <div id="ce-controls" style="max-height: 380px; overflow-y: auto; padding-right: 5px;"></div>
   </div>
 
-  <!-- HEATMAP -->
+  <!-- STATE WEIGHTED DISTRIBUTION BALANCE -->
   <div class="panel span-3">
     <h2 id="heat-title" style="align-items: center; display: flex; justify-content: space-between;">
-      <span>State Weighted Distribution Balance</span>
+      <span>State Weighted Distribution Balance (Phone Screens)</span>
       <div style="display:flex; gap:6px;">
         <button class="btn-action" style="background: #8b5cf6;" onclick="window.runAutoOptimize(false)" title="Clears and mathematically recalculates optimal alignments for currently selected month.">✨ OPTIMIZE MONTH</button>
         <button class="btn-action" style="background: #6d28d9;" onclick="if(confirm('This will wipe all manual toggles and generate mathematically optimized capacity assignments for EVERY month tracking in your horizon simultaneously. Proceed?')) window.runAutoOptimize(true)" title="Generates optimums for ALL active months simultaneously">✨ OPTIMIZE ALL</button>
@@ -205,11 +203,12 @@
         <thead style="position: sticky; top: 0; background: #1e2330; z-index: 10;">
             <tr>
             <th>State</th>
-            <th>Demand</th>
+            <th>Apps Intake</th>
+            <th>PS Demand</th>
             <th>Weighted Cap</th>
             <th>Coverage %</th>
             <th>Balance Gap</th>
-            <th>Assigned Clinical Evaluators</th>
+            <th>Assigned Clinicians</th>
             </tr>
         </thead>
         <tbody id="heatmap-body"></tbody>
@@ -217,15 +216,18 @@
     </div>
   </div>
 
-  <!-- DYNAMIC ROSTER AND PTO ALLOCATION LEDGER -->
   <div class="panel full-width">
-    <h2>Rolling PTO, Quota & Capacity Management Ledger</h2>
+    <h2>Rolling PTO, Quota & Clinical Role Management Ledger</h2>
     
-    <div style="display: flex; justify-content: space-between; align-items: center; background: #161b26; padding: 8px 12px; border-radius: 6px; border: 1px solid #2d3548; margin-bottom: 12px;">
-      <div style="display: flex; gap: 8px; align-items: center;">
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #161b26; padding: 8px 12px; border-radius: 6px; border: 1px solid #2d3548; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <span style="font-weight: 600; color: #a5b4fc; font-size: 10px;">Roster Onboarding:</span>
-          <input type="text" id="new-clinician-name" placeholder="Enter full name of incoming Evaluator" style="width: 220px;">
-          <button class="btn-action" onclick="window.addNewClinicianToRoster()">+ Provision Evaluator Seat</button>
+          <input type="text" id="new-clinician-name" placeholder="Full Name" style="width: 170px;">
+          <select id="new-clinician-role" style="font-weight: bold; color: #a5b4fc; background: #0f1117;">
+            <option value="CE">Standard CE</option>
+            <option value="LEAD">Lead CE</option>
+          </select>
+          <button class="btn-action" onclick="window.addNewClinicianToRoster()">+ Provision Seat</button>
       </div>
       <div style="display: flex; gap: 8px;">
           <button class="btn-action" id="undo-sync-btn" style="background:#f59e0b; color:#78350f; display:none;" onclick="window.undoPtoSync()">⏪ UNDO SYNC</button>
@@ -270,14 +272,12 @@
         <button class="btn-action" style="background:#475569;" onclick="document.getElementById('month-manager-modal').style.display='none'">CLOSE</button>
     </div>
 
-    <!-- ADD NEW MONTH -->
     <div style="display:flex; gap: 8px; margin-bottom: 16px; align-items: center; background: #161b26; padding: 12px; border-radius: 6px; border: 1px solid #2d3548;">
         <span style="font-size: 11px; color: #94a3b8; font-weight: bold;">+ Add New Month:</span>
         <input type="text" id="new-month-input" placeholder="e.g. June, Q3, etc." style="flex:1; padding: 6px;">
         <button class="btn-action" style="background: #10b981;" onclick="window.addNewSpecificMonth()">ADD TO TIMELINE</button>
     </div>
 
-    <!-- ACTIVE TIMELINE -->
     <h3 style="font-size: 11px; color: #a5b4fc; text-transform: uppercase; margin-bottom: 8px;">Active Horizon</h3>
     <table class="compact-modal-table" style="width: 100%; margin-bottom: 16px;">
         <thead>
@@ -290,7 +290,6 @@
         <tbody id="active-months-tbody"></tbody>
     </table>
 
-    <!-- ARCHIVE VAULT -->
     <h3 style="font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">Archived Vault</h3>
     <div id="archive-vault-container" style="display: flex; gap: 8px; flex-wrap: wrap; background: #161b26; padding: 12px; border-radius: 6px; border: 1px solid #2d3548; min-height: 50px;"></div>
   </div>
@@ -300,11 +299,10 @@
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-content">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #2d3548; padding-bottom: 10px;">
-        <h2 style="margin:0; border:none; color:#fff; font-size:13px;">Global Base Targets & Projections</h2>
+        <h2 style="margin:0; border:none; color:#fff; font-size:13px;">Global Base Targets & Accepted App Projections</h2>
         <button class="btn-action" onclick="window.saveGlobalModalParams()">COMMIT PARAMETERS & RECALCULATE</button>
     </div>
 
-    <!-- COMPACT WORKING DAYS SECTION -->
     <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <h2 style="margin-bottom: 4px; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Calendar Working Days</h2>
         <div style="overflow-x: auto;">
@@ -312,21 +310,19 @@
         </div>
     </div>
     
-    <!-- COMPACT STATE LIST MANAGER -->
     <div style="margin-bottom: 12px; background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
             <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Active State Territories (Order & Additions)</h2>
             <button class="btn-action" onclick="window.updateMasterStateList()" style="padding: 2px 6px; font-size: 8px; background: #6366f1;">APPLY STATES</button>
         </div>
-        <p style="font-size: 8px; color: #64748b; margin-bottom: 6px;">Enter state codes separated by commas to change tracking order or add new states. Click Apply to update the grid below.</p>
+        <p style="font-size: 8px; color: #64748b; margin-bottom: 6px;">Enter state codes separated by commas to change tracking order or add new states.</p>
         <textarea id="modal-state-list-input" style="width: 100%; background: #0f1117; border: 1px solid #3d4a63; color: #fff; padding: 6px; font-size: 10px; border-radius: 4px; resize: vertical; min-height: 35px;"></textarea>
     </div>
 
-    <!-- COMPACT DEMAND SECTION -->
     <div style="background: #161b26; border: 1px solid #2d3548; border-radius: 6px; padding: 8px;">
         <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
-            <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Accepted App Projections & Target Enrollments</h2>
-            <span style="font-size: 8px; color: #64748b;"><strong>Tip:</strong> Highlight data in Google Sheets, click first box below, and press <strong>CTRL+V</strong></span>
+            <h2 style="margin:0; font-size: 9px; color: #94a3b8; text-transform: uppercase;">Accepted Applications Projections & Target Enrollments</h2>
+            <span style="font-size: 8px; color: #64748b;"><strong>Tip:</strong> Copy data from Google Sheets and press <strong>CTRL+V</strong> in the first box</span>
         </div>
         <div style="max-height: 380px; overflow-y: auto; overflow-x: auto; border: 1px solid #2d3548; border-radius: 4px;">
             <table class="compact-modal-table" id="modal-demand-entry-table" style="width: 100%;"></table>
@@ -347,13 +343,13 @@
         <button class="btn-action" style="background:#475569;" onclick="document.getElementById('summary-modal').style.display='none'">CLOSE</button>
     </div>
     <div style="color: #cbd5e1; font-size: 12px; line-height: 1.6;">
-        <p style="margin-bottom: 12px;"><strong style="color: #93c5fd;">What it does:</strong> Geographic regulatory compliance and capacity matching.</p>
-        <p style="margin-bottom: 12px;"><strong style="color: #c4b5fd;">Core Focus:</strong> This dashboard answers the question: <em>“Are our clinicians licensed in the right places to handle state-specific demand spikes?”</em></p>
+        <p style="margin-bottom: 12px;"><strong style="color: #93c5fd;">Top of Funnel vs. Phone Screens:</strong> Input numbers represent <strong>Accepted Applications</strong>. A historical conversion rate (default 90%) converts incoming applications into scheduled Phone Screens.</p>
+        <p style="margin-bottom: 12px;"><strong style="color: #c4b5fd;">Lead Role Management:</strong> Clinical Leads (Brian Richter, Dina Siegel, Sheila Rouzitalab, Tori Mahoney) carry administrative leadership duties alongside clinical quotas. Roles are fully editable across the team.</p>
         <strong style="color: #34d399;">Key Features:</strong>
         <ul style="margin-top: 6px; margin-left: 20px; color: #94a3b8;">
-            <li style="margin-bottom: 6px;">Maps out a matrix of Clinical Evaluators against the 28+ state territories they are legally allowed to practice in.</li>
-            <li style="margin-bottom: 6px;">Allows you to switch a CE's availability "ON" or "OFF" for specific states, automatically re-weighting their calendar capacity to cover localized backlogs.</li>
-            <li>Provides a rolling strategy graph comparing state-by-state demand against actual state coverage limits.</li>
+            <li style="margin-bottom: 6px;">Maps out Clinical Evaluators and Leads against state territories they are legally certified in.</li>
+            <li style="margin-bottom: 6px;">Switches an evaluator's availability "ON" or "OFF" for specific states, mathematically balancing slot allocation.</li>
+            <li>Rolling horizon graph tracks Phone Screen Demand against available capacity.</li>
         </ul>
     </div>
   </div>
@@ -364,7 +360,7 @@ let ACTIVE_HORIZON_TIMELINE = [];
 let GLOBAL_PROJECTIONS_LEDGER = {};
 let CLINICAL_EVALUATORS_ROSTER = {};
 let volGrowthMultiplier = 1.0;
-let demandScalePercent = 100.0; // Scaled demand realization percentage (e.g. 90% or 95%)
+let demandScalePercent = 90.0; // Historical conversion rate: 90% Application -> Phone Screen Scheduled
 let activeSelectedMonthIdx = 0;
 let operationalChartInstance = null;
 let MASTER_STATE_LIST = [];
@@ -420,20 +416,20 @@ const BASELINE_PTO_MAP = {
 };
 
 const BASELINE_CE_CONFIG = {
-  "Brian Richter": { q: 3, profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
-  "Charlotte Lively": { q: 4, profile: ["NH","CT","PA","RI","VA","OH","TX"] },
-  "Dina Siegel": { q: 4, profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
-  "Gabby Suihkonen-Gross": { q: 4, profile: ["MA","NH","RI","ME"] },
-  "Sheila Rouzitalab": { q: 4, profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
-  "Tori Mahoney": { q: 4, profile: ["MA","NH","RI","ME","VA","OH"] },
-  "Mackenzie Sheridan": { q: 4, profile: ["MA","NH","CT","ME","OH"] },
-  "Sarah Lee": { q: 4, profile: ["MA","NJ","CT","VA"] },
-  "Larisa Zaleta": { q: 4, profile: ["NJ","CT","NY","IL","DC","FL"] },
-  "Simon Jencius": { q: 4, profile: ["MA","NJ","OH","IL"] },
-  "Charlie Snyder": { q: 4, profile: ["NY","TX","NV"] },
-  "Grace Rezendes": { q: 4, profile: ["MA","NH","RI","ME"] },
-  "Michelle Zalewski": { q: 4, profile: ["MA","PA","IL"] },
-  "Hayley Feuchs": { q: 4, profile: ["NY","DC","NV","AZ"] }
+  "Brian Richter": { q: 3, role: "LEAD", profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
+  "Charlotte Lively": { q: 4, role: "CE", profile: ["NH","CT","PA","RI","VA","OH","TX"] },
+  "Dina Siegel": { q: 4, role: "LEAD", profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
+  "Gabby Suihkonen-Gross": { q: 4, role: "CE", profile: ["MA","NH","RI","ME"] },
+  "Sheila Rouzitalab": { q: 4, role: "LEAD", profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
+  "Tori Mahoney": { q: 4, role: "LEAD", profile: ["MA","NH","RI","ME","VA","OH"] },
+  "Mackenzie Sheridan": { q: 4, role: "CE", profile: ["MA","NH","CT","ME","OH"] },
+  "Sarah Lee": { q: 4, role: "CE", profile: ["MA","NJ","CT","VA"] },
+  "Larisa Zaleta": { q: 4, role: "CE", profile: ["NJ","CT","NY","IL","DC","FL"] },
+  "Simon Jencius": { q: 4, role: "CE", profile: ["MA","NJ","OH","IL"] },
+  "Charlie Snyder": { q: 4, role: "CE", profile: ["NY","TX","NV"] },
+  "Grace Rezendes": { q: 4, role: "CE", profile: ["MA","NH","RI","ME"] },
+  "Michelle Zalewski": { q: 4, role: "CE", profile: ["MA","PA","IL"] },
+  "Hayley Feuchs": { q: 4, role: "CE", profile: ["NY","DC","NV","AZ"] }
 };
 
 function initFirebase() {
@@ -470,13 +466,16 @@ function syncWithFirebase() {
                 GLOBAL_PROJECTIONS_LEDGER = data.ledger || {};
                 CLINICAL_EVALUATORS_ROSTER = data.roster || {};
                 volGrowthMultiplier = data.multiplier || 1.0;
-                demandScalePercent = data.demandScale !== undefined ? data.demandScale : 100.0;
+                demandScalePercent = data.demandScale !== undefined ? data.demandScale : 90.0;
                 MASTER_STATE_LIST = data.stateList || [];
                 ROSTER_ORDER = data.rosterOrder || Object.keys(CLINICAL_EVALUATORS_ROSTER);
                 ARCHIVED_TIMELINE = data.archiveTime || [];
                 ARCHIVED_LEDGER = data.archiveLedg || {};
                 ARCHIVED_ROSTER = data.archiveRost || {};
                 
+                // Enforce lead role baseline if missing
+                enforceKnownLeadRoles();
+
                 saveToLocalOnly();
                 localStorage.setItem('wfm_last_updated', cloudLastUpdated);
                 localLastUpdated = cloudLastUpdated;
@@ -484,23 +483,14 @@ function syncWithFirebase() {
                 activeSelectedMonthIdx = 0; 
                 buildTimelineControls();
                 recalculateDashboardMetrics();
-                console.log("State pulled FROM Firebase seamlessly (Cloud is newer).");
             } else if (localTime > cloudLastUpdated) {
                 pushToFirebase();
-                console.log("State pushed TO Firebase seamlessly (Local is newer).");
-            } else {
-                console.log("Local and Cloud states are perfectly synced.");
             }
         } else {
             pushToFirebase();
-            console.log("Firebase empty. Seeded WITH local data.");
         }
     }).catch((error) => {
-        if (error.code === 'PERMISSION_DENIED') {
-            console.warn("⚠️ FIREBASE PERMISSION DENIED: Running in Local-Only mode.");
-        } else {
-            console.error("Firebase Background Sync Error:", error);
-        }
+        console.warn("Firebase Sync Warning:", error.message);
     });
 }
 
@@ -523,13 +513,22 @@ function pushToFirebase() {
     });
 }
 
+function enforceKnownLeadRoles() {
+    const knownLeads = ["Brian Richter", "Dina Siegel", "Sheila Rouzitalab", "Tori Mahoney"];
+    Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+        if (!CLINICAL_EVALUATORS_ROSTER[name].role) {
+            CLINICAL_EVALUATORS_ROSTER[name].role = knownLeads.includes(name) ? "LEAD" : "CE";
+        }
+    });
+}
+
 function bootstrapDataEngine() {
   try {
     ACTIVE_HORIZON_TIMELINE = JSON.parse(localStorage.getItem('wfm_timeline_v21')) || ["May","June","July","August","September","October","November","December"];
     GLOBAL_PROJECTIONS_LEDGER = JSON.parse(localStorage.getItem('wfm_ledger_v21')) || {};
     CLINICAL_EVALUATORS_ROSTER = JSON.parse(localStorage.getItem('wfm_roster_v21')) || {};
     volGrowthMultiplier = parseFloat(localStorage.getItem('wfm_mult_v21')) || 1.0;
-    demandScalePercent = parseFloat(localStorage.getItem('wfm_demand_scale_v21')) || 100.0;
+    demandScalePercent = parseFloat(localStorage.getItem('wfm_demand_scale_v21')) || 90.0;
     MASTER_STATE_LIST = JSON.parse(localStorage.getItem('wfm_state_list_v21')) || [...DEFAULT_STATE_LIST];
     
     if(!MASTER_STATE_LIST.includes("VT")) MASTER_STATE_LIST.push("VT");
@@ -559,6 +558,7 @@ function bootstrapDataEngine() {
     if (Object.keys(CLINICAL_EVALUATORS_ROSTER).length === 0) {
       Object.keys(BASELINE_CE_CONFIG).forEach(name => {
         CLINICAL_EVALUATORS_ROSTER[name] = {
+          role: BASELINE_CE_CONFIG[name].role || "CE",
           quotaMap: {},
           exactPto: {},
           profile: [...BASELINE_CE_CONFIG[name].profile],
@@ -579,6 +579,10 @@ function bootstrapDataEngine() {
         if (!r.monthlyToggles) r.monthlyToggles = {};
         if (!r.profile) r.profile = [];
         if (!r.exactPto) r.exactPto = {};
+        if (!r.role) {
+            const knownLeads = ["Brian Richter", "Dina Siegel", "Sheila Rouzitalab", "Tori Mahoney"];
+            r.role = knownLeads.includes(name) ? "LEAD" : "CE";
+        }
         
         if (!r.quotaMap) {
             r.quotaMap = {};
@@ -588,7 +592,7 @@ function bootstrapDataEngine() {
         
         ACTIVE_HORIZON_TIMELINE.forEach(m => {
           if (r.ptoMap[m] === undefined) r.ptoMap[m] = 0;
-          if (r.quotaMap[m] === undefined) r.quotaMap[m] = 4;
+          if (r.quotaMap[m] === undefined) r.quotaMap[m] = (r.role === 'LEAD' ? 3 : 4);
           if (!r.monthlyToggles[m]) {
             r.monthlyToggles[m] = [...r.profile];
           }
@@ -606,6 +610,7 @@ function bootstrapDataEngine() {
         ROSTER_ORDER = ROSTER_ORDER.filter(k => CLINICAL_EVALUATORS_ROSTER[k]);
     }
 
+    enforceKnownLeadRoles();
     saveToLocalOnly();
   } catch (err) {
     console.error("Hydration Engine Intercept Failure", err);
@@ -640,7 +645,7 @@ function triggerFactoryResetWfm() {
 
 function setDemandScale(val) {
   let parsed = parseFloat(val);
-  if (isNaN(parsed) || parsed <= 0) parsed = 100.0;
+  if (isNaN(parsed) || parsed <= 0) parsed = 90.0;
   demandScalePercent = parsed;
   saveStateToStorage();
   recalculateDashboardMetrics();
@@ -657,8 +662,17 @@ function setVolMultiplier(val, btn) {
 window.setVolMultiplier = setVolMultiplier;
 
 function getCombinedDemandMultiplier() {
+  // Accepted Applications multiplied by Application-to-Phone-Screen conversion factor (default 90%)
   return volGrowthMultiplier * (demandScalePercent / 100.0);
 }
+
+function updateClinicianRole(name, newRole) {
+  if (!CLINICAL_EVALUATORS_ROSTER[name]) return;
+  CLINICAL_EVALUATORS_ROSTER[name].role = newRole;
+  saveStateToStorage();
+  recalculateDashboardMetrics();
+}
+window.updateClinicianRole = updateClinicianRole;
 
 function runAutoOptimize(allMonths) {
     let monthsToProcess = allMonths ? ACTIVE_HORIZON_TIMELINE : [ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx]];
@@ -759,12 +773,12 @@ function runAutoOptimize(allMonths) {
 
 function copyMatrixToClipboard() {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
-    let tsv = "CE Name\t" + MASTER_STATE_LIST.join("\t") + "\n";
+    let tsv = "CE Name\tRole\t" + MASTER_STATE_LIST.join("\t") + "\n";
     
     ROSTER_ORDER.forEach(name => {
         let r = CLINICAL_EVALUATORS_ROSTER[name];
         let mix = r.monthlyToggles[activeMonth] || [];
-        let row = [name];
+        let row = [name, r.role || "CE"];
         MASTER_STATE_LIST.forEach(s => {
             row.push(mix.includes(s) ? "Yes" : "");
         });
@@ -777,7 +791,7 @@ function copyMatrixToClipboard() {
     textarea.select();
     try {
         document.execCommand("copy");
-        alert("State Matrix copied to clipboard successfully! You can now paste directly into your Google Sheet.");
+        alert("State Matrix copied to clipboard successfully!");
     } catch (err) {
         alert("Failed to copy automatically.");
     }
@@ -850,7 +864,7 @@ function addNewSpecificMonth() {
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         CLINICAL_EVALUATORS_ROSTER[name].ptoMap[newM] = 0;
-        CLINICAL_EVALUATORS_ROSTER[name].quotaMap[newM] = 4;
+        CLINICAL_EVALUATORS_ROSTER[name].quotaMap[newM] = (CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD' ? 3 : 4);
         CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[newM] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
     });
 
@@ -908,16 +922,17 @@ function restoreArchivedMonth(m) {
     }
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
+        let isLead = CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD';
         if (ARCHIVED_ROSTER[name] && ARCHIVED_ROSTER[name].ptoMap[m] !== undefined) {
             CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = ARCHIVED_ROSTER[name].ptoMap[m];
-            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = ARCHIVED_ROSTER[name].quotaMap[m] || 4;
+            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = ARCHIVED_ROSTER[name].quotaMap[m] || (isLead ? 3 : 4);
             CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = ARCHIVED_ROSTER[name].monthlyToggles[m] || [...CLINICAL_EVALUATORS_ROSTER[name].profile];
             delete ARCHIVED_ROSTER[name].ptoMap[m];
             delete ARCHIVED_ROSTER[name].quotaMap[m];
             delete ARCHIVED_ROSTER[name].monthlyToggles[m];
         } else {
             CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
-            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = 4;
+            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = (isLead ? 3 : 4);
             CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...CLINICAL_EVALUATORS_ROSTER[name].profile];
         }
     });
@@ -935,7 +950,7 @@ function deleteSpecificMonth(m) {
         alert("System limitation: You must keep at least one active tracking month in the horizon."); 
         return; 
     }
-    if (!confirm(`Are you sure you want to completely erase ${m.split('_')[0]} from the active horizon? This data cannot be recovered.`)) return;
+    if (!confirm(`Are you sure you want to completely erase ${m.split('_')[0]} from the active horizon?`)) return;
     
     ACTIVE_HORIZON_TIMELINE = ACTIVE_HORIZON_TIMELINE.filter(x => x !== m);
     delete GLOBAL_PROJECTIONS_LEDGER[m];
@@ -955,7 +970,7 @@ function deleteSpecificMonth(m) {
 }
 
 function deleteArchivedMonth(m) {
-    if (!confirm(`Permanently erase archived ${m.split('_')[0]}? This data cannot be recovered.`)) return;
+    if (!confirm(`Permanently erase archived ${m.split('_')[0]}?`)) return;
     ARCHIVED_TIMELINE = ARCHIVED_TIMELINE.filter(x => x !== m);
     delete ARCHIVED_LEDGER[m];
     Object.keys(ARCHIVED_ROSTER).forEach(name => {
@@ -1026,7 +1041,7 @@ function populateGlobalModalViews() {
     html += `</tr>`;
     
     MASTER_STATE_LIST.forEach((s, rIdx) => {
-      html += `<tr><td style="border-right:1px solid #2d3548;"><strong>${s} Demand Volume</strong></td>`;
+      html += `<tr><td style="border-right:1px solid #2d3548;"><strong>${s} Accepted Apps</strong></td>`;
       ACTIVE_HORIZON_TIMELINE.forEach((m, cIdx) => {
           html += `<td><input type="number" class="paste-target" data-row="${rIdx + 1}" data-col="${cIdx}" id="mod-dem-field-${s}-${m}" value="${GLOBAL_PROJECTIONS_LEDGER[m].stateDemand[s] || 0}"></td>`;
       });
@@ -1124,7 +1139,7 @@ function undoPtoSync() {
         saveStateToStorage();
         recalculateDashboardMetrics();
         document.getElementById('undo-sync-btn').style.display = 'none';
-        alert("Sync Undone! Your previous metrics and state configurations have been safely restored.");
+        alert("Sync Undone! Previous metrics safely restored.");
     }
 }
 
@@ -1252,12 +1267,12 @@ async function syncPtoFromGoogleSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Cloud PTO Sync Complete!\nSuccessfully scanned and updated ${updatesCount} monthly PTO entries and registered specific dates for Weekly Views.`);
+        alert(`Cloud PTO Sync Complete! Updated ${updatesCount} monthly PTO entries.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing CSV:", err);
     if (!isSilent) {
-        alert("Failed to sync PTO: " + err.message + "\n\nPlease ensure your Google Sheet is published to the web.");
+        alert("Failed to sync PTO: " + err.message);
     }
   } finally {
     if (!isSilent && btn) {
@@ -1280,7 +1295,7 @@ async function syncLicensureFromSheets(isSilent = false) {
   try {
     const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQd7J8oMveRBfBtVb2OxbyVXJg-bW7_DUQdN8fryo-56EmFqxhhICP24tUG7EL3UsxHMCsCil5WJqYz/pub?gid=748848576&single=true&output=csv&_cb=" + new Date().getTime();
     const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Network response error. Ensure the 'CE Active States' tab is Published to the Web.");
+    if (!response.ok) throw new Error("Network response error. Ensure Google Sheet is Published to the Web.");
     const csvText = await response.text();
     
     localStorage.setItem('wfm_roster_backup', JSON.stringify(CLINICAL_EVALUATORS_ROSTER));
@@ -1341,7 +1356,7 @@ async function syncLicensureFromSheets(isSilent = false) {
     }
 
     if (headerRowIdx === -1 || ceColIdx === -1) {
-        throw new Error("Could not locate the 'CE' column header or State columns in the sheet.");
+        throw new Error("Could not locate the 'CE' column header or State columns.");
     }
 
     let updatesCount = 0;
@@ -1399,12 +1414,12 @@ async function syncLicensureFromSheets(isSilent = false) {
     recalculateDashboardMetrics();
     
     if (!isSilent) {
-        alert(`Licensure Sync Complete!\nSuccessfully mapped and updated ${updatesCount} CE profiles from Google Sheets.`);
+        alert(`Licensure Sync Complete!\nMapped ${updatesCount} CE profiles from Google Sheets.`);
     }
   } catch (err) {
     console.error("Error fetching or parsing Licensure CSV:", err);
     if (!isSilent) {
-        alert("Failed to sync licensure: " + err.message + "\n\nPlease ensure your Google Sheet is set to 'Anyone with the link can view' so the dashboard can read it.");
+        alert("Failed to sync licensure: " + err.message);
     }
   } finally {
     if (!isSilent && btns.length > 0) {
@@ -1427,17 +1442,27 @@ function moveCE(name, dir) {
 
 function addNewClinicianToRoster() {
   const nameInput = document.getElementById('new-clinician-name');
+  const roleSelect = document.getElementById('new-clinician-role');
   if (!nameInput) return;
   const name = nameInput.value.trim();
+  const role = roleSelect ? roleSelect.value : "CE";
   if (!name) return;
   if (CLINICAL_EVALUATORS_ROSTER[name]) {
-    alert("Resource entity entry already holds assignment constraints inside active tracking namespace registry.");
+    alert("Resource already exists in active roster.");
     return;
   }
-  CLINICAL_EVALUATORS_ROSTER[name] = { quotaMap: {}, exactPto: {}, profile: [...MASTER_STATE_LIST], ptoMap: {}, monthlyToggles: {} };
+  let baseQuota = role === "LEAD" ? 3 : 4;
+  CLINICAL_EVALUATORS_ROSTER[name] = { 
+    role: role, 
+    quotaMap: {}, 
+    exactPto: {}, 
+    profile: [...MASTER_STATE_LIST], 
+    ptoMap: {}, 
+    monthlyToggles: {} 
+  };
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = 0;
-    CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = 4;
+    CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = baseQuota;
     CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = [...MASTER_STATE_LIST];
   });
   ROSTER_ORDER.push(name);
@@ -1447,7 +1472,7 @@ function addNewClinicianToRoster() {
 }
 
 function deprovisionClinician(name) {
-  if (!confirm(`Are you certain you wish to completely clear ${name} from deployment tracking rosters permanently?`)) return;
+  if (!confirm(`Are you certain you wish to completely remove ${name} from deployment tracking?`)) return;
   delete CLINICAL_EVALUATORS_ROSTER[name];
   ROSTER_ORDER = ROSTER_ORDER.filter(n => n !== name);
   saveStateToStorage();
@@ -1522,7 +1547,7 @@ function addAllLicenses(name) {
 }
 
 function addAllStatesToAllProviders() {
-  if(!confirm(`Are you sure you want to provision all ${MASTER_STATE_LIST.length} active tracking states to EVERY evaluator's profile simultaneously?`)) return;
+  if(!confirm(`Add all ${MASTER_STATE_LIST.length} active states to EVERY evaluator's profile simultaneously?`)) return;
   Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
       MASTER_STATE_LIST.forEach(state => {
           if (!CLINICAL_EVALUATORS_ROSTER[name].profile.includes(state)) {
@@ -1544,7 +1569,7 @@ function recalculateDashboardMetrics() {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
     if (!activeMonth) return;
     
-    // Synchronize UI demand scale input field
+    // Synchronize UI demand conversion scale field
     const scaleInput = document.getElementById('demand-scale-input');
     if (scaleInput && document.activeElement !== scaleInput) {
         scaleInput.value = demandScalePercent;
@@ -1557,7 +1582,7 @@ function recalculateDashboardMetrics() {
     let clinicianAllocations = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
       let r = CLINICAL_EVALUATORS_ROSTER[name];
       let pto = parseFloat(r.ptoMap[activeMonth]) || 0;
-      let qta = parseFloat(r.quotaMap[activeMonth]) || 0;
+      let qta = parseFloat(r.quotaMap[activeMonth]) || (r.role === 'LEAD' ? 3 : 4);
       let totalCapacity = Math.max(0, (wd - pto) * qta);
       
       let activeStatesThisMonth = r.monthlyToggles[activeMonth] || [];
@@ -1567,18 +1592,23 @@ function recalculateDashboardMetrics() {
       });
 
       return {
-        name: name, quota: qta, pto: pto, capacity: totalCapacity, 
+        name: name, role: r.role || "CE", quota: qta, pto: pto, capacity: totalCapacity, 
         activeStates: activeStatesThisMonth, denom: totalDemandDenom, masterProfile: r.profile
       };
     });
 
     let stateAllocations = {};
-    let systemTotalDemand = 0;
+    let systemGrossAcceptedApps = 0;
+    let systemTotalPsDemand = 0;
     let systemTotalWeightedSupply = 0;
 
     MASTER_STATE_LIST.forEach(s => {
-      let stateDemand = Math.round((GLOBAL_PROJECTIONS_LEDGER[activeMonth].stateDemand[s] || 0) * effectiveMultiplier);
-      systemTotalDemand += stateDemand;
+      let rawApps = (GLOBAL_PROJECTIONS_LEDGER[activeMonth].stateDemand[s] || 0) * volGrowthMultiplier;
+      systemGrossAcceptedApps += Math.round(rawApps);
+
+      // Phone Screen Demand derived via conversion factor
+      let statePsDemand = Math.round(rawApps * (demandScalePercent / 100.0));
+      systemTotalPsDemand += statePsDemand;
 
       let stateWeightedCapacity = 0;
       let contributingCliniciansCount = 0;
@@ -1586,7 +1616,7 @@ function recalculateDashboardMetrics() {
 
       clinicianAllocations.forEach(ce => {
         if (ce.activeStates.includes(s) && ce.denom > 0) {
-          let proportionalWeight = stateDemand / ce.denom;
+          let proportionalWeight = statePsDemand / ce.denom;
           stateWeightedCapacity += (ce.capacity * proportionalWeight);
           contributingCliniciansCount++;
           concurrentAssignedRoster.push(ce.name);
@@ -1597,37 +1627,43 @@ function recalculateDashboardMetrics() {
       clinicianAllocations.forEach(ce => {
         if (ce.masterProfile.includes(s)) {
           let alternateDenom = ce.denom;
-          if (!ce.activeStates.includes(s)) { alternateDenom += stateDemand; }
-          let possibleWeight = alternateDenom > 0 ? stateDemand / alternateDenom : 0;
+          if (!ce.activeStates.includes(s)) { alternateDenom += statePsDemand; }
+          let possibleWeight = alternateDenom > 0 ? statePsDemand / alternateDenom : 0;
           maximumLicensedPotentialSupply += (ce.capacity * possibleWeight);
         }
       });
 
       systemTotalWeightedSupply += stateWeightedCapacity;
-      stateAllocations[s] = { demand: stateDemand, supply: stateWeightedCapacity, count: contributingCliniciansCount, assigned: concurrentAssignedRoster, maxPotential: maximumLicensedPotentialSupply };
+      stateAllocations[s] = { 
+        rawApps: Math.round(rawApps),
+        demand: statePsDemand, 
+        supply: stateWeightedCapacity, 
+        count: contributingCliniciansCount, 
+        assigned: concurrentAssignedRoster, 
+        maxPotential: maximumLicensedPotentialSupply 
+      };
     });
 
-    let aggregateUtilizationIndex = systemTotalWeightedSupply > 0 ? Math.round((systemTotalDemand / systemTotalWeightedSupply) * 100) : 0;
+    let aggregateUtilizationIndex = systemTotalWeightedSupply > 0 ? Math.round((systemTotalPsDemand / systemTotalWeightedSupply) * 100) : 0;
     let totalPtoPoolSum = clinicianAllocations.reduce((acc, curr) => acc + curr.pto, 0);
 
     const statsContainer = document.getElementById('top-stats-container');
     if (statsContainer) {
-      let scaleLabelSuffix = demandScalePercent !== 100 ? ` (${demandScalePercent}%)` : '';
       statsContainer.innerHTML = `
         <div class="stat-card">
-          <div class="stat-label">Accepted App Volume${scaleLabelSuffix} <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Aggregated consumer funnel pipeline demand for selected tracking month with growth and demand scale applied.</span></div></div>
-          <div class="stat-val">${fmt(systemTotalDemand)}</div>
+          <div class="stat-label">Accepted Applications <span class="info-tag" title="Gross intake pipeline application volume before Phone Screen conversion drop-off.">ⓘ</span></div>
+          <div class="stat-val">${fmt(systemGrossAcceptedApps)} <span style="font-size:10px; color:#94a3b8; font-weight:normal;">Apps</span></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Weighted Capacity <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Total calculated aggregate slot supply contribution metrics available across active dispatch grid configuration matrices.</span></div></div>
-          <div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)}</div>
+          <div class="stat-label">Phone Screen Demand (${demandScalePercent}%) <span class="info-tag" title="Calculated Phone Screen appointments based on ${demandScalePercent}% application-to-phone-screen conversion rate.">ⓘ</span></div>
+          <div class="stat-val" style="color:#93c5fd;">${fmt(systemTotalPsDemand)} <span style="font-size:10px; color:#64748b; font-weight:normal;">Slots</span></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">System Utilization <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Primary pipeline processing operations velocity index indicator health check boundary. Baseline thresholds >95% scale immediate staffing burn alerts.</span></div></div>
-          <div class="stat-val ${aggregateUtilizationIndex > 95 ? 'status-red' : ''}">${aggregateUtilizationIndex}%</div>
+          <div class="stat-label">Weighted CE Capacity <span class="info-tag" title="Total aggregate slots supply from active Clinical Evaluator and Lead schedules.">ⓘ</span></div>
+          <div class="stat-val" style="color:#6366f1;">${fmt(systemTotalWeightedSupply)} <span style="font-size:10px; color:#64748b; font-weight:normal;">(${aggregateUtilizationIndex}% Util)</span></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Monthly PTO Pool <div class="tooltip-container"><span class="info-icon">?</span><span class="tooltip-text">Sum total of scheduled evaluator resource days out across selected operational calendar frame.</span></div></div>
+          <div class="stat-label">Total Monthly PTO Pool <span class="info-tag" title="Total clinician working days out for active month.">ⓘ</span></div>
           <div class="stat-val" style="color:#ef4444;">${totalPtoPoolSum} Days</div>
         </div>
       `;
@@ -1635,7 +1671,7 @@ function recalculateDashboardMetrics() {
 
     renderLicensureCrossMatrix(clinicianAllocations, stateAllocations);
     renderStateWeightedHeatmap(stateAllocations);
-    renderExecutiveNarrativeBanner(systemTotalDemand, systemTotalWeightedSupply, activeMonth, targetEnrollment);
+    renderExecutiveNarrativeBanner(systemGrossAcceptedApps, systemTotalPsDemand, systemTotalWeightedSupply, activeMonth, targetEnrollment);
     renderPtoManagerGrid();
     renderWeeklyVolatility();
     renderLongRangeWfmChart();
@@ -1651,13 +1687,15 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
   const bodyRows = document.getElementById('matrix-body-rows');
   const footTotals = document.getElementById('matrix-foot-totals');
 
-  headRow.innerHTML = `<th style="position:sticky; left:0; top:0; background:#1e2330; z-index:30; border-right:1px solid #2d3548; min-width:180px; border-bottom:1px solid #2d3548;">Clinical Evaluator Name</th><th style="position:sticky; top:0; left:180px; background:#1e2330; z-index:30; text-align:center; color:#a5b4fc; font-weight:bold; border-bottom:1px solid #2d3548; border-right:1px solid #2d3548;">Active/Total</th>` + 
+  headRow.innerHTML = `<th style="position:sticky; left:0; top:0; background:#1e2330; z-index:30; border-right:1px solid #2d3548; min-width:180px; border-bottom:1px solid #2d3548;">Clinician & Role</th><th style="position:sticky; top:0; left:180px; background:#1e2330; z-index:30; text-align:center; color:#a5b4fc; font-weight:bold; border-bottom:1px solid #2d3548; border-right:1px solid #2d3548;">Active/Total</th>` + 
     MASTER_STATE_LIST.map(s => `<th style="position:sticky; top:0; background:#1e2330; z-index:20; text-align:center; font-weight:bold; min-width:48px; border-bottom:1px solid #2d3548;">${s}</th>`).join('');
 
   bodyRows.innerHTML = ROSTER_ORDER.map(name => {
     let ce = clinicianAllocations.find(c => c.name === name);
     if(!ce) return '';
     let countActiveOnStates = ce.activeStates.length;
+    let isLead = ce.role === "LEAD";
+
     let stateCellsHtml = MASTER_STATE_LIST.map(s => {
       let holdsMasterLicense = ce.masterProfile.includes(s);
       if (!holdsMasterLicense) {
@@ -1677,8 +1715,11 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
       <tr data-ce-row-id="${ce.name}">
         <td style="position:sticky; left:0; background:#1e2330; z-index:10; border-right:1px solid #2d3548;">
           <div style="display:flex; align-items:center; justify-content:space-between;">
-            <span style="font-weight:700; color:#f1f5f9; font-size: 11px;">${ce.name}</span>
-            <button class="btn-remove" onclick="window.deprovisionClinician('${ce.name.replace(/'/g, "\\'")}')" title="Permanently drop this evaluator profile resource from structural infrastructure blocks">×</button>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-weight:700; color:#f1f5f9; font-size: 11px;">${ce.name}</span>
+              <span class="role-badge ${isLead ? 'role-lead' : 'role-ce'}">${isLead ? 'LEAD' : 'CE'}</span>
+            </div>
+            <button class="btn-remove" onclick="window.deprovisionClinician('${ce.name.replace(/'/g, "\\'")}')" title="Drop evaluator profile">×</button>
           </div>
           <div style="font-size: 8px; color: #64748b; line-height: 1.2; max-width: 170px; white-space: normal; margin-top:2px;">
             <strong>Licenses:</strong> ${MASTER_STATE_LIST.filter(s => ce.masterProfile.includes(s)).join(', ') || 'None'}
@@ -1691,7 +1732,7 @@ function renderLicensureCrossMatrix(clinicianAllocations, stateAllocations) {
   }).join('');
 
   if(footTotals) {
-      let footerHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:10; border-right:1px solid #2d3548; color:#64748b;">Active Providers Dispatched</td><td style="position:sticky; left:180px; background:#0f1117; z-index:10; border-right:1px solid #2d3548; text-align:center;">—</td>`;
+      let footerHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:10; border-right:1px solid #2d3548; color:#64748b;">Active Clinicians Dispatched</td><td style="position:sticky; left:180px; background:#0f1117; z-index:10; border-right:1px solid #2d3548; text-align:center;">—</td>`;
       MASTER_STATE_LIST.forEach(s => {
         footerHtml += `<td style="text-align:center; color:#f1f5f9; background:#161b26; border-top:1px solid #3d4a63;">${stateAllocations[s].count}</td>`;
       });
@@ -1706,12 +1747,20 @@ function renderSidebarProfileManager(clinicianAllocations) {
   container.innerHTML = ROSTER_ORDER.map(name => {
     let ce = clinicianAllocations.find(c => c.name === name);
     if(!ce) return '';
+    let isLead = ce.role === "LEAD";
+
     return `
     <div class="ce-row">
       <div style="display:flex; justify-content:space-between; margin-bottom:4px; align-items: center;">
-        <strong>${ce.name}</strong> 
+        <div>
+          <strong>${ce.name}</strong> 
+          <span class="role-badge ${isLead ? 'role-lead' : 'role-ce'}" style="margin-left:2px;">${isLead ? 'LEAD' : 'CE'}</span>
+        </div>
         <div style="display:flex; align-items:center; gap:6px;">
-            <span title="Denominator: Total demand of all active states." style="font-size:7px; color:#64748b; cursor:help;">Load: ${Math.round(ce.denom)}</span>
+            <select onchange="window.updateClinicianRole('${ce.name.replace(/'/g, "\\'")}', this.value)" style="font-size:8px; padding:1px; background:#0f1117; color:#cbd5e1;">
+              <option value="CE" ${ce.role === 'CE' ? 'selected' : ''}>CE</option>
+              <option value="LEAD" ${ce.role === 'LEAD' ? 'selected' : ''}>Lead</option>
+            </select>
             <div style="display:flex; flex-direction:column; gap:1px;">
                 <button class="btn-action" style="padding:0 3px; font-size:6px; background:#334155; line-height:1;" onclick="window.moveCE('${ce.name.replace(/'/g, "\\'")}', -1)">▲</button>
                 <button class="btn-action" style="padding:0 3px; font-size:6px; background:#334155; line-height:1;" onclick="window.moveCE('${ce.name.replace(/'/g, "\\'")}', 1)">▼</button>
@@ -1729,7 +1778,7 @@ function renderSidebarProfileManager(clinicianAllocations) {
       <div style="display:flex; align-items:center; gap:4px;">
         <input type="text" placeholder="ST" style="width:40px;" id="add-${ce.name.replace(/\s/g, '')}">
         <button class="btn-action" style="padding:2px 6px;" onclick="window.addLicenseToProfile('${ce.name.replace(/'/g, "\\'")}')" title="Add Single State">+</button>
-        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="window.addAllLicenses('${ce.name.replace(/'/g, "\\'")}')" title="Add All ${MASTER_STATE_LIST.length} States">+ ALL</button>
+        <button class="btn-action" style="padding:2px 6px; background:#4f46e5;" onclick="window.addAllLicenses('${ce.name.replace(/'/g, "\\'")}')" title="Add All States">+ ALL</button>
       </div>
     </div>
   `}).join('');
@@ -1762,7 +1811,8 @@ function renderStateWeightedHeatmap(stateAllocations) {
     return `
       <tr>
         <td><strong>${s}</strong></td>
-        <td style="font-weight:600;">${r.demand === 0 ? '-' : fmt(r.demand)}</td>
+        <td style="color:#94a3b8;">${r.rawApps === 0 ? '-' : fmt(r.rawApps)}</td>
+        <td style="font-weight:700; color:#93c5fd;">${r.demand === 0 ? '-' : fmt(r.demand)}</td>
         <td style="color:#a5b4fc; font-weight:600;">${r.demand === 0 ? '-' : fmt(r.supply)}</td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
@@ -1770,12 +1820,15 @@ function renderStateWeightedHeatmap(stateAllocations) {
             ${r.demand > 0 ? `<div class="progress-bg"><div class="progress-fill" style="width:${barWidth}%; background:${barColor};"></div></div>` : ''}
           </div>
         </td>
-        <td class="${r.demand === 0 ? '' : (netBalanceOffset < 0 ? 'status-red' : 'status-green')}" title="Total Unconstrained Potential Licensed Supply Cap Ceiling: ${Math.round(r.maxPotential)} Slots">
-          ${r.demand === 0 ? '-' : (netBalanceOffset > 0 ? '+' : '') + fmt(netBalanceOffset)} ${r.demand > 0 && structuralShortageAlert ? '<span style="font-size:9px; color:#ef4444; font-weight:900;" title="CRITICAL: Total possible potential capacity across all certified profiles is less than marketing demand. Add licenses.">⚠️ STRUCTURAL</span>' : ''}
+        <td class="${r.demand === 0 ? '' : (netBalanceOffset < 0 ? 'status-red' : 'status-green')}" title="Total Unconstrained Potential Licensed Supply: ${Math.round(r.maxPotential)} Slots">
+          ${r.demand === 0 ? '-' : (netBalanceOffset > 0 ? '+' : '') + fmt(netBalanceOffset)} ${r.demand > 0 && structuralShortageAlert ? '<span style="font-size:9px; color:#ef4444; font-weight:900;" title="CRITICAL: Total possible potential capacity across all certified profiles is less than demand. Add licenses.">⚠️ STRUCTURAL</span>' : ''}
         </td>
         <td>
-          <div style="max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            ${r.assigned.map(n => `<span class="provider-pill" onmouseover="window.linkTraceMarker('${n.replace(/'/g, "\\'")}')" onmouseout="window.clearTraceMarker()">${n.split(' ')[0]}</span>`).join('')}
+          <div style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${r.assigned.map(n => {
+              let isLead = CLINICAL_EVALUATORS_ROSTER[n] && CLINICAL_EVALUATORS_ROSTER[n].role === "LEAD";
+              return `<span class="provider-pill" style="${isLead ? 'border:1px solid #818cf8;' : ''}" onmouseover="window.linkTraceMarker('${n.replace(/'/g, "\\'")}')" onmouseout="window.clearTraceMarker()">${n.split(' ')[0]}${isLead ? ' ★' : ''}</span>`;
+            }).join('')}
           </div>
         </td>
       </tr>
@@ -1785,49 +1838,49 @@ function renderStateWeightedHeatmap(stateAllocations) {
   const summaryContainer = document.getElementById('heatmap-summary');
   if (summaryContainer) {
       summaryContainer.innerHTML = `
-        <div class="summary-box box-opt">
+        <div class="summary-box box-opt" title="States at 90%+ coverage: ${optStates.join(', ') || 'None'}">
           <div class="val">${optCount}</div>
           <div class="lbl">Optimal Phone Screen Cov (≥90%)</div>
-          <div class="tooltip-text" style="bottom:auto; top:110%;">${optStates.length ? optStates.join(', ') : 'None'}</div>
         </div>
-        <div class="summary-box box-hlt">
+        <div class="summary-box box-hlt" title="States at 80-89% coverage: ${hltStates.join(', ') || 'None'}">
           <div class="val">${hltCount}</div>
           <div class="lbl">Healthy Phone Screen Cov (80-89%)</div>
-          <div class="tooltip-text" style="bottom:auto; top:110%;">${hltStates.length ? hltStates.join(', ') : 'None'}</div>
         </div>
-        <div class="summary-box box-wrn">
+        <div class="summary-box box-wrn" title="States at 70-79% coverage: ${wrnStates.join(', ') || 'None'}">
           <div class="val">${wrnCount}</div>
           <div class="lbl">Warning Phone Screen Cov (70-79%)</div>
-          <div class="tooltip-text" style="bottom:auto; top:110%;">${wrnStates.length ? wrnStates.join(', ') : 'None'}</div>
         </div>
-        <div class="summary-box box-crt">
+        <div class="summary-box box-crt" title="States at <70% coverage: ${crtStates.join(', ') || 'None'}">
           <div class="val">${crtCount}</div>
           <div class="lbl">Critical Phone Screen Cov (<70%)</div>
-          <div class="tooltip-text" style="bottom:auto; top:110%;">${crtStates.length ? crtStates.join(', ') : 'None'}</div>
         </div>
       `;
   }
 }
 
-function renderExecutiveNarrativeBanner(totalDemand, totalSupply, activeMonth, targetEnrollment) {
+function renderExecutiveNarrativeBanner(grossApps, totalPsDemand, totalSupply, activeMonth, targetEnrollment) {
   const container = document.getElementById('executive-insight-banner');
   if (!container) return;
 
-  let clinicianDeficitCount = Math.ceil(Math.max(0, totalDemand - totalSupply) / 64);
+  let clinicianDeficitCount = Math.ceil(Math.max(0, totalPsDemand - totalSupply) / 64);
   let expectedTheoreticalEnrollments = Math.round(totalSupply * 0.25);
   let targetDeficitDelta = targetEnrollment - expectedTheoreticalEnrollments;
 
+  let leadCount = Object.values(CLINICAL_EVALUATORS_ROSTER).filter(r => r.role === 'LEAD').length;
+  let ceCount = Object.values(CLINICAL_EVALUATORS_ROSTER).filter(r => r.role !== 'LEAD').length;
+
   container.innerHTML = `
     <h3>MONTHLY OPERATIONS SYSTEM ANALYSIS — OPERATIONS PULSE: ${activeMonth.split('_')[0].toUpperCase()}</h3>
-    <p>Current scheduling processing constraints indicate marketing pipeline demand vectors require clearing <strong>${fmt(totalDemand)} Phone Screen slots</strong> across active deployment matrices. 
-    Available workforce scheduling models yield <strong>${fmt(totalSupply)} viable production appointments</strong>. 
-    ${totalSupply >= totalDemand 
-      ? `Workforce optimization models indicate tactical allocation strategies match queue depth requirements, remaining <strong>perfectly balanced</strong> against incoming pipeline loads.` 
-      : `Operational gaps identify an immediate shortfall of <strong>${fmt(totalDemand - totalSupply)} required phone screens</strong>. Resolving this pipeline processing boundary requires immediately onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinical Evaluators</strong> or optimizing target licensure distribution mix blocks.`}
-    Downstream conversions projection tracks toward delivering a capacity yield potential of <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to organizational goal commitments of <strong>${fmt(targetEnrollment)}</strong> 
+    <p>Top-of-funnel volume projects <strong>${fmt(grossApps)} Accepted Applications</strong>. 
+    Applying the historical conversion factor of <strong>${demandScalePercent}%</strong> yields a net requirement of <strong>${fmt(totalPsDemand)} scheduled Phone Screen slots</strong>. 
+    Active clinical evaluators and leads (${leadCount} Leads, ${ceCount} CEs) provide <strong>${fmt(totalSupply)} viable production appointments</strong>. 
+    ${totalSupply >= totalPsDemand 
+      ? `Current capacity models confirm scheduling supply satisfies queue depth, remaining <strong class="status-green">fully balanced</strong> against incoming pipeline demands.` 
+      : `Operational gaps identify a shortfall of <strong class="status-red">${fmt(totalPsDemand - totalSupply)} required Phone Screen slots</strong>. Addressing this gap requires onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinicians</strong> or re-weighting state coverage toggles.`}
+    Downstream conversions project toward delivering an estimated <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to monthly organizational target commitments of <strong>${fmt(targetEnrollment)}</strong> 
     ${targetDeficitDelta > 0 
-      ? `(Tracking a structural deficit baseline gap risk of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>. Broaden specialized licensing matrices or drive conversion velocity vectors).` 
-      : `(Positioned safely to cross target baseline goals by a margin buffer of <strong class="status-green">+${fmt(Math.abs(targetDeficitDelta))} enrollments</strong>).`}</p>
+      ? `(Tracking a structural deficit gap of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>).` 
+      : `(Positioned safely to achieve target commitments with an expected surplus buffer of <strong class="status-green">+${fmt(Math.abs(targetDeficitDelta))} enrollments</strong>).`}</p>
   `;
 }
 
@@ -1836,13 +1889,13 @@ function renderPtoManagerGrid() {
   const body = document.getElementById('pto-ledger-body');
   const foot = document.getElementById('pto-ledger-foot');
 
-  let headHtml = `<tr><th rowspan="2" style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548; min-width:140px;">Clinical Evaluator</th>`;
+  let headHtml = `<tr><th rowspan="2" style="position:sticky; left:0; background:#1e2330; z-index:2; border-right:1px solid #2d3548; min-width:140px;">Clinician Name</th><th rowspan="2" style="position:sticky; left:140px; background:#1e2330; z-index:2; border-right:1px solid #2d3548; text-align:center; min-width:80px;">Role</th>`;
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     headHtml += `<th colspan="3" class="pto-grid-header" style="text-align:center; border-left:1px solid #2d3548;">${m.split('_')[0]}</th>`;
   });
   headHtml += `</tr><tr>`;
   ACTIVE_HORIZON_TIMELINE.forEach(() => {
-    headHtml += `<th class="sub-head" style="border-left:1px solid #2d3548; text-align:center;">PTO</th><th class="sub-head" style="text-align:center;">QTA</th><th class="sub-head" style="text-align:center;">CAP</th>`;
+    headHtml += `<th style="border-left:1px solid #2d3548; text-align:center; font-size:8px;">PTO</th><th style="text-align:center; font-size:8px;">QTA</th><th style="text-align:center; font-size:8px;">CAP</th>`;
   });
   headHtml += `</tr>`;
   thead.innerHTML = headHtml;
@@ -1850,15 +1903,17 @@ function renderPtoManagerGrid() {
   body.innerHTML = ROSTER_ORDER.map(name => {
     let r = CLINICAL_EVALUATORS_ROSTER[name];
     if(!r) return '';
+    let isLead = r.role === 'LEAD';
+
     let columnsHtml = ACTIVE_HORIZON_TIMELINE.map((m) => {
       let ptoValue = r.ptoMap[m] !== undefined ? r.ptoMap[m] : 0;
-      let qtaValue = r.quotaMap[m] !== undefined ? r.quotaMap[m] : 4;
+      let qtaValue = r.quotaMap[m] !== undefined ? r.quotaMap[m] : (isLead ? 3 : 4);
       let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
       let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(qtaValue) || 0));
 
       return `
         <td style="border-left:1px solid #2d3548; text-align:center;"><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
-        <td style="text-align:center;"><input type="number" step="0.5" value="${qtaValue}" style="width:34px; color:#6366f1;" onchange="window.updateClinicianBaseQuota('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
+        <td style="text-align:center;"><input type="number" step="0.5" value="${qtaValue}" style="width:34px; color:${isLead ? '#a5b4fc' : '#6366f1'}; font-weight:bold;" onchange="window.updateClinicianBaseQuota('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
         <td class="cap-cell">${Math.round(calculatedCapacity)}</td>
       `;
     }).join('');
@@ -1868,12 +1923,18 @@ function renderPtoManagerGrid() {
         <td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;">
           <strong style="color:#f1f5f9;">${name}</strong>
         </td>
+        <td style="position:sticky; left:140px; background:#111521; z-index:1; border-right:1px solid #2d3548; text-align:center;">
+          <select onchange="window.updateClinicianRole('${name.replace(/'/g, "\\'")}', this.value)" style="font-size:9px; padding:2px 4px; font-weight:bold; color:${isLead ? '#c7d2fe' : '#94a3b8'};">
+            <option value="CE" ${!isLead ? 'selected' : ''}>CE</option>
+            <option value="LEAD" ${isLead ? 'selected' : ''}>LEAD</option>
+          </select>
+        </td>
         ${columnsHtml}
       </tr>
     `;
   }).join('');
 
-  let totalsHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548;">AGGREGATE SUMS</td>`;
+  let totalsHtml = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548;">AGGREGATE SUMS</td><td style="position:sticky; left:140px; background:#0f1117; z-index:2; border-right:1px solid #2d3548; text-align:center;">—</td>`;
   ACTIVE_HORIZON_TIMELINE.forEach(m => {
     let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
     let aggregatePtoDaysSum = 0;
@@ -1881,7 +1942,7 @@ function renderPtoManagerGrid() {
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
       let ptoValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
-      let quotaValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || 0;
+      let quotaValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || (CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD' ? 3 : 4);
       aggregatePtoDaysSum += ptoValue;
       aggregateSlotsCapacitySum += Math.max(0, (monthWd - ptoValue) * quotaValue);
     });
@@ -1937,7 +1998,7 @@ function renderWeeklyVolatility() {
     let tfoot = document.getElementById('weekly-cap-foot');
     
     if(thead) {
-        thead.innerHTML = `<tr><th style="position:sticky; left:0; background:#1e2330; z-index:2; min-width:140px; border-right:1px solid #2d3548;">Clinical Evaluator</th>` + 
+        thead.innerHTML = `<tr><th style="position:sticky; left:0; background:#1e2330; z-index:2; min-width:140px; border-right:1px solid #2d3548;">Clinician & Role</th>` + 
             weeks.map(w => `<th style="text-align:center;">${w.label} CAP</th>`).join('') + `</tr>`;
     }
 
@@ -1947,7 +2008,8 @@ function renderWeeklyVolatility() {
         tbody.innerHTML = ROSTER_ORDER.map(name => {
             let r = CLINICAL_EVALUATORS_ROSTER[name];
             if(!r) return '';
-            let quota = parseFloat(r.quotaMap[activeMonth]) || 0;
+            let quota = parseFloat(r.quotaMap[activeMonth]) || (r.role === 'LEAD' ? 3 : 4);
+            let isLead = r.role === 'LEAD';
             
             let cells = weeks.map((w, i) => {
                 if(!w.start || !w.end) return `<td style="text-align:center; color:#64748b;">-</td>`;
@@ -1976,7 +2038,7 @@ function renderWeeklyVolatility() {
                 return `<td style="text-align:center; font-weight:bold; color:#4ade80;">${Math.round(weekCap)}</td>`;
             }).join('');
 
-            return `<tr><td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;"><strong>${name}</strong></td>${cells}</tr>`;
+            return `<tr><td style="position:sticky; left:0; background:#1e2330; z-index:1; border-right:1px solid #2d3548;"><strong>${name}</strong> <span class="role-badge ${isLead ? 'role-lead' : 'role-ce'}">${isLead ? 'LEAD' : 'CE'}</span></td>${cells}</tr>`;
         }).join('');
     }
 
@@ -1999,7 +2061,7 @@ function saveWeeklyDates() {
     GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks = weeks;
     saveStateToStorage();
     recalculateDashboardMetrics();
-    alert("Weekly Date ranges successfully saved to Ledger!");
+    alert("Weekly date ranges successfully saved!");
 }
 
 function renderLongRangeWfmChart() {
@@ -2023,7 +2085,7 @@ function renderLongRangeWfmChart() {
       let supplySum = 0;
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         let pto = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
-        let quota = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || 0;
+        let quota = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || (CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD' ? 3 : 4);
         supplySum += Math.max(0, (monthWd - pto) * quota);
       });
       aggregateSupplyPoints.push(Math.round(supplySum));
@@ -2039,7 +2101,7 @@ function renderLongRangeWfmChart() {
         labels: dataLabels,
         datasets: [
           {
-            label: 'Total Pipeline Volume Demand',
+            label: `Phone Screen Demand (${demandScalePercent}% of Apps)`,
             data: aggregateDemandPoints,
             borderColor: '#ef4444',
             backgroundColor: 'transparent',
@@ -2080,39 +2142,27 @@ function renderLongRangeWfmChart() {
       }
     });
   } catch (err) {
-    console.error("Chart.js Pipeline Visualization Execution Intercept Failure: ", err);
+    console.error("Chart.js Visualization Intercept Failure: ", err);
   }
 }
 
 function linkTraceMarker(name) {
   let targetRow = document.querySelector(`tr[data-ce-row-id="${name}"]`);
   let ptoRow = document.querySelector(`#pto-ledger-table tr[data-ce-row-id="${name}"]`);
-  if (targetRow) {
-    targetRow.style.backgroundColor = "#312e81";
-  }
-  if (ptoRow) {
-    ptoRow.style.backgroundColor = "#312e81";
-  }
+  if (targetRow) targetRow.style.backgroundColor = "#312e81";
+  if (ptoRow) ptoRow.style.backgroundColor = "#312e81";
 }
 
 function clearTraceMarker() {
   Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
     let targetRow = document.querySelector(`tr[data-ce-row-id="${name}"]`);
     let ptoRow = document.querySelector(`#pto-ledger-table tr[data-ce-row-id="${name}"]`);
-    if (targetRow) {
-      targetRow.style.backgroundColor = "";
-    }
-    if (ptoRow) {
-      ptoRow.style.backgroundColor = "";
-    }
+    if (targetRow) targetRow.style.backgroundColor = "";
+    if (ptoRow) ptoRow.style.backgroundColor = "";
   });
 }
 
-function SafeSetter(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = val;
-}
-
+// Window scope exports
 window.removeLicenseFromProfile = removeLicenseFromProfile;
 window.updateMonthlyMixToggle = updateMonthlyMixToggle;
 window.addAllStatesToAllProviders = addAllStatesToAllProviders;
