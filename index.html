@@ -600,6 +600,11 @@ function bootstrapDataEngine() {
             r.monthlyToggles[m] = [...r.profile];
           }
         });
+
+        // Self-heal: If a Lead was saved with the default CE quota (4), align to standard Lead quota (3)
+        if (r.role === 'LEAD' && ACTIVE_HORIZON_TIMELINE.every(m => r.quotaMap[m] === 4)) {
+          ACTIVE_HORIZON_TIMELINE.forEach(m => { r.quotaMap[m] = 3; });
+        }
       });
     }
 
@@ -672,6 +677,16 @@ function getCombinedDemandMultiplier() {
 function updateClinicianRole(name, newRole) {
   if (!CLINICAL_EVALUATORS_ROSTER[name]) return;
   CLINICAL_EVALUATORS_ROSTER[name].role = newRole;
+
+  // Automatically update daily quota baseline: 3 PS/day for Leads, 4 PS/day for standard CEs
+  const targetQuota = newRole === "LEAD" ? 3 : 4;
+  if (!CLINICAL_EVALUATORS_ROSTER[name].quotaMap) {
+    CLINICAL_EVALUATORS_ROSTER[name].quotaMap = {};
+  }
+  ACTIVE_HORIZON_TIMELINE.forEach(m => {
+    CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = targetQuota;
+  });
+
   saveStateToStorage();
   recalculateDashboardMetrics();
 }
