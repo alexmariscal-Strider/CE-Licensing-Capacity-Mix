@@ -344,7 +344,10 @@
     </div>
     <div style="color: #cbd5e1; font-size: 12px; line-height: 1.6;">
         <p style="margin-bottom: 12px;"><strong style="color: #93c5fd;">Top of Funnel vs. Phone Screens:</strong> Input numbers represent <strong>Accepted Applications</strong>. A historical conversion rate (default 90%) converts incoming applications into scheduled Phone Screens.</p>
-        <p style="margin-bottom: 12px;"><strong style="color: #c4b5fd;">Lead Role Management:</strong> Clinical Leads (Brian Richter, Dina Siegel, Sheila Rouzitalab, Tori Mahoney) carry administrative leadership duties alongside clinical quotas. Roles are fully editable across the team.</p>
+        <p style="margin-bottom: 12px;"><strong style="color: #c4b5fd;">Production Quotas & Lead Role Baselines:</strong>
+        <br>• <strong>Standard CE:</strong> 4 Phone Screens & 3 Evals/day (~80 PS & ~60 Evals/month).
+        <br>• <strong>Lead CE (Brian, Dina, Sheila, Tori):</strong> 3 Phone Screens & 3 Evals/day (~60 PS & ~60 Evals/month).
+        <br>• <strong>Lead Tradeoff Rules:</strong> For every two Leads reduced from 3 → 2 PS/day, the system loses <strong>~40 slots (0.5 FTE CE)</strong>. Reduced from 3 → 1 PS/day, the system loses <strong>~80 slots (1.0 FTE CE)</strong>.</p>
         <strong style="color: #34d399;">Key Features:</strong>
         <ul style="margin-top: 6px; margin-left: 20px; color: #94a3b8;">
             <li style="margin-bottom: 6px;">Maps out Clinical Evaluators and Leads against state territories they are legally certified in.</li>
@@ -418,16 +421,16 @@ const BASELINE_PTO_MAP = {
 const BASELINE_CE_CONFIG = {
   "Brian Richter": { q: 3, role: "LEAD", profile: ["CT","VA","TX","IL","DC","FL","NC","GA","SC","MD","MO","WI","NV","AZ","MT","OK"] },
   "Charlotte Lively": { q: 4, role: "CE", profile: ["NH","CT","PA","RI","VA","OH","TX"] },
-  "Dina Siegel": { q: 4, role: "LEAD", profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
+  "Dina Siegel": { q: 3, role: "LEAD", profile: ["PA","ME","TX","DC","FL","NC","GA","SC","MD","DE","WV","MO","WI"] },
   "Gabby Suihkonen-Gross": { q: 4, role: "CE", profile: ["MA","NH","RI","ME"] },
-  "Sheila Rouzitalab": { q: 4, role: "LEAD", profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
-  "Tori Mahoney": { q: 4, role: "LEAD", profile: ["MA","NH","RI","ME","VA","OH"] },
+  "Sheila Rouzitalab": { q: 3, role: "LEAD", profile: ["NJ","NY","PA","RI","ME","VA","IL"] },
+  "Tori Mahoney": { q: 3, role: "LEAD", profile: ["MA","NH","RI","ME","VA","OH"] },
   "Mackenzie Sheridan": { q: 4, role: "CE", profile: ["MA","NH","CT","ME","OH"] },
   "Sarah Lee": { q: 4, role: "CE", profile: ["MA","NJ","CT","VA"] },
   "Larisa Zaleta": { q: 4, role: "CE", profile: ["NJ","CT","NY","IL","DC","FL"] },
   "Simon Jencius": { q: 4, role: "CE", profile: ["MA","NJ","OH","IL"] },
   "Charlie Snyder": { q: 4, role: "CE", profile: ["NY","TX","NV"] },
-  "Grace Rezendes": { q: 4, role: "CE", profile: ["MA","NH","RI","ME"] },
+  "Grace Rezendes": { q: 4, profile: ["MA","NH","RI","ME"], role: "CE" },
   "Michelle Zalewski": { q: 4, role: "CE", profile: ["MA","PA","IL"] },
   "Hayley Feuchs": { q: 4, role: "CE", profile: ["NY","DC","NV","AZ"] }
 };
@@ -1862,7 +1865,8 @@ function renderExecutiveNarrativeBanner(grossApps, totalPsDemand, totalSupply, a
   const container = document.getElementById('executive-insight-banner');
   if (!container) return;
 
-  let clinicianDeficitCount = Math.ceil(Math.max(0, totalPsDemand - totalSupply) / 64);
+  // Standard CE monthly production benchmark is ~80 phone screen slots (20 working days * 4 quota/day)
+  let clinicianDeficitCount = Math.max(0, totalPsDemand - totalSupply) / 80;
   let expectedTheoreticalEnrollments = Math.round(totalSupply * 0.25);
   let targetDeficitDelta = targetEnrollment - expectedTheoreticalEnrollments;
 
@@ -1873,10 +1877,10 @@ function renderExecutiveNarrativeBanner(grossApps, totalPsDemand, totalSupply, a
     <h3>MONTHLY OPERATIONS SYSTEM ANALYSIS — OPERATIONS PULSE: ${activeMonth.split('_')[0].toUpperCase()}</h3>
     <p>Top-of-funnel volume projects <strong>${fmt(grossApps)} Accepted Applications</strong>. 
     Applying the historical conversion factor of <strong>${demandScalePercent}%</strong> yields a net requirement of <strong>${fmt(totalPsDemand)} scheduled Phone Screen slots</strong>. 
-    Active clinical evaluators and leads (${leadCount} Leads, ${ceCount} CEs) provide <strong>${fmt(totalSupply)} viable production appointments</strong>. 
+    Active clinical evaluators and leads (${leadCount} Leads @ 3 PS/day, ${ceCount} CEs @ 4 PS/day) provide <strong>${fmt(totalSupply)} viable production appointments</strong>. 
     ${totalSupply >= totalPsDemand 
       ? `Current capacity models confirm scheduling supply satisfies queue depth, remaining <strong class="status-green">fully balanced</strong> against incoming pipeline demands.` 
-      : `Operational gaps identify a shortfall of <strong class="status-red">${fmt(totalPsDemand - totalSupply)} required Phone Screen slots</strong>. Addressing this gap requires onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Clinicians</strong> or re-weighting state coverage toggles.`}
+      : `Operational gaps identify a shortfall of <strong class="status-red">${fmt(totalPsDemand - totalSupply)} required Phone Screen slots</strong>. Addressing this gap requires onboarding approximately <strong>${clinicianDeficitCount.toFixed(1)} additional Full-Time CEs</strong> (or equivalent Lead capacity re-allocations).`}
     Downstream conversions project toward delivering an estimated <strong>${fmt(expectedTheoreticalEnrollments)} realized enrollments</strong> relative to monthly organizational target commitments of <strong>${fmt(targetEnrollment)}</strong> 
     ${targetDeficitDelta > 0 
       ? `(Tracking a structural deficit gap of <strong class="status-red">${fmt(targetDeficitDelta)} net closures</strong>).` 
