@@ -244,13 +244,13 @@
     </div>
   </div>
 
-  <!-- WEEKLY CAPACITY VOLATILITY -->
+  <!-- WEEKLY PHONE SCREEN VOLATILITY & CAPACITY -->
   <div class="panel full-width">
     <h2 style="display:flex; justify-content:space-between; align-items:center;">
-        <span>Weekly Evaluation Volatility & Capacity</span>
+        <span>Weekly Phone Screen Volatility & Capacity</span>
         <button class="btn-action" style="padding: 4px 8px; font-size: 8px; background: #6366f1;" onclick="window.saveWeeklyDates()">💾 SAVE DATES</button>
     </h2>
-    <p style="font-size: 9px; color: #94a3b8; margin-bottom: 8px;">Define the strict work weeks for the active month below. The engine calculates precise weekly capacity by reading exact PTO dates synced from Google Sheets.</p>
+    <p style="font-size: 9px; color: #94a3b8; margin-bottom: 8px;">Define the strict work weeks for the active month below. The engine calculates precise weekly capacity by reading exact PTO dates synced from Google Sheets and reflecting active monthly quotas.</p>
     
     <div id="weekly-dates-container" style="display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap;"></div>
     
@@ -382,6 +382,20 @@ function fmt(num) {
 }
 window.fmt = fmt;
 
+// SAFE QUOTA RESOLUTION ENGINE: Explicitly handles 0 without fallback overrides
+function getClinicianQuota(name, month) {
+    let r = CLINICAL_EVALUATORS_ROSTER[name];
+    if (!r) return 4;
+    let isLead = r.role === 'LEAD';
+    let defaultQ = isLead ? 3 : 4;
+    if (!r.quotaMap || r.quotaMap[month] === undefined || r.quotaMap[month] === null || r.quotaMap[month] === '') {
+        return defaultQ;
+    }
+    let val = parseFloat(r.quotaMap[month]);
+    return isNaN(val) ? defaultQ : val;
+}
+window.getClinicianQuota = getClinicianQuota;
+
 const firebaseConfig = {
   apiKey: "AIzaSyBU1tPMT" + "jYtRSbmlttGfLKebl7gnwLzgBw",
   authDomain: "ce-wfm-suite.firebaseapp.com",
@@ -476,7 +490,6 @@ function syncWithFirebase() {
                 ARCHIVED_LEDGER = data.archiveLedg || {};
                 ARCHIVED_ROSTER = data.archiveRost || {};
                 
-                // Enforce lead role baseline if missing
                 enforceKnownLeadRoles();
 
                 saveToLocalOnly();
@@ -589,7 +602,7 @@ function bootstrapDataEngine() {
         
         if (!r.quotaMap) {
             r.quotaMap = {};
-            ACTIVE_HORIZON_TIMELINE.forEach(m => r.quotaMap[m] = r.quota || 4);
+            ACTIVE_HORIZON_TIMELINE.forEach(m => r.quotaMap[m] = r.quota !== undefined ? r.quota : 4);
             delete r.quota;
         }
         
@@ -670,7 +683,6 @@ function setVolMultiplier(val, btn) {
 window.setVolMultiplier = setVolMultiplier;
 
 function getCombinedDemandMultiplier() {
-  // Accepted Applications multiplied by Application-to-Phone-Screen conversion factor (default 90%)
   return volGrowthMultiplier * (demandScalePercent / 100.0);
 }
 
@@ -678,7 +690,6 @@ function updateClinicianRole(name, newRole) {
   if (!CLINICAL_EVALUATORS_ROSTER[name]) return;
   CLINICAL_EVALUATORS_ROSTER[name].role = newRole;
 
-  // Automatically update daily quota baseline: 3 PS/day for Leads, 4 PS/day for standard CEs
   const targetQuota = newRole === "LEAD" ? 3 : 4;
   if (!CLINICAL_EVALUATORS_ROSTER[name].quotaMap) {
     CLINICAL_EVALUATORS_ROSTER[name].quotaMap = {};
@@ -706,7 +717,8 @@ function runAutoOptimize(allMonths) {
         let ces = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
             let r = CLINICAL_EVALUATORS_ROSTER[name];
             let pto = parseFloat(r.ptoMap[m]) || 0;
-            let cap = Math.max(0, (wd - pto) * (parseFloat(r.quotaMap[m]) || 0));
+            let qta = getClinicianQuota(name, m);
+            let cap = Math.max(0, (wd - pto) * qta);
             return { name: name, cap: cap, profile: r.profile, active: [] }; 
         });
 
@@ -943,7 +955,7 @@ function restoreArchivedMonth(m) {
         let isLead = CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD';
         if (ARCHIVED_ROSTER[name] && ARCHIVED_ROSTER[name].ptoMap[m] !== undefined) {
             CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m] = ARCHIVED_ROSTER[name].ptoMap[m];
-            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = ARCHIVED_ROSTER[name].quotaMap[m] || (isLead ? 3 : 4);
+            CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m] = ARCHIVED_ROSTER[name].quotaMap[m] !== undefined ? ARCHIVED_ROSTER[name].quotaMap[m] : (isLead ? 3 : 4);
             CLINICAL_EVALUATORS_ROSTER[name].monthlyToggles[m] = ARCHIVED_ROSTER[name].monthlyToggles[m] || [...CLINICAL_EVALUATORS_ROSTER[name].profile];
             delete ARCHIVED_ROSTER[name].ptoMap[m];
             delete ARCHIVED_ROSTER[name].quotaMap[m];
@@ -1587,7 +1599,6 @@ function recalculateDashboardMetrics() {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
     if (!activeMonth) return;
     
-    // Synchronize UI demand conversion scale field
     const scaleInput = document.getElementById('demand-scale-input');
     if (scaleInput && document.activeElement !== scaleInput) {
         scaleInput.value = demandScalePercent;
@@ -1600,7 +1611,7 @@ function recalculateDashboardMetrics() {
     let clinicianAllocations = Object.keys(CLINICAL_EVALUATORS_ROSTER).map(name => {
       let r = CLINICAL_EVALUATORS_ROSTER[name];
       let pto = parseFloat(r.ptoMap[activeMonth]) || 0;
-      let qta = parseFloat(r.quotaMap[activeMonth]) || (r.role === 'LEAD' ? 3 : 4);
+      let qta = getClinicianQuota(name, activeMonth);
       let totalCapacity = Math.max(0, (wd - pto) * qta);
       
       let activeStatesThisMonth = r.monthlyToggles[activeMonth] || [];
@@ -1624,7 +1635,6 @@ function recalculateDashboardMetrics() {
       let rawApps = (GLOBAL_PROJECTIONS_LEDGER[activeMonth].stateDemand[s] || 0) * volGrowthMultiplier;
       systemGrossAcceptedApps += Math.round(rawApps);
 
-      // Phone Screen Demand derived via conversion factor
       let statePsDemand = Math.round(rawApps * (demandScalePercent / 100.0));
       systemTotalPsDemand += statePsDemand;
 
@@ -1880,7 +1890,6 @@ function renderExecutiveNarrativeBanner(grossApps, totalPsDemand, totalSupply, a
   const container = document.getElementById('executive-insight-banner');
   if (!container) return;
 
-  // Standard CE monthly production benchmark is ~80 phone screen slots (20 working days * 4 quota/day)
   let clinicianDeficitCount = Math.max(0, totalPsDemand - totalSupply) / 80;
   let expectedTheoreticalEnrollments = Math.round(totalSupply * 0.25);
   let targetDeficitDelta = targetEnrollment - expectedTheoreticalEnrollments;
@@ -1926,9 +1935,9 @@ function renderPtoManagerGrid() {
 
     let columnsHtml = ACTIVE_HORIZON_TIMELINE.map((m) => {
       let ptoValue = r.ptoMap[m] !== undefined ? r.ptoMap[m] : 0;
-      let qtaValue = r.quotaMap[m] !== undefined ? r.quotaMap[m] : (isLead ? 3 : 4);
+      let qtaValue = getClinicianQuota(name, m);
       let monthWd = GLOBAL_PROJECTIONS_LEDGER[m].workingDays;
-      let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * (parseFloat(qtaValue) || 0));
+      let calculatedCapacity = Math.max(0, (monthWd - ptoValue) * qtaValue);
 
       return `
         <td style="border-left:1px solid #2d3548; text-align:center;"><input type="number" step="0.5" value="${ptoValue}" style="width:34px;" onchange="window.updateClinicianPtoValue('${name.replace(/'/g, "\\'")}', '${m}', this.value)"></td>
@@ -1961,7 +1970,7 @@ function renderPtoManagerGrid() {
 
     Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
       let ptoValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
-      let quotaValue = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || (CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD' ? 3 : 4);
+      let quotaValue = getClinicianQuota(name, m);
       aggregatePtoDaysSum += ptoValue;
       aggregateSlotsCapacitySum += Math.max(0, (monthWd - ptoValue) * quotaValue);
     });
@@ -1983,11 +1992,13 @@ function updateClinicianPtoValue(name, month, value) {
 }
 
 function updateClinicianBaseQuota(name, month, value) {
-  CLINICAL_EVALUATORS_ROSTER[name].quotaMap[month] = parseFloat(value) || 0;
+  let parsed = parseFloat(value);
+  CLINICAL_EVALUATORS_ROSTER[name].quotaMap[month] = isNaN(parsed) ? 0 : parsed;
   saveStateToStorage();
   recalculateDashboardMetrics();
 }
 
+// --- WEEKLY PHONE SCREEN VOLATILITY & CAPACITY ---
 function renderWeeklyVolatility() {
     let activeMonth = ACTIVE_HORIZON_TIMELINE[activeSelectedMonthIdx];
     if (!GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks || GLOBAL_PROJECTIONS_LEDGER[activeMonth].weeks.length === 0) {
@@ -2018,7 +2029,7 @@ function renderWeeklyVolatility() {
     
     if(thead) {
         thead.innerHTML = `<tr><th style="position:sticky; left:0; background:#1e2330; z-index:2; min-width:140px; border-right:1px solid #2d3548;">Clinician & Role</th>` + 
-            weeks.map(w => `<th style="text-align:center;">${w.label} CAP</th>`).join('') + `</tr>`;
+            weeks.map(w => `<th style="text-align:center;">${w.label} PS CAP</th>`).join('') + `</tr>`;
     }
 
     let weeklyTotals = [0, 0, 0, 0, 0];
@@ -2027,7 +2038,7 @@ function renderWeeklyVolatility() {
         tbody.innerHTML = ROSTER_ORDER.map(name => {
             let r = CLINICAL_EVALUATORS_ROSTER[name];
             if(!r) return '';
-            let quota = parseFloat(r.quotaMap[activeMonth]) || (r.role === 'LEAD' ? 3 : 4);
+            let quota = getClinicianQuota(name, activeMonth);
             let isLead = r.role === 'LEAD';
             
             let cells = weeks.map((w, i) => {
@@ -2062,7 +2073,7 @@ function renderWeeklyVolatility() {
     }
 
     if(tfoot) {
-        tfoot.innerHTML = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548; color:#93c5fd;">WEEKLY SYSTEM TOTALS</td>` +
+        tfoot.innerHTML = `<tr class="totals-row"><td style="position:sticky; left:0; background:#0f1117; z-index:2; border-right:1px solid #2d3548; color:#93c5fd;">WEEKLY PS SYSTEM TOTALS</td>` +
             weeks.map((w, i) => `<td class="cap-cell" style="color:#4ade80; background:rgba(34,197,94,0.1);">${Math.round(weeklyTotals[i])}</td>`).join('') + `</tr>`;
     }
 }
@@ -2104,7 +2115,7 @@ function renderLongRangeWfmChart() {
       let supplySum = 0;
       Object.keys(CLINICAL_EVALUATORS_ROSTER).forEach(name => {
         let pto = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].ptoMap[m]) || 0;
-        let quota = parseFloat(CLINICAL_EVALUATORS_ROSTER[name].quotaMap[m]) || (CLINICAL_EVALUATORS_ROSTER[name].role === 'LEAD' ? 3 : 4);
+        let quota = getClinicianQuota(name, m);
         supplySum += Math.max(0, (monthWd - pto) * quota);
       });
       aggregateSupplyPoints.push(Math.round(supplySum));
